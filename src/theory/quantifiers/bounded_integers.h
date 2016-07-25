@@ -134,12 +134,11 @@ private:
   std::map< Node, std::map< Node, BoundInstTrie > > d_bnd_it;
 private:
   void addLiteralFromRange( Node lit, Node r );
-  
+
   void setBoundedVar( Node f, Node v, unsigned bound_type );
 public:
   BoundedIntegers( context::Context* c, QuantifiersEngine* qe );
   virtual ~BoundedIntegers();
-  
   void presolve();
   bool needsCheck( Theory::Effort e );
   void check( Theory::Effort e, unsigned quant_e );
