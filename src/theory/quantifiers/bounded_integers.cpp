@@ -156,7 +156,7 @@ QuantifiersModule(qe), d_assertions(c){
 
 }
 
-BoundedIntegers::~BoundedIntegers() { 
+BoundedIntegers::~BoundedIntegers() noexcept {
   for( std::map< Node, RangeModel * >::iterator it = d_rms.begin(); it != d_rms.end(); ++it ){
     delete it->second;
   }

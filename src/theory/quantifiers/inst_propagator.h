@@ -36,7 +36,7 @@ private:
   QuantifiersEngine* d_qe;
 public:
   EqualityQueryInstProp( QuantifiersEngine* qe );
-  ~EqualityQueryInstProp(){};
+  ~EqualityQueryInstProp() noexcept {};
   /** reset */
   bool reset( Theory::Effort e );
   /** identify */

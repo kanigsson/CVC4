@@ -417,7 +417,7 @@ private:
   void flattenRepresentatives( std::map< TypeNode, std::vector< Node > >& reps );
 public:
   EqualityQueryQuantifiersEngine( context::Context* c, QuantifiersEngine* qe );
-  virtual ~EqualityQueryQuantifiersEngine();
+  virtual ~EqualityQueryQuantifiersEngine() noexcept;
   /** reset */
   bool reset( Theory::Effort e );
   /** identify */

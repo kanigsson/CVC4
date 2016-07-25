@@ -33,6 +33,7 @@ private:
   NodeSet d_added_split;
 public:
   QuantDSplit( QuantifiersEngine * qe, context::Context* c );
+  ~QuantDSplit() noexcept {}
   /** determine whether this quantified formula will be reduced */
   void preRegisterQuantifier( Node q );
   

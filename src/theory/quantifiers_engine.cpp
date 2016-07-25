@@ -1433,7 +1433,7 @@ EqualityQueryQuantifiersEngine::EqualityQueryQuantifiersEngine( context::Context
   }
 }
 
-EqualityQueryQuantifiersEngine::~EqualityQueryQuantifiersEngine(){
+EqualityQueryQuantifiersEngine::~EqualityQueryQuantifiersEngine() noexcept {
   delete d_eq_inference;
 }
 
