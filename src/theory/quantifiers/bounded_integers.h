@@ -89,7 +89,7 @@ private:
     Node d_proxy_range;
   public:
     IntRangeModel( BoundedIntegers * bi, Node r, context::Context* c, context::Context* u, bool isProxy);
-    virtual ~IntRangeModel() noexcept {}
+    virtual ~IntRangeModel(){}
     Node d_range;
     int d_curr_max;
     std::map< int, Node > d_range_literal;
@@ -138,7 +138,7 @@ private:
   void setBoundedVar( Node f, Node v, unsigned bound_type );
 public:
   BoundedIntegers( context::Context* c, QuantifiersEngine* qe );
-  virtual ~BoundedIntegers() noexcept;
+  virtual ~BoundedIntegers();
   void presolve();
   bool needsCheck( Theory::Effort e );
   void check( Theory::Effort e, unsigned quant_e );

@@ -184,7 +184,7 @@ private:
   bool d_consistent_ee;
 public:
   TermDb( context::Context* c, context::UserContext* u, QuantifiersEngine* qe );
-  ~TermDb() noexcept {}
+  ~TermDb(){}
   /** boolean terms */
   Node d_true;
   Node d_false;
