@@ -53,7 +53,6 @@ TESTS =	\
 	nun-0208-to.smt2 \
 	datatypes-ufinite.smt2 \
 	datatypes-ufinite-nested.smt2 \
-	ForElimination-scala-9.smt2 \
 	agree466.smt2 \
 	LeftistHeap.scala-8-ncm.smt2 \
 	sc-crash-052316.smt2 \
@@ -78,5 +77,5 @@ EXTRA_DIST = $(TESTS)
 regress regress0 test: check
 
 # do nothing in this subdir
-.PHONY: regress1 regress2 regress3
-regress1 regress2 regress3:
+.PHONY: regress1 regress2 regress3 regress4
+regress1 regress2 regress3 regress4:

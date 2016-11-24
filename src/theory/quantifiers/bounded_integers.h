@@ -60,6 +60,7 @@ private:
   std::map< Node, std::map< Node, Node > > d_nground_range;
   //set membership range
   std::map< Node, std::map< Node, Node > > d_setm_range;
+  std::map< Node, std::map< Node, Node > > d_setm_range_lit;
   void hasFreeVar( Node f, Node n );
   void process( Node f, Node n, bool pol,
                 std::map< Node, unsigned >& bound_lit_type_map,
@@ -145,7 +146,7 @@ public:
   void check( Theory::Effort e, unsigned quant_e );
   void registerQuantifier( Node f );
   void assertNode( Node n );
-  Node getNextDecisionRequest();
+  Node getNextDecisionRequest( unsigned& priority );
   bool isBoundVar( Node q, Node v ) { return std::find( d_set[q].begin(), d_set[q].end(), v )!=d_set[q].end(); }
   unsigned getBoundVarType( Node q, Node v );
   unsigned getNumBoundVars( Node q ) { return d_set[q].size(); }

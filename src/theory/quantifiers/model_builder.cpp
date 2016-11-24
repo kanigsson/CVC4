@@ -45,7 +45,7 @@ bool QModelBuilder::isQuantifierActive( Node f ) {
 
 
 bool QModelBuilder::optUseModel() {
-  return options::mbqiMode()!=MBQI_NONE || options::fmfBoundInt();
+  return options::mbqiMode()!=MBQI_NONE || options::fmfBound();
 }
 
 void QModelBuilder::debugModel( FirstOrderModel* fm ){
@@ -391,7 +391,7 @@ bool QModelBuilderIG::isTermActive( Node n ){
 
 
 //do exhaustive instantiation
-bool QModelBuilderIG::doExhaustiveInstantiation( FirstOrderModel * fm, Node f, int effort ) {
+int QModelBuilderIG::doExhaustiveInstantiation( FirstOrderModel * fm, Node f, int effort ) {
   if( optUseModel() ){
     RepSetIterator riter( d_qe, &(d_qe->getModel()->d_rep_set) );
     if( riter.setQuantifier( f ) ){
@@ -470,10 +470,9 @@ bool QModelBuilderIG::doExhaustiveInstantiation( FirstOrderModel * fm, Node f, i
       }
     }
     //if the iterator is incomplete, we will return unknown instead of sat if no instantiations are added this round
-    d_incomplete_check = riter.isIncomplete();
-    return true;
+    return riter.isIncomplete() ? -1 : 1;
   }else{
-    return false;
+    return 0;
   }
 }
 

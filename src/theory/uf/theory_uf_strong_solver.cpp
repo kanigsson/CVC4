@@ -1645,34 +1645,37 @@ Node SortModel::getCardinalityLiteral( int c ) {
 
 StrongSolverTheoryUF::StrongSolverTheoryUF(context::Context* c,
                                            context::UserContext* u,
-                                           OutputChannel& out,
-                                           TheoryUF* th)
-  : d_out( &out )
-  , d_th( th )
-  , d_conflict( c, false )
-  , d_rep_model()
-  , d_aloc_com_card( u, 0 )
-  , d_com_card_assertions( c )
-  , d_min_pos_com_card( c, -1 )
-  , d_card_assertions_eqv_lemma( u )
-  , d_min_pos_tn_master_card( c, -1 )
-  , d_rel_eqc( c )
-{
-  if( options::ufssDiseqPropagation() ){
-    d_deq_prop = new DisequalityPropagator( th->getQuantifiersEngine(), this );
-  }else{
-    d_deq_prop = NULL;
+                                           OutputChannel& out, TheoryUF* th)
+    : d_out(&out),
+      d_th(th),
+      d_conflict(c, false),
+      d_rep_model(),
+      d_aloc_com_card(u, 0),
+      d_com_card_assertions(c),
+      d_min_pos_com_card(c, -1),
+      d_card_assertions_eqv_lemma(u),
+      d_min_pos_tn_master_card(c, -1),
+      d_rel_eqc(c),
+      d_deq_prop(NULL),
+      d_sym_break(NULL) {
+  if (options::ufssDiseqPropagation()) {
+    d_deq_prop = new DisequalityPropagator(th->getQuantifiersEngine(), this);
   }
-  if( options::ufssSymBreak() ){
-    d_sym_break = new SubsortSymmetryBreaker( th->getQuantifiersEngine(), c );
-  }else{
-    d_sym_break = NULL;
+  if (options::ufssSymBreak()) {
+    d_sym_break = new SubsortSymmetryBreaker(th->getQuantifiersEngine(), c);
   }
 }
 
-StrongSolverTheoryUF::~StrongSolverTheoryUF() { 
-  for( std::map< TypeNode, SortModel* >::iterator it = d_rep_model.begin(); it != d_rep_model.end(); ++it ){
+StrongSolverTheoryUF::~StrongSolverTheoryUF() {
+  for (std::map<TypeNode, SortModel*>::iterator it = d_rep_model.begin();
+       it != d_rep_model.end(); ++it) {
     delete it->second;
+  }
+  if (d_sym_break) {
+    delete d_sym_break;
+  }
+  if (d_deq_prop) {
+    delete d_deq_prop;
   }
 }
 
@@ -1959,7 +1962,7 @@ void StrongSolverTheoryUF::propagate( Theory::Effort level ){
 }
 
 /** get next decision request */
-Node StrongSolverTheoryUF::getNextDecisionRequest(){
+Node StrongSolverTheoryUF::getNextDecisionRequest( unsigned& priority ){
   //request the combined cardinality as a decision literal, if not already asserted
   if( options::ufssFairness() ){
     int comCard = 0;
@@ -1969,6 +1972,7 @@ Node StrongSolverTheoryUF::getNextDecisionRequest(){
         com_lit = d_com_card_literal.find( comCard )!=d_com_card_literal.end() ? d_com_card_literal[comCard] : Node::null();
         if( !com_lit.isNull() && d_com_card_assertions.find( com_lit )==d_com_card_assertions.end() ){
           Trace("uf-ss-dec") << "Decide on combined cardinality : " << com_lit << std::endl;
+          priority = 1;
           return com_lit;
         }
         comCard++;
@@ -1981,6 +1985,7 @@ Node StrongSolverTheoryUF::getNextDecisionRequest(){
   for( std::map< TypeNode, SortModel* >::iterator it = d_rep_model.begin(); it != d_rep_model.end(); ++it ){
     Node n = it->second->getNextDecisionRequest();
     if( !n.isNull() ){
+      priority = 1;
       return n;
     }
   }

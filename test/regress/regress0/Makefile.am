@@ -1,4 +1,4 @@
-SUBDIRS = . arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets parser sygus sep
+SUBDIRS = . arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep
 DIST_SUBDIRS = $(SUBDIRS)
 
 # don't override a BINARY imported from a personal.mk
@@ -147,16 +147,13 @@ BUG_TESTS = \
 	bug398.smt2 \
 	bug421.smt2 \
 	bug421b.smt2 \
-	bug425.cvc \
 	bug480.smt2 \
 	bug484.smt2 \
 	bug486.cvc \
 	bug507.smt2 \
 	bug512.minimized.smt2 \
 	bug516.smt2 \
-	bug519.smt2 \
 	bug520.smt2 \
-	bug521.smt2 \
 	bug521.minimized.smt2 \
 	bug522.smt2 \
 	bug528a.smt2 \
@@ -209,5 +206,5 @@ EXTRA_DIST += $(DISABLED_TESTS) \
 regress regress0 test: check
 
 # do nothing in this subdir
-.PHONY: regress1 regress2 regress3
-regress1 regress2 regress3:
+.PHONY: regress1 regress2 regress3 regress4
+regress1 regress2 regress3 regress4:

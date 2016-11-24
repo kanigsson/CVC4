@@ -566,7 +566,7 @@ const Datatype& DatatypeType::getDatatype() const {
   NodeManagerScope nms(d_nodeManager);
   if( d_typeNode->isParametricDatatype() ) {
     PrettyCheckArgument( (*d_typeNode)[0].getKind() == kind::DATATYPE_TYPE, this);
-    const Datatype& dt = (*d_typeNode)[0].getConst<Datatype>();
+    const Datatype& dt = (*d_typeNode)[0].getDatatype();
     return dt;
   } else {
     return d_typeNode->getDatatype();
@@ -608,7 +608,7 @@ std::vector<Type> DatatypeType::getParamTypes() const {
 
 DatatypeType DatatypeType::instantiate(const std::vector<Type>& params) const {
   NodeManagerScope nms(d_nodeManager);
-  TypeNode cons = d_nodeManager->mkTypeConst( getDatatype() );
+  TypeNode cons = d_nodeManager->mkTypeConst( (*d_typeNode)[0].getConst<DatatypeIndexConstant>() );
   vector<TypeNode> paramsNodes;
   paramsNodes.push_back( cons );
   for(vector<Type>::const_iterator i = params.begin(),

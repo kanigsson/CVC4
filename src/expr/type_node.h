@@ -116,7 +116,7 @@ public:
    * Destructor. If ref_count is true it will decrement the reference count
    * and, if zero, collect the NodeValue.
    */
-  ~TypeNode() throw(AssertionException);
+  ~TypeNode();
 
   /**
    * Assignment operator for nodes, copies the relevant information from node
@@ -785,7 +785,7 @@ inline TypeNode::TypeNode(const TypeNode& typeNode) {
   d_nv->inc();
 }
 
-inline TypeNode::~TypeNode() throw(AssertionException) {
+inline TypeNode::~TypeNode() {
   Assert(d_nv != NULL, "Expecting a non-NULL expression value!");
   d_nv->dec();
 }
@@ -1023,7 +1023,9 @@ inline bool TypeNode::isBitVector(unsigned size) const {
 /** Get the datatype specification from a datatype type */
 inline const Datatype& TypeNode::getDatatype() const {
   Assert(isDatatype());
-  return getConst<Datatype>();
+  //return getConst<Datatype>();
+  DatatypeIndexConstant dic = getConst<DatatypeIndexConstant>();
+  return NodeManager::currentNM()->getDatatypeForIndex( dic.getIndex() );
 }
 
 /** Get the exponent size of this floating-point type */
