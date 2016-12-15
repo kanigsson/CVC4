@@ -12,6 +12,9 @@
 /builds/
 /doc/doxygen
 .dep
+Makefile.in
+/configure
+/aclocal.m4
 callgrind.out*
 gmon.out
 stamp-generated
@@ -20,6 +23,7 @@ generated/
 \#*\#
 *.gcov
 /lcov/
+/config/compile
 .cvc4_config
 config.reconfig
 *.swp
