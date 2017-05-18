@@ -29,7 +29,7 @@ unsigned QuantifiersModule::needsModel( Theory::Effort e ) {
 }
 
 eq::EqualityEngine * QuantifiersModule::getEqualityEngine() {
-  return d_quantEngine->getMasterEqualityEngine();
+  return d_quantEngine->getActiveEqualityEngine();
 }
 
 bool QuantifiersModule::areEqual( TNode n1, TNode n2 ) {
@@ -136,6 +136,14 @@ Node QuantArith::mkNode( std::map< Node, Node >& msum ) {
   return children.size()>1 ? NodeManager::currentNM()->mkNode( PLUS, children ) : (children.size()==1 ? children[0] : NodeManager::currentNM()->mkConst( Rational(0) ));
 }
 
+Node QuantArith::mkCoeffTerm( Node coeff, Node t ) {
+  if( coeff.isNull() ){
+    return t;
+  }else{
+    return NodeManager::currentNM()->mkNode( kind::MULT, coeff, t );
+  }
+}
+
 // given (msum <k> 0), solve (veq_c * v <k> val) or (val <k> veq_c * v), where:
 // veq_c is either null (meaning 1), or positive.
 // return value 1: veq_c*v is RHS, -1: veq_c*v is LHS, 0: failed.
@@ -201,7 +209,7 @@ int QuantArith::isolate( Node v, std::map< Node, Node >& msum, Node & veq, Kind 
 }
 
 Node QuantArith::solveEqualityFor( Node lit, Node v ) {
-  Assert( lit.getKind()==EQUAL || lit.getKind()==IFF );
+  Assert( lit.getKind()==EQUAL );
   //first look directly at sides
   TypeNode tn = lit[0].getType();
   for( unsigned r=0; r<2; r++ ){
@@ -404,8 +412,8 @@ void QuantPhaseReq::getPolarity( Node n, int child, bool hasPol, bool pol, bool&
 }
 
 void QuantPhaseReq::getEntailPolarity( Node n, int child, bool hasPol, bool pol, bool& newHasPol, bool& newPol ) {
-  if( n.getKind()==AND || n.getKind()==OR ){
-    newHasPol = hasPol && pol==( n.getKind()==AND );
+  if( n.getKind()==AND || n.getKind()==OR || n.getKind()==SEP_STAR ){
+    newHasPol = hasPol && pol!=( n.getKind()==OR );
     newPol = pol;
   }else if( n.getKind()==IMPLIES ){
     newHasPol = hasPol && !pol;
@@ -513,7 +521,7 @@ Node QuantEPR::mkEPRAxiom( TypeNode tn ) {
     std::vector< Node > disj;
     Node x = NodeManager::currentNM()->mkBoundVar( tn );
     for( unsigned i=0; i<d_consts[tn].size(); i++ ){
-      disj.push_back( NodeManager::currentNM()->mkNode( tn.isBoolean() ? IFF : EQUAL, x, d_consts[tn][i] ) );
+      disj.push_back( NodeManager::currentNM()->mkNode( EQUAL, x, d_consts[tn][i] ) );
     }
     Assert( !disj.empty() );
     d_epr_axiom[tn] = NodeManager::currentNM()->mkNode( FORALL, NodeManager::currentNM()->mkNode( BOUND_VAR_LIST, x ), disj.size()==1 ? disj[0] : NodeManager::currentNM()->mkNode( OR, disj ) );

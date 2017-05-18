@@ -67,11 +67,6 @@ class Trigger {
   void reset( Node eqc );
   /** get next match.  must call reset( eqc ) once before this function. */
   bool getNextMatch( Node f, InstMatch& m );
-  /** get the match against ground term or formula t.
-      the trigger and t should have the same shape.
-      Currently the trigger should not be a multi-trigger.
-  */
-  bool getMatch( Node f, Node t, InstMatch& m);
   /** return whether this is a multi-trigger */
   bool isMultiTrigger() { return d_nodes.size()>1; }
   /** get inst pattern list */
@@ -142,7 +137,7 @@ private:
   static Node getIsUsableEq( Node q, Node eq );
   static bool isUsableEqTerms( Node q, Node n1, Node n2 );
   /** collect all APPLY_UF pattern terms for f in n */
-  static bool collectPatTerms2( Node q, Node n, std::map< Node, Node >& visited, std::map< Node, TriggerTermInfo >& tinfo, 
+  static void collectPatTerms2( Node q, Node n, std::map< Node, Node >& visited, std::map< Node, TriggerTermInfo >& tinfo, 
                                 quantifiers::TriggerSelMode tstrt, std::vector< Node >& exclude, std::vector< Node >& added,
                                 bool pol, bool hasPol, bool epol, bool hasEPol );
 

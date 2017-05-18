@@ -61,7 +61,7 @@ class DatatypesEnumerator : public TypeEnumeratorBase<DatatypesEnumerator> {
   bool d_child_enum;
 
   bool hasCyclesDt( const Datatype& dt ) {
-    return dt.isRecursiveSingleton() || !dt.isFinite();
+    return dt.isRecursiveSingleton( d_type.toType() ) || !dt.isFinite( d_type.toType() );
   }
   bool hasCycles( TypeNode tn ){
     if( tn.isDatatype() ){
@@ -81,7 +81,7 @@ class DatatypesEnumerator : public TypeEnumeratorBase<DatatypesEnumerator> {
   void init();
 public:
 
-  DatatypesEnumerator(TypeNode type, TypeEnumeratorProperties * tep = NULL) throw() :
+  DatatypesEnumerator(TypeNode type, TypeEnumeratorProperties * tep = NULL) :
     TypeEnumeratorBase<DatatypesEnumerator>(type),
     d_tep(tep),
     d_datatype(DatatypeType(type.toType()).getDatatype()),
@@ -89,7 +89,7 @@ public:
     d_child_enum = false;
     init();
   }
-  DatatypesEnumerator(TypeNode type, bool childEnum, TypeEnumeratorProperties * tep = NULL) throw() :
+  DatatypesEnumerator(TypeNode type, bool childEnum, TypeEnumeratorProperties * tep = NULL) :
     TypeEnumeratorBase<DatatypesEnumerator>(type),
     d_tep(tep),
     d_datatype(DatatypeType(type.toType()).getDatatype()),
@@ -97,7 +97,7 @@ public:
     d_child_enum = childEnum;
     init();
   }
-  DatatypesEnumerator(const DatatypesEnumerator& de) throw() :
+  DatatypesEnumerator(const DatatypesEnumerator& de) :
     TypeEnumeratorBase<DatatypesEnumerator>(de.getType()),
     d_tep(de.d_tep),
     d_datatype(de.d_datatype),
@@ -130,7 +130,7 @@ public:
   virtual ~DatatypesEnumerator() throw() {
   }
 
-  Node operator*() throw(NoMoreValuesException) {
+  Node operator*() {
     Debug("dt-enum-debug") << ": get term " << this << std::endl;
     if(d_ctor < d_has_debruijn + d_datatype.getNumConstructors()) {
       return getCurrentTerm( d_ctor );
@@ -139,7 +139,7 @@ public:
     }
   }
 
-  DatatypesEnumerator& operator++() throw() {
+  DatatypesEnumerator& operator++() {
     Debug("dt-enum-debug") << ": increment " << this << std::endl;
     unsigned prevSize = d_size_limit;
     while(d_ctor < d_has_debruijn+d_datatype.getNumConstructors()) {
@@ -159,7 +159,7 @@ public:
       }
       if( d_ctor>=d_has_debruijn+d_datatype.getNumConstructors() ){
         //try next size limit as long as new terms were generated at last size, or other cases
-        if( prevSize==d_size_limit || ( d_size_limit==0 && d_datatype.isCodatatype() ) || !d_datatype.isInterpretedFinite() ){
+        if( prevSize==d_size_limit || ( d_size_limit==0 && d_datatype.isCodatatype() ) || !d_datatype.isInterpretedFinite( d_type.toType() ) ){
           d_size_limit++;
           d_ctor = d_zeroCtor;
           for( unsigned i=0; i<d_sel_sum.size(); i++ ){

@@ -247,16 +247,14 @@ Node TheoryArrays::solveWrite(TNode term, bool solve1, bool solve2, bool ppCheck
         for (j = leftWrites - 1; j > i; --j) {
           index_j = write_j[1];
           if (!ppCheck || !ppDisequal(index_i, index_j)) {
-            Node hyp2(index_i.getType() == nm->booleanType()?
-                      index_i.iffNode(index_j) : index_i.eqNode(index_j));
+            Node hyp2(index_i.eqNode(index_j));
             hyp << hyp2.notNode();
           }
           write_j = write_j[0];
         }
 
         Node r1 = nm->mkNode(kind::SELECT, e1, index_i);
-        conc = (r1.getType() == nm->booleanType())?
-          r1.iffNode(write_i[2]) : r1.eqNode(write_i[2]);
+        conc = r1.eqNode(write_i[2]);
         if (hyp.getNumChildren() != 0) {
           if (hyp.getNumChildren() == 1) {
             conc = hyp.getChild(0).impNode(conc);
@@ -356,11 +354,11 @@ Theory::PPAssertStatus TheoryArrays::ppAssert(TNode in, SubstitutionMap& outSubs
     case kind::NOT:
     {
       d_ppFacts.push_back(in);
-      Assert(in[0].getKind() == kind::EQUAL ||
-             in[0].getKind() == kind::IFF );
-      Node a = in[0][0];
-      Node b = in[0][1];
-      d_ppEqualityEngine.assertEquality(in[0], false, in);
+      if (in[0].getKind() == kind::EQUAL ) {
+        Node a = in[0][0];
+        Node b = in[0][1];
+        d_ppEqualityEngine.assertEquality(in[0], false, in);
+      }
       break;
     }
     default:
@@ -403,7 +401,7 @@ void TheoryArrays::explain(TNode literal, std::vector<TNode>& assumptions, eq::E
   TNode atom = polarity ? literal : literal[0];
   //eq::EqProof * eqp = new eq::EqProof;
   // eq::EqProof * eqp = NULL;
-  if (atom.getKind() == kind::EQUAL || atom.getKind() == kind::IFF) {
+  if (atom.getKind() == kind::EQUAL) {
     d_equalityEngine.explainEquality(atom[0], atom[1], polarity, assumptions, proof);
   } else {
     d_equalityEngine.explainPredicate(atom, polarity, assumptions, proof);
@@ -686,12 +684,6 @@ void TheoryArrays::preRegisterTermInternal(TNode node)
     else {
       d_equalityEngine.addTerm(node);
     }
-    // Maybe it's a predicate
-    // TODO: remove this or keep it if we allow Boolean elements in arrays.
-    if (node.getType().isBoolean()) {
-      // Get triggered for both equal and dis-equal
-      d_equalityEngine.addTriggerPredicate(node);
-    }
 
     Assert(d_equalityEngine.getRepresentative(store) == store);
     d_infoMap.addIndex(store, node[1]);
@@ -819,6 +811,12 @@ void TheoryArrays::preRegisterTermInternal(TNode node)
 void TheoryArrays::preRegisterTerm(TNode node)
 {
   preRegisterTermInternal(node);
+  // If we have a select from an array of Bools, mark it as a term that can be propagated.
+  // Note: do this here instead of in preRegisterTermInternal to prevent internal select
+  // terms from being propagated out (as this results in an assertion failure).
+  if (node.getKind() == kind::SELECT && node.getType().isBoolean()) {
+    d_equalityEngine.addTriggerPredicate(node);
+  }
 }
 
 
@@ -1040,7 +1038,7 @@ void TheoryArrays::computeCareGraph()
 /////////////////////////////////////////////////////////////////////////////
 
 
-void TheoryArrays::collectModelInfo( TheoryModel* m, bool fullModel )
+void TheoryArrays::collectModelInfo( TheoryModel* m )
 {
   set<Node> termSet;
 
@@ -1701,6 +1699,11 @@ void TheoryArrays::mergeArrays(TNode a, TNode b)
 
   Node n;
   while (true) {
+    // Normally, a is its own representative, but it's possible for a to have
+    // been merged with another array after it got queued up by the equality engine,
+    // so we take its representative to be safe.
+    a = d_equalityEngine.getRepresentative(a);
+    Assert(d_equalityEngine.getRepresentative(b) == a);
     Trace("arrays-merge") << spaces(getSatContext()->getLevel()) << "Arrays::merge: " << a << "," << b << ")\n";
 
     if (options::arraysLazyRIntro1() && !options::arraysWeakEquivalence()) {
@@ -1751,18 +1754,20 @@ void TheoryArrays::mergeArrays(TNode a, TNode b)
       }
     }
 
-    // If a and b have different default values associated with their mayequal equivalence classes,
-    // things get complicated - disallow this for now.  -Clark
     TNode mayRepA = d_mayEqualEqualityEngine.getRepresentative(a);
     TNode mayRepB = d_mayEqualEqualityEngine.getRepresentative(b);
 
+    // If a and b have different default values associated with their mayequal equivalence classes,
+    // things get complicated.  Similarly, if two mayequal equivalence classes have different
+    // constant representatives, it's not clear what to do. - disallow these cases for now.  -Clark
     DefValMap::iterator it = d_defValues.find(mayRepA);
     DefValMap::iterator it2 = d_defValues.find(mayRepB);
     TNode defValue;
 
     if (it != d_defValues.end()) {
       defValue = (*it).second;
-      if (it2 != d_defValues.end() && (defValue != (*it2).second)) {
+      if ((it2 != d_defValues.end() && (defValue != (*it2).second)) ||
+          (mayRepA.isConst() && mayRepB.isConst() && mayRepA != mayRepB)) {
         throw LogicException("Array theory solver does not yet support write-chains connecting two different constant arrays");
       }
     }
@@ -2235,11 +2240,7 @@ void TheoryArrays::conflict(TNode a, TNode b) {
   Debug("pf::array") << "TheoryArrays::Conflict called" << std::endl;
   eq::EqProof* proof = d_proofsEnabled ? new eq::EqProof() : NULL;
 
-  if (a.getKind() == kind::CONST_BOOLEAN) {
-    d_conflictNode = explain(a.iffNode(b), proof);
-  } else {
-    d_conflictNode = explain(a.eqNode(b), proof);
-  }
+  d_conflictNode = explain(a.eqNode(b), proof);
 
   if (!d_inCheckModel) {
     ProofArray* proof_array = NULL;

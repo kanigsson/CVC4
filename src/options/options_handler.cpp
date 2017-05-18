@@ -32,7 +32,6 @@
 #include "options/arith_propagation_mode.h"
 #include "options/arith_unate_lemma_mode.h"
 #include "options/base_options.h"
-#include "options/boolean_term_conversion_mode.h"
 #include "options/bv_bitblast_mode.h"
 #include "options/bv_options.h"
 #include "options/decision_mode.h"
@@ -515,6 +514,24 @@ depth \n\
 \n\
 ";
 
+const std::string OptionsHandler::s_fmfBoundMinModeModeHelp = "\
+Modes for finite model finding bound minimization, supported by --fmf-bound-min-mode:\n\
+\n\
+none \n\
++ Do not minimize inferred bounds.\n\
+\n\
+int (default) \n\
++ Minimize integer ranges only.\n\
+\n\
+setc \n\
++ Minimize cardinality of set membership ranges only.\n\
+\n\
+all \n\
++ Minimize all inferred bounds.\n\
+\n\
+";
+
+
 theory::quantifiers::InstWhenMode OptionsHandler::stringToInstWhenMode(std::string option, std::string optarg) throw(OptionException) {
   if(optarg == "pre-full") {
     return theory::quantifiers::INST_WHEN_PRE_FULL;
@@ -831,6 +848,25 @@ theory::quantifiers::QuantRepMode OptionsHandler::stringToQuantRepMode(std::stri
   }
 }
 
+
+theory::quantifiers::FmfBoundMinMode OptionsHandler::stringToFmfBoundMinMode(std::string option, std::string optarg) throw(OptionException) {
+  if(optarg == "none" ) {
+    return theory::quantifiers::FMF_BOUND_MIN_NONE;
+  } else if(optarg == "int" || optarg == "default") {
+    return theory::quantifiers::FMF_BOUND_MIN_INT_RANGE;
+  } else if(optarg == "setc" || optarg == "default") {
+    return theory::quantifiers::FMF_BOUND_MIN_SET_CARD;
+  } else if(optarg == "all") {
+    return theory::quantifiers::FMF_BOUND_MIN_ALL;
+  } else if(optarg ==  "help") {
+    puts(s_fmfBoundMinModeModeHelp.c_str());
+    exit(1);
+  } else {
+    throw OptionException(std::string("unknown option for --fmf-bound-min-mode: `") +
+                          optarg + "'.  Try --fmf-bound-min-mode help.");
+  }
+}
+
 // theory/bv/options_handlers.h
 void OptionsHandler::abcEnabledBuild(std::string option, bool value) throw(OptionException) {
 #ifndef CVC4_USE_ABC
@@ -922,7 +958,7 @@ const std::string OptionsHandler::s_bitblastingModeHelp = "\
 Bit-blasting modes currently supported by the --bitblast option:\n\
 \n\
 lazy (default)\n\
-+ Separate boolean structure and term reasoning betwen the core\n\
++ Separate boolean structure and term reasoning between the core\n\
   SAT solver and the bv SAT solver\n\
 \n\
 eager\n\
@@ -1023,41 +1059,6 @@ void OptionsHandler::setBitblastAig(std::string option, bool arg) throw(OptionEx
     }
   }
 }
-
-
-// theory/booleans/options_handlers.h
-const std::string OptionsHandler::s_booleanTermConversionModeHelp = "\
-Boolean term conversion modes currently supported by the\n\
---boolean-term-conversion-mode option:\n\
-\n\
-bitvectors [default]\n\
-+ Boolean terms are converted to bitvectors of size 1.\n\
-\n\
-datatypes\n\
-+ Boolean terms are converted to enumerations in the Datatype theory.\n\
-\n\
-native\n\
-+ Boolean terms are converted in a \"natural\" way depending on where they\n\
-  are used.  If in a datatype context, they are converted to an enumeration.\n\
-  Elsewhere, they are converted to a bitvector of size 1.\n\
-";
-
-theory::booleans::BooleanTermConversionMode OptionsHandler::stringToBooleanTermConversionMode(std::string option, std::string optarg) throw(OptionException){
-  if(optarg ==  "bitvectors") {
-    return theory::booleans::BOOLEAN_TERM_CONVERT_TO_BITVECTORS;
-  } else if(optarg ==  "datatypes") {
-    return theory::booleans::BOOLEAN_TERM_CONVERT_TO_DATATYPES;
-  } else if(optarg ==  "native") {
-    return theory::booleans::BOOLEAN_TERM_CONVERT_NATIVE;
-  } else if(optarg ==  "help") {
-    puts(s_booleanTermConversionModeHelp.c_str());
-    exit(1);
-  } else {
-    throw OptionException(std::string("unknown option for --boolean-term-conversion-mode: `") +
-                          optarg + "'.  Try --boolean-term-conversion-mode help.");
-  }
-}
-
 
 // theory/uf/options_handlers.h
 const std::string OptionsHandler::s_ufssModeHelp = "\

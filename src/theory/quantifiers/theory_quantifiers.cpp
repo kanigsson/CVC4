@@ -35,8 +35,7 @@ using namespace CVC4::theory;
 using namespace CVC4::theory::quantifiers;
 
 TheoryQuantifiers::TheoryQuantifiers(Context* c, context::UserContext* u, OutputChannel& out, Valuation valuation, const LogicInfo& logicInfo) :
-    Theory(THEORY_QUANTIFIERS, c, u, out, valuation, logicInfo),
-  d_masterEqualityEngine(0)
+    Theory(THEORY_QUANTIFIERS, c, u, out, valuation, logicInfo)
 {
   d_numInstantiations = 0;
   d_baseDecLevel = -1;
@@ -55,7 +54,7 @@ TheoryQuantifiers::~TheoryQuantifiers() {
 }
 
 void TheoryQuantifiers::setMasterEqualityEngine(eq::EqualityEngine* eq) {
-  d_masterEqualityEngine = eq;
+
 }
 
 void TheoryQuantifiers::addSharedTerm(TNode t) {
@@ -88,10 +87,12 @@ void TheoryQuantifiers::presolve() {
   }
 }
 
-void TheoryQuantifiers::ppNotifyAssertions( std::vector< Node >& assertions ) {
-  Trace("quantifiers-presolve") << "TheoryQuantifiers::ppNotifyAssertions" << std::endl;
-  if( getQuantifiersEngine() ){
-    getQuantifiersEngine()->ppNotifyAssertions( assertions );
+void TheoryQuantifiers::ppNotifyAssertions(
+    const std::vector<Node>& assertions) {
+  Trace("quantifiers-presolve")
+      << "TheoryQuantifiers::ppNotifyAssertions" << std::endl;
+  if (getQuantifiersEngine()) {
+    getQuantifiersEngine()->ppNotifyAssertions(assertions);
   }
 }
 
@@ -116,16 +117,14 @@ void TheoryQuantifiers::computeCareGraph() {
   //do nothing
 }
 
-void TheoryQuantifiers::collectModelInfo(TheoryModel* m, bool fullModel) {
-  if(fullModel) {
-    for(assertions_iterator i = facts_begin(); i != facts_end(); ++i) {
-      if((*i).assertion.getKind() == kind::NOT) {
-        Debug("quantifiers::collectModelInfo") << "got quant FALSE: " << (*i).assertion[0] << endl;
-        m->assertPredicate((*i).assertion[0], false);
-      } else {
-        Debug("quantifiers::collectModelInfo") << "got quant TRUE : " << *i << endl;
-        m->assertPredicate(*i, true);
-      }
+void TheoryQuantifiers::collectModelInfo(TheoryModel* m) {
+  for(assertions_iterator i = facts_begin(); i != facts_end(); ++i) {
+    if((*i).assertion.getKind() == kind::NOT) {
+      Debug("quantifiers::collectModelInfo") << "got quant FALSE: " << (*i).assertion[0] << endl;
+      m->assertPredicate((*i).assertion[0], false);
+    } else {
+      Debug("quantifiers::collectModelInfo") << "got quant TRUE : " << *i << endl;
+      m->assertPredicate(*i, true);
     }
   }
 }

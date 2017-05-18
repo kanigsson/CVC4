@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # mkkind
 # Morgan Deters <mdeters@cs.nyu.edu> for CVC4
@@ -237,6 +237,15 @@ function constant {
 
   check_theory_seen
   register_kind "$1" 0 "$5"
+}
+
+function nullaryoperator {
+  # nullaryoperator K ["comment"]
+
+  lineno=${BASH_LINENO[0]}
+
+  check_theory_seen
+  register_kind "$1" 0 "$2"
 }
 
 function register_sort {

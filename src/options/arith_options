@@ -135,7 +135,7 @@ option replayRejectCutSize --replay-reject-cut unsigned :default 25500
  maximum complexity of any coefficient while replaying cuts
 
 option lemmaRejectCutSize --replay-lemma-reject-cut unsigned :default 25500
- maximum complexity of any coefficient while outputing replaying cut lemmas
+ maximum complexity of any coefficient while outputting replaying cut lemmas
 
 option soiApproxMajorFailure --replay-soi-major-threshold double :default .01
  threshold for a major tolerance failure by the approximate solver
@@ -164,5 +164,29 @@ option pbRewriteThreshold --pb-rewrite-threshold int :default 256
 
 option sNormInferEq --snorm-infer-eq bool :default false
  infer equalities based on Shostak normalization
+
+option nlExt --nl-ext bool :default false
+ extended approach to non-linear
+ 
+option nlExtResBound --nl-ext-rbound bool :default false
+ use resolution-style inference for inferring new bounds
+
+option nlExtTangentPlanes --nl-ext-tplanes bool :default false
+ use non-terminating tangent plane strategy for non-linear
+
+option nlExtEntailConflicts --nl-ext-ent-conf bool :default false
+ check for entailed conflicts in non-linear solver
+ 
+option nlExtRewrites --nl-ext-rewrite bool :default true
+ do rewrites in non-linear solver
+ 
+option nlExtSolveSubs --nl-ext-solve-subs bool :default false
+ do solving for determining constant substitutions
+ 
+option nlExtPurify --nl-ext-purify bool :default false
+ purify non-linear terms at preprocess
+ 
+option nlExtSplitZero --nl-ext-split-zero bool :default false
+ intial splits on zero for all variables
 
 endmodule

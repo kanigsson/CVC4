@@ -946,9 +946,9 @@ Expr ExprManager::mkBoundVar(Type type) {
   return Expr(this, d_nodeManager->mkBoundVarPtr(*type.d_typeNode));
 }
 
-Expr ExprManager::mkUniqueVar(Type type, Kind k){
+Expr ExprManager::mkNullaryOperator(Type type, Kind k){
   NodeManagerScope nms(d_nodeManager);
-  Node n = d_nodeManager->mkUniqueVar(*type.d_typeNode, k); 
+  Node n = d_nodeManager->mkNullaryOperator(*type.d_typeNode, k); 
   return n.toExpr();
 }
 
@@ -1037,6 +1037,10 @@ Statistics ExprManager::getStatistics() const throw() {
 
 SExpr ExprManager::getStatistic(const std::string& name) const throw() {
   return d_nodeManager->getStatisticsRegistry()->getStatistic(name);
+}
+
+void ExprManager::safeFlushStatistics(int fd) const {
+  d_nodeManager->getStatisticsRegistry()->safeFlushInformation(fd);
 }
 
 namespace expr {

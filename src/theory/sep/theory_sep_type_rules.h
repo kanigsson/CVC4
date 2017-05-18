@@ -25,14 +25,6 @@ namespace CVC4 {
 namespace theory {
 namespace sep {
 
-class SepNilRefTypeRule {
-public:
-  inline static TypeNode computeType(NodeManager* nodeManager, TNode n, bool check)
-    throw (TypeCheckingExceptionPrivate, AssertionException) {
-    return TypeNode::fromType( n.getConst<NilRef>().getType() );
-  }
-};
-
 class SepEmpTypeRule {
 public:
   inline static TypeNode computeType(NodeManager* nodeManager, TNode n, bool check)
@@ -106,6 +98,17 @@ struct SepLabelTypeRule {
     return btype;
   }
 };/* struct SepLabelTypeRule */
+
+struct SepNilTypeRule {
+  inline static TypeNode computeType(NodeManager* nodeManager, TNode n, bool check)
+    throw (TypeCheckingExceptionPrivate, AssertionException) {
+    Assert(n.getKind() == kind::SEP_NIL);
+    Assert(check);
+    TypeNode type = n.getType();
+    return type;
+  }
+};/* struct SepLabelTypeRule */
+
 
 }/* CVC4::theory::sep namespace */
 }/* CVC4::theory namespace */

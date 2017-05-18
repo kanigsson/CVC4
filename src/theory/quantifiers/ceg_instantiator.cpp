@@ -16,7 +16,7 @@
 #include "theory/quantifiers/ceg_t_instantiator.h"
 
 #include "options/quantifiers_options.h"
-#include "smt/ite_removal.h"
+#include "smt/term_formula_removal.h"
 #include "theory/quantifiers/first_order_model.h"
 #include "theory/quantifiers/term_database.h"
 #include "theory/quantifiers/quantifiers_rewriter.h"
@@ -556,34 +556,43 @@ Node CegInstantiator::applySubstitution( TypeNode tn, Node n, std::vector< Node 
           }
         }
         //make sum with normalized coefficient
-        Assert( !pv_coeff.isNull() );
-        pv_coeff = Rewriter::rewrite( pv_coeff );
-        Trace("cegqi-si-apply-subs-debug") << "Combined coeff : " << pv_coeff << std::endl;
-        std::vector< Node > children;
-        for( std::map< Node, Node >::iterator it = msum.begin(); it != msum.end(); ++it ){
-          Node c_coeff;
-          if( !msum_coeff[it->first].isNull() ){
-            c_coeff = Rewriter::rewrite( NodeManager::currentNM()->mkConst( pv_coeff.getConst<Rational>() / msum_coeff[it->first].getConst<Rational>() ) );
+        if( !pv_coeff.isNull() ){
+          pv_coeff = Rewriter::rewrite( pv_coeff );
+          Trace("cegqi-si-apply-subs-debug") << "Combined coeff : " << pv_coeff << std::endl;
+          std::vector< Node > children;
+          for( std::map< Node, Node >::iterator it = msum.begin(); it != msum.end(); ++it ){
+            Node c_coeff;
+            if( !msum_coeff[it->first].isNull() ){
+              c_coeff = Rewriter::rewrite( NodeManager::currentNM()->mkConst( pv_coeff.getConst<Rational>() / msum_coeff[it->first].getConst<Rational>() ) );
+            }else{
+              c_coeff = pv_coeff;
+            }
+            if( !it->second.isNull() ){
+              c_coeff = NodeManager::currentNM()->mkNode( MULT, c_coeff, it->second );
+            }
+            Assert( !c_coeff.isNull() );
+            Node c;
+            if( msum_term[it->first].isNull() ){
+              c = c_coeff;
+            }else{
+              c = NodeManager::currentNM()->mkNode( MULT, c_coeff, msum_term[it->first] );
+            }
+            children.push_back( c );
+            Trace("cegqi-si-apply-subs-debug") << "Add child : " << c << std::endl;
+          }
+          Node nret = children.size()==1 ? children[0] : NodeManager::currentNM()->mkNode( PLUS, children );
+          nret = Rewriter::rewrite( nret );
+          //ensure that nret does not contain vars
+          if( !TermDb::containsTerms( nret, vars ) ){
+            //result is ( nret / pv_coeff )
+            return nret;
           }else{
-            c_coeff = pv_coeff;
+            Trace("cegqi-si-apply-subs-debug") << "Failed, since result " << nret << " contains free variable." << std::endl;
           }
-          if( !it->second.isNull() ){
-            c_coeff = NodeManager::currentNM()->mkNode( MULT, c_coeff, it->second );
-          }
-          Assert( !c_coeff.isNull() );
-          Node c;
-          if( msum_term[it->first].isNull() ){
-            c = c_coeff;
-          }else{
-            c = NodeManager::currentNM()->mkNode( MULT, c_coeff, msum_term[it->first] );
-          }
-          children.push_back( c );
-          Trace("cegqi-si-apply-subs-debug") << "Add child : " << c << std::endl;
+        }else{
+          //implies that we have a monomial that has a free variable
+          Trace("cegqi-si-apply-subs-debug") << "Failed to find coefficient during substitution, implies monomial with free variable." << std::endl;
         }
-        Node nret = children.size()==1 ? children[0] : NodeManager::currentNM()->mkNode( PLUS, children );
-        nret = Rewriter::rewrite( nret );
-        //result is ( nret / pv_coeff )
-        return nret;
       }else{
         Trace("cegqi-si-apply-subs-debug") << "Failed to find monomial sum " << n << std::endl;
       }
@@ -702,19 +711,16 @@ void CegInstantiator::processAssertions() {
   d_curr_eqc.clear();
   d_curr_type_eqc.clear();
 
+  // must use master equality engine to avoid value instantiations
   eq::EqualityEngine* ee = d_qe->getMasterEqualityEngine();
   //to eliminate identified illegal terms
   std::map< Node, Node > aux_subs;
 
   //for each variable
-  std::vector< TheoryId > tids;
-  tids.push_back(THEORY_UF);
   for( unsigned i=0; i<d_vars.size(); i++ ){
     Node pv = d_vars[i];
     TypeNode pvtn = pv.getType();
-    //collect relevant theories
-    std::map< TypeNode, bool > visited;
-    collectTheoryIds( pvtn, visited, tids );
+    Trace("cbqi-proc-debug") << "Collect theory ids from type " << pvtn << " of " << pv << std::endl;
     //collect information about eqc
     if( ee->hasTerm( pv ) ){
       Node pvr = ee->getRepresentative( pv );
@@ -729,8 +735,8 @@ void CegInstantiator::processAssertions() {
     }
   }
   //collect assertions for relevant theories
-  for( unsigned i=0; i<tids.size(); i++ ){
-    TheoryId tid = tids[i];
+  for( unsigned i=0; i<d_tids.size(); i++ ){
+    TheoryId tid = d_tids[i];
     Theory* theory = d_qe->getTheoryEngine()->theoryOf( tid );
     if( theory && d_qe->getTheoryEngine()->isTheoryEnabled(tid) ){
       Trace("cbqi-proc") << "Collect assertions from theory " << tid << std::endl;
@@ -753,6 +759,12 @@ void CegInstantiator::processAssertions() {
               Trace("cbqi-proc") << "......add substitution : " << itae2->first << " -> " << itae2->second << std::endl;
             }
           }
+        }else if( atom.getKind()==BOOLEAN_TERM_VARIABLE ){
+          if( std::find( d_aux_vars.begin(), d_aux_vars.end(), atom )!=d_aux_vars.end() ){
+            Node val = NodeManager::currentNM()->mkConst( lit.getKind()!=NOT );
+            aux_subs[ atom ] = val;
+            Trace("cbqi-proc") << "......add substitution : " << atom << " -> " << val << std::endl;
+          }
         }
       }
     }
@@ -765,7 +777,7 @@ void CegInstantiator::processAssertions() {
     TypeNode rtn = r.getType();
     TheoryId tid = Theory::theoryOf( rtn );
     //if we care about the theory of this eqc
-    if( std::find( tids.begin(), tids.end(), tid )!=tids.end() ){
+    if( std::find( d_tids.begin(), d_tids.end(), tid )!=d_tids.end() ){
       if( rtn.isInteger() || rtn.isReal() ){
         rtn = rtn.getBaseType();
       }
@@ -794,7 +806,7 @@ void CegInstantiator::processAssertions() {
     if( it!=aux_subs.end() ){
       addToAuxVarSubstitution( subs_lhs, subs_rhs, r, it->second );
     }else{
-      Trace("cbqi-proc") << "....no substitution found for auxiliary variable " << r << "!!!" << std::endl;
+      Trace("cbqi-proc") << "....no substitution found for auxiliary variable " << r << "!!! type is " << r.getType() << std::endl;
       Assert( false );
     }
   }
@@ -884,7 +896,7 @@ void CegInstantiator::collectCeAtoms( Node n, std::map< Node, bool >& visited ) 
     d_is_nested_quant = true;
   }else if( visited.find( n )==visited.end() ){
     visited[n] = true;
-    if( TermDb::isBoolConnective( n.getKind() ) ){
+    if( TermDb::isBoolConnectiveTerm( n ) ){
       for( unsigned i=0; i<n.getNumChildren(); i++ ){
         collectCeAtoms( n[i], visited );
       }
@@ -940,7 +952,7 @@ void CegInstantiator::registerCounterexampleLemma( std::vector< Node >& lems, st
 
   //remove ITEs
   IteSkolemMap iteSkolemMap;
-  d_qe->getTheoryEngine()->getIteRemover()->run(lems, iteSkolemMap);
+  d_qe->getTheoryEngine()->getTermFormulaRemover()->run(lems, iteSkolemMap);
   //Assert( d_aux_vars.empty() );
   d_aux_vars.clear();
   d_aux_eq.clear();
@@ -965,6 +977,14 @@ void CegInstantiator::registerCounterexampleLemma( std::vector< Node >& lems, st
         }
       }
     }
+    /*else if( lems[i].getKind()==EQUAL && lems[i][0].getType().isBoolean() ){
+      //Boolean terms
+      if( std::find( d_aux_vars.begin(), d_aux_vars.end(), lems[i][0] )!=d_aux_vars.end() ){
+        Node v = lems[i][0];
+        d_aux_eq[rlem][v] = lems[i][1];
+         Trace("cbqi-debug") << "  " << rlem << " implies " << v << " = " << lems[i][1] << std::endl;
+      } 
+    }*/
     lems[i] = rlem;
   }
   //collect atoms from all lemmas: we will only do bounds coming from original body
@@ -972,6 +992,21 @@ void CegInstantiator::registerCounterexampleLemma( std::vector< Node >& lems, st
   std::map< Node, bool > visited;
   for( unsigned i=0; i<lems.size(); i++ ){
     collectCeAtoms( lems[i], visited );
+  }
+
+  //compute the theory ids
+  d_tids.clear();
+  d_tids.push_back(THEORY_UF);
+  for( unsigned r=0; r<2; r++ ){
+    unsigned sz = r==0 ? d_vars.size() : d_aux_vars.size();
+    for( unsigned i=0; i<sz; i++ ){
+      Node pv = r==0 ? d_vars[i] : d_aux_vars[i];
+      TypeNode pvtn = pv.getType();
+      Trace("cbqi-proc-debug") << "Collect theory ids from type " << pvtn << " of " << pv << std::endl;
+      //collect relevant theories
+      std::map< TypeNode, bool > visited;
+      collectTheoryIds( pvtn, visited, d_tids );
+    }
   }
 }
 

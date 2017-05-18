@@ -315,7 +315,7 @@ void NodeManager::reclaimZombies() {
 
       // remove from the pool
       kind::MetaKind mk = nv->getMetaKind();
-      if(mk != kind::metakind::VARIABLE) {
+      if(mk != kind::metakind::VARIABLE && mk != kind::metakind::NULLARY_OPERATOR) {
         poolRemove(nv);
       }
 
@@ -383,7 +383,7 @@ std::vector<NodeValue*> NodeManager::TopologicalSort(
         stack.back().first = true;
         Assert(visited.count(current) == 0);
         visited.insert(current);
-        for (int i = 0; i < current->getNumChildren(); ++i) {
+        for (unsigned i = 0; i < current->getNumChildren(); ++i) {
           expr::NodeValue* child = current->getChild(i);
           if (visited.find(child) == visited.end()) {
             stack.push_back(std::make_pair(false, child));
@@ -412,8 +412,9 @@ TypeNode NodeManager::getType(TNode n, bool check)
   bool hasType = getAttribute(n, TypeAttr(), typeNode);
   bool needsCheck = check && !getAttribute(n, TypeCheckedAttr());
 
-  Debug("getType") << "getting type for " << n << endl;
 
+  Debug("getType") << this << " getting type for " << &n << " " << n << ", check=" << check << ", needsCheck = " << needsCheck << ", hasType = " << hasType << endl;
+  
   if(needsCheck && !(*d_options)[options::earlyTypeChecking]) {
     /* Iterate and compute the children bottom up. This avoids stack
        overflows in computeType() when the Node graph is really deep,
@@ -437,6 +438,7 @@ TypeNode NodeManager::getType(TNode n, bool check)
       }
 
       if( readyToCompute ) {
+        Assert( check || m.getMetaKind()!=kind::metakind::NULLARY_OPERATOR );
         /* All the children have types, time to compute */
         typeNode = TypeChecker::computeType(this, m, check);
         worklist.pop();
@@ -448,6 +450,7 @@ TypeNode NodeManager::getType(TNode n, bool check)
   } else if( !hasType || needsCheck ) {
     /* We can compute the type top-down, without worrying about
        deep recursion. */
+    Assert( check || n.getMetaKind()!=kind::metakind::NULLARY_OPERATOR );
     typeNode = TypeChecker::computeType(this, n, check);
   }
 
@@ -456,7 +459,7 @@ TypeNode NodeManager::getType(TNode n, bool check)
   /* The check should have happened, if we asked for it. */
   Assert( !check || getAttribute(n, TypeCheckedAttr()) );
 
-  Debug("getType") << "type of " << n << " is " << typeNode << endl;
+  Debug("getType") << "type of " << &n << " " <<  n << " is " << typeNode << endl;
   return typeNode;
 }
 
@@ -780,14 +783,21 @@ Node NodeManager::mkInstConstant(const TypeNode& type) {
   return n;
 }
 
-Node NodeManager::mkUniqueVar(const TypeNode& type, Kind k) {
+Node NodeManager::mkBooleanTermVariable() {
+  Node n = NodeBuilder<0>(this, kind::BOOLEAN_TERM_VARIABLE);
+  n.setAttribute(TypeAttr(), booleanType());
+  n.setAttribute(TypeCheckedAttr(), true);
+  return n;
+}
+
+Node NodeManager::mkNullaryOperator(const TypeNode& type, Kind k) {
   std::map< TypeNode, Node >::iterator it = d_unique_vars[k].find( type );
   if( it==d_unique_vars[k].end() ){
-    Node n = NodeBuilder<0>(this, k);
-    n.setAttribute(TypeAttr(), type);
-    n.setAttribute(TypeCheckedAttr(), true);
+    Node n = NodeBuilder<0>(this, k).constructNode();
+    setAttribute(n, TypeAttr(), type);
+    //setAttribute(n, TypeCheckedAttr(), true);
     d_unique_vars[k][type] = n;
-    Assert( n.getMetaKind() == kind::metakind::VARIABLE );
+    Assert( n.getMetaKind() == kind::metakind::NULLARY_OPERATOR );
     return n;
   }else{
     return it->second;

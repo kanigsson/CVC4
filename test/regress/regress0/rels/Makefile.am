@@ -99,10 +99,23 @@ TESTS =	\
   rel_tc_5_1.cvc \
   rel_tp_join_1.cvc \
   rel_transpose_0.cvc \
-  set-strat.cvc
+  set-strat.cvc \
+  rel_tc_8.cvc \
+  atom_univ2.cvc \
+  rels-sharing-simp.cvc \
+  iden_0.cvc \
+  iden_1_1.cvc \
+  iden_1.cvc \
+  joinImg_0_1.cvc \
+  joinImg_0_2.cvc \
+  joinImg_0.cvc \
+  joinImg_1_1.cvc \
+  joinImg_1.cvc \
+  joinImg_2_1.cvc \
+  joinImg_2.cvc \
+  card_transpose.cvc
 
 # unsolved : garbage_collect.cvc
-# dump-unsat-core crash : rel_tc_8.cvc
 
 EXTRA_DIST = $(TESTS)
 

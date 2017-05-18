@@ -97,7 +97,7 @@ namespace theory {
 }/* CVC4::theory namespace */
 
 class DecisionEngine;
-class RemoveITE;
+class RemoveTermFormulas;
 class UnconstrainedSimplifier;
 
 /**
@@ -187,6 +187,7 @@ class TheoryEngine {
    * Model builder object
    */
   theory::TheoryEngineModelBuilder* d_curr_model_builder;
+  bool d_aloc_curr_model_builder;
 
   typedef std::hash_map<Node, Node, NodeHashFunction> NodeMap;
   typedef std::hash_map<TNode, Node, TNodeHashFunction> TNodeMap;
@@ -439,7 +440,7 @@ class TheoryEngine {
   /** Enusre that the given atoms are send to the given theory */
   void ensureLemmaAtoms(const std::vector<TNode>& atoms, theory::TheoryId theory);
 
-  RemoveITE& d_iteRemover;
+  RemoveTermFormulas& d_tform_remover;
 
   /** sort inference module */
   SortInference d_sortInfer;
@@ -461,7 +462,7 @@ public:
 
   /** Constructs a theory engine */
   TheoryEngine(context::Context* context, context::UserContext* userContext,
-               RemoveITE& iteRemover, const LogicInfo& logic,
+               RemoveTermFormulas& iteRemover, const LogicInfo& logic,
                LemmaChannels* channels);
 
   /** Destroys a theory engine */
@@ -603,18 +604,11 @@ public:
    */
   Node preprocess(TNode node);
 
+  /** Notify (preprocessed) assertions. */
+  void notifyPreprocessedAssertions(const std::vector<Node>& assertions);
 
-  /**
-   * Notify (preprocessed) assertions 
-   */
-  void notifyPreprocessedAssertions( std::vector< Node >& assertions );
-
-  /**
-   * Return whether or not we are incomplete (in the current context).
-   */
-  inline bool isIncomplete() const {
-    return d_incomplete;
-  }
+  /** Return whether or not we are incomplete (in the current context). */
+  inline bool isIncomplete() const { return d_incomplete; }
 
   /**
    * Returns true if we need another round of checking.  If this
@@ -720,7 +714,7 @@ public:
   /**
    * collect model info
    */
-  void collectModelInfo( theory::TheoryModel* m, bool fullModel );
+  void collectModelInfo( theory::TheoryModel* m );
   /** post process model */
   void postProcessModel( theory::TheoryModel* m );
 
@@ -837,6 +831,7 @@ private:
 public:
   void staticInitializeBVOptions(const std::vector<Node>& assertions);
   void ppBvToBool(const std::vector<Node>& assertions, std::vector<Node>& new_assertions);
+  void ppBoolToBv(const std::vector<Node>& assertions, std::vector<Node>& new_assertions);
   bool ppBvAbstraction(const std::vector<Node>& assertions, std::vector<Node>& new_assertions);
   void mkAckermanizationAsssertions(std::vector<Node>& assertions);
 
@@ -850,7 +845,7 @@ public:
 
   theory::eq::EqualityEngine* getMasterEqualityEngine() { return d_masterEqualityEngine; }
 
-  RemoveITE* getIteRemover() { return &d_iteRemover; }
+  RemoveTermFormulas* getTermFormulaRemover() { return &d_tform_remover; }
 
   SortInference* getSortInference() { return &d_sortInfer; }
 

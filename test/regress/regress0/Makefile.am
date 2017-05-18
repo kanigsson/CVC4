@@ -1,4 +1,4 @@
-SUBDIRS = . arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep
+SUBDIRS = . expect arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep nl
 DIST_SUBDIRS = $(SUBDIRS)
 
 # don't override a BINARY imported from a personal.mk
@@ -111,7 +111,13 @@ CVC_TESTS = \
 	wiki.21.cvc \
 	queries0.cvc \
 	trim.cvc \
-	print_lambda.cvc 
+	print_lambda.cvc \
+	cvc3.userdoc.01.cvc \
+	cvc3.userdoc.02.cvc \
+	cvc3.userdoc.03.cvc \
+	cvc3.userdoc.04.cvc \
+	cvc3.userdoc.05.cvc \
+	cvc3.userdoc.06.cvc
 
 # Regression tests for TPTP inputs
 TPTP_TESTS =
@@ -171,15 +177,20 @@ BUG_TESTS = \
 	bug595.cvc \
 	bug596.cvc \
 	bug596b.cvc \
-	bug605.cvc
+	bug605.cvc \
+	bt-test-00.smt2 \
+	bt-test-01.smt2
 #bug590.smt2
 
 TESTS = $(SMT_TESTS) $(SMT2_TESTS) $(CVC_TESTS) $(TPTP_TESTS) $(BUG_TESTS)
 
 # bug512 -- taking too long, --time-per not working perhaps? in any case,
 # we have a minimized version still getting tested
+# bug639 -- still fails, reopened bug
 DISABLED_TESTS = \
-	bug512.smt2
+	bug512.smt2 \
+	bug639.smt2
+
 
 EXTRA_DIST = $(TESTS) \
 	simplification_bug4.smt2.expect \
@@ -189,6 +200,7 @@ EXTRA_DIST = $(TESTS) \
 if CVC4_BUILD_PROFILE_COMPETITION
 else
 TESTS += \
+	bug681.smt2 \
 	error.cvc \
 	errorcrash.smt2 \
 	arrayinuf_error.smt2

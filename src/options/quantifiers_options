@@ -54,7 +54,7 @@ option aggressiveMiniscopeQuant --ag-miniscope-quant bool :default false
  perform aggressive miniscoping for quantifiers
 option elimTautQuant --elim-taut-quant bool :default true
  eliminate tautological disjuncts of quantified formulas
-option elimExtArithQuant --elim-ext-arith-quant bool :default true
+option elimExtArithQuant --elim-ext-arith-quant bool :read-write :default true
  eliminate extended arithmetic symbols in quantified formulas
 option condRewriteQuant --cond-rewrite-quant bool :default true
  conditional rewriting of quantified formulas
@@ -91,6 +91,10 @@ option multiTriggerWhenSingle --multi-trigger-when-single bool :default false
  select multi triggers when single triggers exist
 option multiTriggerPriority --multi-trigger-priority bool :default false
  only try multi triggers if single triggers give no instantiations
+option multiTriggerCache --multi-trigger-cache bool :default false
+ caching version of multi triggers
+option multiTriggerLinear --multi-trigger-linear bool :default true
+ implementation of multi triggers where maximum number of instantiations is linear wrt number of ground terms
 option triggerSelMode --trigger-sel CVC4::theory::quantifiers::TriggerSelMode :default CVC4::theory::quantifiers::TRIGGER_SEL_MIN :read-write :include "options/quantifiers_modes.h" :handler  stringToTriggerSelMode
  selection mode for triggers
 option triggerActiveSelMode --trigger-active-sel CVC4::theory::quantifiers::TriggerActiveSelMode :default CVC4::theory::quantifiers::TRIGGER_ACTIVE_SEL_ALL :read-write :include "options/quantifiers_modes.h" :handler stringToTriggerActiveSelMode
@@ -108,6 +112,8 @@ option instWhenPhase --inst-when-phase=N int :read-write :default 2 :read-write
  instantiation rounds quantifiers takes (>=1) before allowing theory combination to happen
 option instWhenTcFirst --inst-when-tc-first bool :default true :read-write
  allow theory combination to happen once initially, before quantifier strategies are run
+option quantModelEe --quant-model-ee bool :default false
+ use equality engine of model for last call effort
  
 option instMaxLevel --inst-max-level=N int :read-write :default -1
  maximum inst level of terms used to instantiate quantified formulas with (-1 == no limit, default)
@@ -165,6 +171,8 @@ option fmfBound fmf-bound --fmf-bound bool :default false :read-write
  finite model finding on bounded quantification
 option fmfBoundLazy --fmf-bound-lazy bool :default false :read-write
  enforce bounds for bounded quantification lazily via use of proxy variables
+option fmfBoundMinMode --fmf-bound-min-mode=MODE CVC4::theory::quantifiers::FmfBoundMinMode :default CVC4::theory::quantifiers::FMF_BOUND_MIN_INT_RANGE :include "options/quantifiers_modes.h" :handler stringToFmfBoundMinMode
+ mode for which types of bounds to minimize via first decision heuristics
  
 ### conflict-based instantiation options 
  
@@ -185,6 +193,8 @@ option qcfVoExp --qcf-vo-exp bool :default false
 
 option instNoEntail --inst-no-entail bool :read-write :default true
  do not consider instances of quantified formulas that are currently entailed
+option instNoModelTrue --inst-no-model-true bool :read-write :default false
+ do not consider instances of quantified formulas that are currently true in model, if it is available
 
 option instPropagate --inst-prop bool :read-write :default false
  internal propagation for instantiations for selecting relevant instances
@@ -267,9 +277,13 @@ option sygusNormalFormGlobalContent --sygus-nf-sym-content bool :default true
   
 option sygusInvTemplMode --sygus-inv-templ=MODE CVC4::theory::quantifiers::SygusInvTemplMode :default CVC4::theory::quantifiers::SYGUS_INV_TEMPL_MODE_NONE :include "options/quantifiers_modes.h" :handler stringToSygusInvTemplMode
   template mode for sygus invariant synthesis
+option sygusUnifCondSol --sygus-unif-csol bool :default false
+  enable approach which unifies conditional solutions
 
 option sygusDirectEval --sygus-direct-eval bool :default true
   direct unfolding of evaluation functions
+option sygusCRefEval --sygus-cref-eval bool :default false
+  direct evaluation of refinement lemmas for conflict analysis
   
 # approach applied to general quantified formulas
 option cbqi --cbqi bool :read-write :default false
@@ -300,7 +314,7 @@ option cbqiLitDepend --cbqi-lit-dep bool :default true
   dependency lemmas for quantifier alternation in counterexample-based quantifier instantiation
 option cbqiInnermost --cbqi-innermost bool :read-write :default true
  only process innermost quantified formulas in counterexample-based quantifier instantiation
-option cbqiNestedQE --cbqi-nested-qe bool :default false
+option cbqiNestedQE --cbqi-nested-qe bool :read-write :default false
  process nested quantified formulas with quantifier elimination in counterexample-based quantifier instantiation
  
 option quantEpr --quant-epr bool :default false :read-write
@@ -325,7 +339,7 @@ option macrosQuant --macros-quant bool :read-write :default false
  perform quantifiers macro expansion
 option macrosQuantMode --macros-quant-mode=MODE CVC4::theory::quantifiers::MacrosQuantMode :default CVC4::theory::quantifiers::MACROS_QUANT_MODE_GROUND_UF :include "options/quantifiers_modes.h" :handler stringToMacrosQuantMode
  mode for quantifiers macro expansion
-option quantDynamicSplit --quant-dsplit-mode=MODE CVC4::theory::quantifiers::QuantDSplitMode :read-write :default CVC4::theory::quantifiers::QUANT_DSPLIT_MODE_DEFAULT :include "options/quantifiers_modes.h" :handler stringToQuantDSplitMode
+option quantDynamicSplit --quant-dsplit-mode=MODE CVC4::theory::quantifiers::QuantDSplitMode :read-write :default CVC4::theory::quantifiers::QUANT_DSPLIT_MODE_NONE :include "options/quantifiers_modes.h" :handler stringToQuantDSplitMode
  mode for dynamic quantifiers splitting
 option quantAntiSkolem --quant-anti-skolem bool :read-write :default false
  perform anti-skolemization for quantified formulas

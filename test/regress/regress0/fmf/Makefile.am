@@ -56,7 +56,25 @@ TESTS =	\
 	agree466.smt2 \
 	LeftistHeap.scala-8-ncm.smt2 \
 	sc-crash-052316.smt2 \
-	bound-int-alt.smt2
+	bound-int-alt.smt2 \
+	bug723-irrelevant-funs.smt2 \
+	bounded_sets.smt2 \
+	fmf-strange-bounds.smt2 \
+	fmf-strange-bounds-2.smt2 \
+	fmf-bound-2dim.smt2 \
+	memory_model-R_cpp-dd.cvc \
+	bug764.smt2 \
+	ko-bound-set.cvc \
+	cons-sets-bounds.smt2 \
+	bug651.smt2 \
+	bug652.smt2 \
+	bug782.smt2 \
+	quant_real_univ.cvc \
+	constr-ground-to.smt2 \
+	bug-041417-set-options.cvc \
+	alg202+1.smt2 \
+	fmf-fun-no-elim-ext-arith.smt2 \
+	fmf-fun-no-elim-ext-arith2.smt2
 
 EXTRA_DIST = $(TESTS)
 

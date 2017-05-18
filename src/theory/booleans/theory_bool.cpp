@@ -56,6 +56,21 @@ Theory::PPAssertStatus TheoryBool::ppAssert(TNode in, SubstitutionMap& outSubsti
   return PP_ASSERT_STATUS_SOLVED;
 }
 
+/*
+void TheoryBool::check(Effort level) {
+  if (done() && !fullEffort(level)) {
+    return;
+  }
+  while (!done())
+  {
+    // Get all the assertions
+    Assertion assertion = get();
+    TNode fact = assertion.assertion;
+  }
+  if( Theory::fullEffort(level) ){
+  }
+}  
+*/
 
 }/* CVC4::theory::booleans namespace */
 }/* CVC4::theory namespace */

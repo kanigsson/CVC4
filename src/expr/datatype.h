@@ -221,7 +221,7 @@ private:
                                 const std::vector< DatatypeType >& paramReplacements);
 
   /** compute the cardinality of this datatype */
-  Cardinality computeCardinality( std::vector< Type >& processing ) const throw(IllegalArgumentException);
+  Cardinality computeCardinality( Type t, std::vector< Type >& processing ) const throw(IllegalArgumentException);
   /** compute whether this datatype is well-founded */
   bool computeWellFounded( std::vector< Type >& processing ) const throw(IllegalArgumentException);
   /** compute ground term */
@@ -329,21 +329,21 @@ public:
    * Return the cardinality of this constructor (the product of the
    * cardinalities of its arguments).
    */
-  Cardinality getCardinality() const throw(IllegalArgumentException);
+  Cardinality getCardinality( Type t ) const throw(IllegalArgumentException);
 
   /**
    * Return true iff this constructor is finite (it is nullary or
    * each of its argument types are finite).  This function can
    * only be called for resolved constructors.
    */
-  bool isFinite() const throw(IllegalArgumentException);
+  bool isFinite( Type t ) const throw(IllegalArgumentException);
   /**
    * Return true iff this constructor is finite (it is nullary or
    * each of its argument types are finite) under assumption
    * uninterpreted sorts are finite.  This function can
    * only be called for resolved constructors.
    */
-  bool isInterpretedFinite() const throw(IllegalArgumentException);
+  bool isInterpretedFinite( Type t ) const throw(IllegalArgumentException);
 
   /**
    * Returns true iff this Datatype constructor has already been
@@ -491,16 +491,17 @@ private:
   Expr d_sygus_bvl;
   bool d_sygus_allow_const;
   bool d_sygus_allow_all;
+  Expr d_sygus_eval;
 
   // "mutable" because computing the cardinality can be expensive,
   // and so it's computed just once, on demand---this is the cache
   mutable Cardinality d_card;
 
   // is this type a recursive singleton type
-  mutable int d_card_rec_singleton;
+  mutable std::map< Type, int > d_card_rec_singleton;
   // if d_card_rec_singleton is true,
   // infinite cardinality depends on at least one of the following uninterpreted sorts having cardinality > 1
-  mutable std::vector< Type > d_card_u_assume;
+  mutable std::map< Type, std::vector< Type > > d_card_u_assume;
   // is this well-founded
   mutable int d_well_founded;
   // ground term for this datatype
@@ -542,9 +543,9 @@ private:
   friend class ExprManager;// for access to resolve()
 
   /** compute the cardinality of this datatype */
-  Cardinality computeCardinality( std::vector< Type >& processing ) const throw(IllegalArgumentException);
+  Cardinality computeCardinality( Type t, std::vector< Type >& processing ) const throw(IllegalArgumentException);
   /** compute whether this datatype is a recursive singleton */
-  bool computeCardinalityRecSingleton( std::vector< Type >& processing, std::vector< Type >& u_assume ) const throw(IllegalArgumentException);
+  bool computeCardinalityRecSingleton( Type t, std::vector< Type >& processing, std::vector< Type >& u_assume ) const throw(IllegalArgumentException);
   /** compute whether this datatype is well-founded */
   bool computeWellFounded( std::vector< Type >& processing ) const throw(IllegalArgumentException);
   /** compute ground term */
@@ -618,7 +619,9 @@ public:
    * Return the cardinality of this datatype (the sum of the
    * cardinalities of its constructors).  The Datatype must be
    * resolved.
+   * Version taking Type t is required for parametric datatypes.
    */
+  Cardinality getCardinality( Type t ) const throw(IllegalArgumentException);
   Cardinality getCardinality() const throw(IllegalArgumentException);
 
   /**
@@ -626,15 +629,20 @@ public:
    * finite,  i.e., there  are finitely  many ground  terms).   If the
    * datatype is  not well-founded, this function  returns false.  The
    * Datatype must be resolved or an exception is thrown.
+   * Version taking Type t is required for parametric.
    */
+  bool isFinite( Type t ) const throw(IllegalArgumentException);
   bool isFinite() const throw(IllegalArgumentException);
+  
   /**
    * Return  true iff this  Datatype is  finite (all  constructors are
    * finite,  i.e., there  are finitely  many ground  terms) under the
    * assumption unintepreted sorts are finite.   If the
    * datatype is  not well-founded, this function  returns false.  The
    * Datatype must be resolved or an exception is thrown.
+   * Version taking Type t is required for parametric datatypes.
    */
+  bool isInterpretedFinite( Type t ) const throw(IllegalArgumentException);
   bool isInterpretedFinite() const throw(IllegalArgumentException);
 
   /**
@@ -645,11 +653,19 @@ public:
 
   /**
    * Return true iff this datatype is a recursive singleton
+   * Version taking Type t is required for parametric datatypes.
    */
+  bool isRecursiveSingleton( Type t ) const throw(IllegalArgumentException);
   bool isRecursiveSingleton() const throw(IllegalArgumentException);
 
 
-  /** get number of recursive singleton argument types */
+  /** 
+   * Get recursive singleton argument types (uninterpreted sorts that the singleton cardinality 
+   * of this datatype is dependent upon).
+   * Versions taking Type t are required for parametric datatypes.
+  */
+  unsigned getNumRecursiveSingletonArgTypes( Type t ) const throw(IllegalArgumentException);
+  Type getRecursiveSingletonArgType( Type t, unsigned i ) const throw(IllegalArgumentException);
   unsigned getNumRecursiveSingletonArgTypes() const throw(IllegalArgumentException);
   Type getRecursiveSingletonArgType( unsigned i ) const throw(IllegalArgumentException);
 
@@ -729,6 +745,8 @@ public:
   bool getSygusAllowConst() const;
   /** does it allow constants */
   bool getSygusAllowAll() const;
+  /** get the evaluation function for this datatype for the deep embedding */
+  Expr getSygusEvaluationFunc() const;
 
   /**
    * Get whether this datatype involves an external type.  If so,
@@ -836,7 +854,6 @@ inline Datatype::Datatype(std::string name, bool isCo) :
   d_involvesExt(false),
   d_involvesUt(false),
   d_card(CardinalityUnknown()),
-  d_card_rec_singleton(0),
   d_well_founded(0) {
 }
 
@@ -853,7 +870,6 @@ inline Datatype::Datatype(std::string name, const std::vector<Type>& params, boo
   d_involvesExt(false),
   d_involvesUt(false),
   d_card(CardinalityUnknown()),
-  d_card_rec_singleton(0),
   d_well_founded(0) {
 }
 

@@ -39,7 +39,8 @@ void DumpC::setDumpFromString(const std::string& optarg) {
   char* toksave;
   while((optargPtr = strtok_r(tokstr, ",", &toksave)) != NULL) {
     tokstr = NULL;
-    if(!strcmp(optargPtr, "benchmark")) {
+    if(!strcmp(optargPtr, "raw-benchmark")) {
+    } else if(!strcmp(optargPtr, "benchmark")) {
     } else if(!strcmp(optargPtr, "declarations")) {
     } else if(!strcmp(optargPtr, "assertions")) {
       Dump.on("assertions:post-everything");
@@ -58,6 +59,8 @@ void DumpC::setDumpFromString(const std::string& optarg) {
       } else if(!strcmp(p, "boolean-terms")) {
       } else if(!strcmp(p, "constrain-subtypes")) {
       } else if(!strcmp(p, "substitution")) {
+      } else if(!strcmp(p, "bv-to-bool")) {
+      } else if(!strcmp(p, "bool-to-bv")) {
       } else if(!strcmp(p, "strings-pp")) {
       } else if(!strcmp(p, "skolem-quant")) {
       } else if(!strcmp(p, "simplify")) {
@@ -127,7 +130,7 @@ void DumpC::setDumpFromString(const std::string& optarg) {
     Dump.on("benchmark");
     if(strcmp(optargPtr, "benchmark")) {
       Dump.on("declarations");
-      if(strcmp(optargPtr, "declarations")) {
+      if(strcmp(optargPtr, "declarations") && strcmp(optargPtr, "raw-benchmark")) {
         Dump.on("skolems");
       }
     }
@@ -149,6 +152,10 @@ benchmark\n\
 declarations\n\
 + Dump user declarations.  Implied by all following modes.\n\
 \n\
+raw-benchmark\n\
++ Dump all user-commands as they are received (including assertions) without\n\
+  any preprocessing and without any internally-created commands.\n\
+\n\
 skolems\n\
 + Dump internally-created skolem variable declarations.  These can\n\
   arise from preprocessing simplifications, existential elimination,\n\
@@ -158,9 +165,9 @@ assertions\n\
 + Output the assertions after preprocessing and before clausification.\n\
   Can also specify \"assertions:pre-PASS\" or \"assertions:post-PASS\",\n\
   where PASS is one of the preprocessing passes: definition-expansion\n\
-  boolean-terms constrain-subtypes substitution strings-pp skolem-quant\n\
-  simplify static-learning ite-removal repeat-simplify\n\
-  rewrite-apply-to-const theory-preprocessing.\n\
+  boolean-terms constrain-subtypes substitution bv-to-bool bool-to-bv\n\
+  strings-pp skolem-quant simplify static-learning ite-removal\n\
+  repeat-simplify rewrite-apply-to-const theory-preprocessing.\n\
   PASS can also be the special value \"everything\", in which case the\n\
   assertions are printed before any preprocessing (with\n\
   \"assertions:pre-everything\") or after all preprocessing completes\n\
@@ -202,17 +209,17 @@ bv-abstraction [non-stateful]\n\
 bv-algebraic [non-stateful]\n\
 + Output correctness queries for bv algebraic solver. \n\
 \n\
-theory::fullcheck [non-stateful]\n                                      \
+theory::fullcheck [non-stateful]\n\
 + Output completeness queries for all full-check effort-level theory checks\n\
 \n\
 Dump modes can be combined with multiple uses of --dump.  Generally you want\n\
-one from the assertions category (either assertions or clauses), and\n\
-perhaps one or more stateful or non-stateful modes for checking correctness\n\
-and completeness of decision procedure implementations.  Stateful modes dump\n\
-the contextual assertions made by the core solver (all decisions and\n\
-propagations as assertions; that affects the validity of the resulting\n\
-correctness and completeness queries, so of course stateful and non-stateful\n\
-modes cannot be mixed in the same run.\n\
+raw-benchmark or, alternatively, one from the assertions category (either\n\
+assertions or clauses), and perhaps one or more stateful or non-stateful modes\n\
+for checking correctness and completeness of decision procedure implementations.\n\
+Stateful modes dump the contextual assertions made by the core solver (all\n\
+decisions and propagations as assertions); this affects the validity of the\n\
+resulting correctness and completeness queries, so of course stateful and\n\
+non-stateful modes cannot be mixed in the same run.\n\
 \n\
 The --output-language option controls the language used for dumping, and\n\
 this allows you to connect CVC4 to another solver implementation via a UNIX\n\

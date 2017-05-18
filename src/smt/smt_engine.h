@@ -105,10 +105,6 @@ namespace theory {
   class TheoryModel;
 }/* CVC4::theory namespace */
 
-namespace stats {
-  StatisticsRegistry* getStatisticsRegistry(SmtEngine*);
-}/* CVC4::stats namespace */
-
 // TODO: SAT layer (esp. CNF- versus non-clausal solvers under the
 // hood): use a type parameter and have check() delegate, or subclass
 // SmtEngine and override check()?
@@ -356,7 +352,6 @@ class CVC4_PUBLIC SmtEngine {
   friend class ::CVC4::smt::SmtEnginePrivate;
   friend class ::CVC4::smt::SmtScope;
   friend class ::CVC4::smt::BooleanTermConverter;
-  friend ::CVC4::StatisticsRegistry* ::CVC4::stats::getStatisticsRegistry(SmtEngine*);
   friend ProofManager* ::CVC4::smt::currentProofManager();
   friend class ::CVC4::LogicRequest;
   // to access d_modelCommands
@@ -394,7 +389,7 @@ class CVC4_PUBLIC SmtEngine {
    * or INVALID query).  Only permitted if CVC4 was built with model
    * support and produce-models is on.
    */
-  Model* getModel() throw(ModalException, UnsafeInterruptException);
+  Model* getModel();
 
   // disallow copy/assignment
   SmtEngine(const SmtEngine&) CVC4_UNDEFINED;
@@ -443,8 +438,7 @@ public:
   /**
    * Query information about the SMT environment.
    */
-  CVC4::SExpr getInfo(const std::string& key) const
-    throw(OptionException, ModalException);
+  CVC4::SExpr getInfo(const std::string& key) const;
 
   /**
    * Set an aspect of the current SMT execution environment.
@@ -533,21 +527,21 @@ public:
    * this function returns true if the expression was added and false
    * if this request was ignored.
    */
-  bool addToAssignment(const Expr& e) throw();
+  bool addToAssignment(const Expr& e);
 
   /**
    * Get the assignment (only if immediately preceded by a SAT or
    * INVALID query).  Only permitted if the SmtEngine is set to
    * operate interactively and produce-assignments is on.
    */
-  CVC4::SExpr getAssignment() throw(ModalException, UnsafeInterruptException);
+  CVC4::SExpr getAssignment();
 
   /**
    * Get the last proof (only if immediately preceded by an UNSAT
    * or VALID query).  Only permitted if CVC4 was built with proof
    * support and produce-proofs is on.
    */
-  Proof* getProof() throw(ModalException, UnsafeInterruptException);
+  Proof* getProof();
 
   /**
    * Print all instantiations made by the quantifiers module.
@@ -580,13 +574,13 @@ public:
    * UNSAT or VALID query).  Only permitted if CVC4 was built with
    * unsat-core support and produce-unsat-cores is on.
    */
-  UnsatCore getUnsatCore() throw(ModalException, UnsafeInterruptException);
+  UnsatCore getUnsatCore();
 
   /**
    * Get the current set of assertions.  Only permitted if the
    * SmtEngine is set to operate interactively.
    */
-  std::vector<Expr> getAssertions() throw(ModalException);
+  std::vector<Expr> getAssertions();
 
   /**
    * Push a user-level context.
@@ -596,7 +590,7 @@ public:
   /**
    * Pop a user-level context.  Throws an exception if nothing to pop.
    */
-  void pop() throw(ModalException, UnsafeInterruptException);
+  void pop();
 
   /**
    * Completely reset the state of the solver, as though destroyed and
@@ -726,6 +720,11 @@ public:
    * Get the value of one named statistic from this SmtEngine.
    */
   SExpr getStatistic(std::string name) const throw();
+
+  /**
+   * Flush statistic from this SmtEngine. Safe to use in a signal handler.
+   */
+  void safeFlushStatistics(int fd) const;
 
   /**
    * Returns the most recent result of checkSat/query or (set-info :status).

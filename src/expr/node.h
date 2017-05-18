@@ -457,14 +457,21 @@ public:
   bool isConst() const;
 
   /**
-   * Returns true if this node represents a constant
-   * @return true if const
+   * Returns true if this node represents a variable
    */
   inline bool isVar() const {
     assertTNodeNotExpired();
     return getMetaKind() == kind::metakind::VARIABLE;
   }
-
+  
+  /**
+   * Returns true if this node represents a nullary operator
+   */
+  inline bool isNullaryOp() const {
+    assertTNodeNotExpired();
+    return getMetaKind() == kind::metakind::NULLARY_OPERATOR;
+  }
+  
   inline bool isClosure() const {
     assertTNodeNotExpired();
     return getKind() == kind::LAMBDA ||
@@ -893,8 +900,6 @@ public:
   NodeTemplate<true> iteNode(const NodeTemplate<ref_count2>& thenpart,
                              const NodeTemplate<ref_count3>& elsepart) const;
   template <bool ref_count2>
-  NodeTemplate<true> iffNode(const NodeTemplate<ref_count2>& right) const;
-  template <bool ref_count2>
   NodeTemplate<true> impNode(const NodeTemplate<ref_count2>& right) const;
   template <bool ref_count2>
   NodeTemplate<true> xorNode(const NodeTemplate<ref_count2>& right) const;
@@ -1203,14 +1208,6 @@ NodeTemplate<ref_count>::iteNode(const NodeTemplate<ref_count2>& thenpart,
 template <bool ref_count>
 template <bool ref_count2>
 NodeTemplate<true>
-NodeTemplate<ref_count>::iffNode(const NodeTemplate<ref_count2>& right) const {
-  assertTNodeNotExpired();
-  return NodeManager::currentNM()->mkNode(kind::IFF, *this, right);
-}
-
-template <bool ref_count>
-template <bool ref_count2>
-NodeTemplate<true>
 NodeTemplate<ref_count>::impNode(const NodeTemplate<ref_count2>& right) const {
   assertTNodeNotExpired();
   return NodeManager::currentNM()->mkNode(kind::IMPLIES, *this, right);
@@ -1262,6 +1259,9 @@ NodeTemplate<true> NodeTemplate<ref_count>::getOperator() const {
 
   case kind::metakind::CONSTANT:
     IllegalArgument(*this, "getOperator() called on Node with CONSTANT-kinded kind");
+
+  case kind::metakind::NULLARY_OPERATOR:
+    IllegalArgument(*this, "getOperator() called on Node with NULLARY_OPERATOR-kinded kind");
 
   default:
     Unhandled(mk);

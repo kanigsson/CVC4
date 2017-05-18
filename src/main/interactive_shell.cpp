@@ -104,7 +104,7 @@ InteractiveShell::InteractiveShell(ExprManager& exprManager,
   }
 
 #if HAVE_LIBREADLINE
-  if(d_in == cin) {
+  if(&d_in == &cin) {
     ::rl_readline_name = const_cast<char*>("CVC4");
 #if READLINE_COMPENTRY_FUNC_RETURNS_CHARP
     ::rl_completion_entry_function = commandGenerator;
@@ -127,6 +127,7 @@ InteractiveShell::InteractiveShell(ExprManager& exprManager,
       break;
     case output::LANG_SMTLIB_V2_0:
     case output::LANG_SMTLIB_V2_5:
+    case output::LANG_SMTLIB_V2_6:
       d_historyFilename = string(getenv("HOME")) + "/.cvc4_history_smtlib2";
       commandsBegin = smt2_commands;
       commandsEnd = smt2_commands + sizeof(smt2_commands) / sizeof(*smt2_commands);
@@ -332,7 +333,8 @@ restart:
     goto restart;
   } catch(ParserException& pe) {
     if(d_options.getOutputLanguage() == output::LANG_SMTLIB_V2_0 ||
-       d_options.getOutputLanguage() == output::LANG_SMTLIB_V2_5) {
+       d_options.getOutputLanguage() == output::LANG_SMTLIB_V2_5 ||
+       d_options.getOutputLanguage() == output::LANG_SMTLIB_V2_6) {
       d_out << "(error \"" << pe << "\")" << endl;
     } else {
       d_out << pe << endl;

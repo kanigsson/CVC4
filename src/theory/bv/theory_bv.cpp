@@ -71,9 +71,9 @@ TheoryBV::TheoryBV(context::Context* c, context::UserContext* u,
     d_extf_range_infer(u),
     d_extf_collapse_infer(u)
 {
-  d_extt = new ExtTheory( this );
-  d_extt->addFunctionKind( kind::BITVECTOR_TO_NAT );
-  d_extt->addFunctionKind( kind::INT_TO_BITVECTOR );
+  setupExtTheory();
+  getExtTheory()->addFunctionKind(kind::BITVECTOR_TO_NAT);
+  getExtTheory()->addFunctionKind(kind::INT_TO_BITVECTOR);
 
   if (options::bitblastMode() == theory::bv::BITBLAST_MODE_EAGER) {
     d_eagerSolver = new EagerBitblastSolver(this);
@@ -87,7 +87,7 @@ TheoryBV::TheoryBV(context::Context* c, context::UserContext* u,
   }
 
   if (options::bitvectorInequalitySolver()) {
-    SubtheorySolver* ineq_solver = new InequalitySolver(c, this);
+    SubtheorySolver* ineq_solver = new InequalitySolver(c, u, this);
     d_subtheories.push_back(ineq_solver);
     d_subtheoryMap[SUB_INEQUALITY] = ineq_solver;
   }
@@ -114,7 +114,6 @@ TheoryBV::~TheoryBV() {
     delete d_subtheories[i];
   }
   delete d_abstractionModule;
-  delete d_extt;
 }
 
 void TheoryBV::setMasterEqualityEngine(eq::EqualityEngine* eq) {
@@ -397,10 +396,9 @@ void TheoryBV::check(Effort e)
   }
   
   //last call : do reductions on extended bitvector functions
-  if( e==Theory::EFFORT_LAST_CALL ){
-    std::vector< Node > nred;
-    getExtTheory()->getActive( nred );
-    doExtfReductions( nred );
+  if (e == Theory::EFFORT_LAST_CALL) {
+    std::vector<Node> nred = getExtTheory()->getActive();
+    doExtfReductions(nred);
     return;
   }
 
@@ -578,14 +576,14 @@ bool TheoryBV::needsCheckLastEffort() {
   return d_needsLastCallCheck;
 }
 
-void TheoryBV::collectModelInfo( TheoryModel* m, bool fullModel ){
+void TheoryBV::collectModelInfo( TheoryModel* m ){
   Assert(!inConflict());
   if (options::bitblastMode() == theory::bv::BITBLAST_MODE_EAGER) {
-    d_eagerSolver->collectModelInfo(m, fullModel);
+    d_eagerSolver->collectModelInfo(m, true);
   }
   for (unsigned i = 0; i < d_subtheories.size(); ++i) {
     if (d_subtheories[i]->isComplete()) {
-      d_subtheories[i]->collectModelInfo(m, fullModel);
+      d_subtheories[i]->collectModelInfo(m, true);
       return;
     }
   }

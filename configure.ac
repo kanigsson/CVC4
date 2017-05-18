@@ -720,6 +720,9 @@ AC_ARG_ENABLE([coverage],
 
 if test -z "${enable_coverage+set}"; then
   enable_coverage=no
+  # make COVERAGE_ON the empty string for makefile conditional function
+  # $(if $(COVERAGE_ON), action1, action2)
+  COVERAGE_ON=
 fi
 
 AC_MSG_RESULT([$enable_coverage])
@@ -730,6 +733,7 @@ if test "$enable_coverage" = yes; then
   # If the user didn't specify these, we force them here.  If the
   # user specified them in opposite phase, give warnings that they
   # shouldn't do that, or bomb out.
+  COVERAGE_ON=yes
   if test "$user_specified_enable_or_disable_shared" != yes; then
     enable_shared=no
     AC_MSG_WARN([turning off shared library building due to --enable-coverage])
@@ -1020,16 +1024,16 @@ fi
 
 # Checks for libraries.
 
-AC_SEARCH_LIBS([clock_gettime], [rt],
+AC_SEARCH_LIBS([clock_gettime], [rt pthread],
                [AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
                           [Defined to 1 if clock_gettime() is supported by the platform.])],
                [AC_LIBOBJ([clock_gettime])])
 AC_CHECK_FUNC([strtok_r], [AC_DEFINE([HAVE_STRTOK_R], [1],
-                                     [Defined to 1 if strtok_r() is supported by the platform.])],
-                          [AC_LIBOBJ([strtok_r])])
+                                     [Defined to 1 if strtok_r() is supported by the platform.])])
 AC_CHECK_FUNC([ffs], [AC_DEFINE([HAVE_FFS], [1],
-                                [Defined to 1 if ffs() is supported by the platform.])],
-                     [AC_LIBOBJ([ffs])])
+                                [Defined to 1 if ffs() is supported by the platform.])])
+
+AC_LIBOBJ([strtok_r ffs])
 
 # Check for antlr C++ runtime (defined in config/antlr.m4)
 AC_LIB_ANTLR
@@ -1263,6 +1267,7 @@ AC_SUBST(BUILDING_STATIC)
 AC_SUBST(STATIC_BINARY)
 AM_CONDITIONAL([STATIC_BINARY], [test "$enable_static_binary" = yes])
 AM_CONDITIONAL([COVERAGE_ENABLED], [test "$enable_coverage" = yes])
+AC_SUBST([COVERAGE_ON])
 
 AM_CONDITIONAL([CVC4_DEBUG], [test "$with_build" = debug])
 AM_CONDITIONAL([CVC4_TRACING], [test "$enable_tracing" = yes])
@@ -1358,8 +1363,6 @@ else
   AM_CONDITIONAL([CVC4_HAS_THREADS], [false])
   AC_SUBST([CVC4_HAS_THREADS], 0)
 fi
-
-AM_CONDITIONAL([CVC4_NEEDS_REPLACEMENT_FUNCTIONS], [test -n "$LIBOBJS"])
 
 # Final information to the user
 gpl=no

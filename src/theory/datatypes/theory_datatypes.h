@@ -263,7 +263,7 @@ public:
   void presolve();
   void addSharedTerm(TNode t);
   EqualityStatus getEqualityStatus(TNode a, TNode b);
-  void collectModelInfo( TheoryModel* m, bool fullModel );
+  void collectModelInfo( TheoryModel* m );
   void shutdown() { }
   std::string identify() const { return std::string("TheoryDatatypes"); }
   /** equality engine */
@@ -310,11 +310,14 @@ private:
   bool mustCommunicateFact( Node n, Node exp );
   /** check clash mod eq */
   bool checkClashModEq( TNode n1, TNode n2, std::vector< Node >& exp, std::vector< std::pair< TNode, TNode > >& deq_cand );
+  /** get relevant terms */
+  void getRelevantTerms( std::set<Node>& termSet );
 private:
   //equality queries
   bool hasTerm( TNode a );
   bool areEqual( TNode a, TNode b );
   bool areDisequal( TNode a, TNode b );
+  bool areCareDisequal( TNode x, TNode y );
   TNode getRepresentative( TNode a );
 };/* class TheoryDatatypes */
 

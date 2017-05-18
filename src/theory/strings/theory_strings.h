@@ -141,6 +141,7 @@ private:
   bool hasTerm( Node a );
   bool areEqual( Node a, Node b );
   bool areDisequal( Node a, Node b );
+  bool areCareDisequal( TNode x, TNode y );
   // t is representative, te = t, add lt = te to explanation exp
   Node getLengthExp( Node t, std::vector< Node >& exp, Node te );
   Node getLength( Node t, std::vector< Node >& exp );
@@ -216,7 +217,7 @@ private:
   // MODEL GENERATION
   /////////////////////////////////////////////////////////////////////////////
 public:
-  void collectModelInfo(TheoryModel* m, bool fullModel);
+  void collectModelInfo(TheoryModel* m);
 
   /////////////////////////////////////////////////////////////////////////////
   // NOTIFICATIONS
@@ -359,9 +360,7 @@ private:
                                       std::map< Node, std::vector< Node > > &XinR_with_exps);
   void checkMemberships();
   bool checkMemberships2();
-  bool checkPDerivative( Node x, Node r, Node atom, bool &addedLemma,
-                         std::vector< Node > &processed, std::vector< Node > &cprocessed,
-                         std::vector< Node > &nf_exp);
+  bool checkPDerivative( Node x, Node r, Node atom, bool &addedLemma, std::vector< Node > &nf_exp);
   //check contains
   void checkPosContains( std::vector< Node >& posContains );
   void checkNegContains( std::vector< Node >& negContains );

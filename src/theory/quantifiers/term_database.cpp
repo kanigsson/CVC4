@@ -17,7 +17,6 @@
 #include "expr/datatype.h"
 #include "options/base_options.h"
 #include "options/quantifiers_options.h"
-#include "theory/datatypes/datatypes_rewriter.h"
 #include "theory/quantifiers/ce_guided_instantiation.h"
 #include "theory/quantifiers/first_order_model.h"
 #include "theory/quantifiers/fun_def_engine.h"
@@ -205,7 +204,7 @@ void TermDb::addTerm( Node n, std::set< Node >& added, bool withinQuant, bool wi
 
 void TermDb::computeArgReps( TNode n ) {
   if( d_arg_reps.find( n )==d_arg_reps.end() ){
-    eq::EqualityEngine * ee = d_quantEngine->getTheoryEngine()->getMasterEqualityEngine();
+    eq::EqualityEngine * ee = d_quantEngine->getActiveEqualityEngine();
     for( unsigned j=0; j<n.getNumChildren(); j++ ){
       TNode r = ee->hasTerm( n[j] ) ? ee->getRepresentative( n[j] ) : n[j];
       d_arg_reps[n].push_back( r );
@@ -216,7 +215,7 @@ void TermDb::computeArgReps( TNode n ) {
 void TermDb::computeUfEqcTerms( TNode f ) {
   if( d_func_map_eqc_trie.find( f )==d_func_map_eqc_trie.end() ){
     d_func_map_eqc_trie[f].clear();
-    eq::EqualityEngine * ee = d_quantEngine->getTheoryEngine()->getMasterEqualityEngine();
+    eq::EqualityEngine * ee = d_quantEngine->getActiveEqualityEngine();
     for( unsigned i=0; i<d_op_map[f].size(); i++ ){
       TNode n = d_op_map[f][i];
       if( hasTermCurrent( n ) ){
@@ -235,7 +234,7 @@ void TermDb::computeUfTerms( TNode f ) {
     d_op_nonred_count[ f ] = 0;
     std::map< Node, std::vector< Node > >::iterator it = d_op_map.find( f );
     if( it!=d_op_map.end() ){
-      eq::EqualityEngine* ee = d_quantEngine->getMasterEqualityEngine();
+      eq::EqualityEngine* ee = d_quantEngine->getActiveEqualityEngine();
       Trace("term-db-debug") << "Adding terms for operator " << f << std::endl;
       unsigned congruentCount = 0;
       unsigned nonCongruentCount = 0;
@@ -268,10 +267,10 @@ void TermDb::computeUfTerms( TNode f ) {
             }else{
               if( at!=n && ee->areDisequal( at, n, false ) ){
                 std::vector< Node > lits;
-                lits.push_back( NodeManager::currentNM()->mkNode( at.getType().isBoolean() ? IFF : EQUAL, at, n ) );
+                lits.push_back( NodeManager::currentNM()->mkNode( EQUAL, at, n ) );
                 for( unsigned i=0; i<at.getNumChildren(); i++ ){
                   if( at[i]!=n[i] ){
-                    lits.push_back( NodeManager::currentNM()->mkNode( at[i].getType().isBoolean() ? IFF : EQUAL, at[i], n[i] ).negate() );
+                    lits.push_back( NodeManager::currentNM()->mkNode( EQUAL, at[i], n[i] ).negate() );
                   }
                 }
                 Node lem = lits.size()==1 ? lits[0] : NodeManager::currentNM()->mkNode( OR, lits );
@@ -279,10 +278,12 @@ void TermDb::computeUfTerms( TNode f ) {
                   Trace("term-db-lemma") << "Disequal congruent terms : " << at << " " << n << "!!!!" << std::endl;
                   if( !d_quantEngine->getTheoryEngine()->needCheck() ){
                     Trace("term-db-lemma") << "  all theories passed with no lemmas." << std::endl;
+                    // we should be a full effort check, prior to theory combination
                   }
                   Trace("term-db-lemma") << "  add lemma : " << lem << std::endl;
                 }
                 d_quantEngine->addLemma( lem );
+                d_quantEngine->setConflict();
                 d_consistent_ee = false;
                 return;
               }
@@ -308,7 +309,8 @@ void TermDb::computeUfTerms( TNode f ) {
 
 bool TermDb::inRelevantDomain( TNode f, unsigned i, TNode r ) {
   computeUfTerms( f );
-  Assert( d_quantEngine->getTheoryEngine()->getMasterEqualityEngine()->getRepresentative( r )==r );
+  Assert( !d_quantEngine->getActiveEqualityEngine()->hasTerm( r ) || 
+          d_quantEngine->getActiveEqualityEngine()->getRepresentative( r )==r );
   std::map< Node, std::map< unsigned, std::vector< Node > > >::iterator it = d_func_map_rel_dom.find( f );
   if( it != d_func_map_rel_dom.end() ){
     std::map< unsigned, std::vector< Node > >::iterator it2 = it->second.find( i );
@@ -485,7 +487,7 @@ bool TermDb::isEntailed2( TNode n, std::map< TNode, TNode >& subs, bool subsRep,
   Assert( !qy->extendsEngine() );
   Trace("term-db-entail") << "Check entailed : " << n << ", pol = " << pol << std::endl;
   Assert( n.getType().isBoolean() );
-  if( n.getKind()==EQUAL ){
+  if( n.getKind()==EQUAL && !n[0].getType().isBoolean() ){
     TNode n1 = getEntailedTerm2( n[0], subs, subsRep, hasSubs, qy );
     if( !n1.isNull() ){
       TNode n2 = getEntailedTerm2( n[1], subs, subsRep, hasSubs, qy );
@@ -519,10 +521,11 @@ bool TermDb::isEntailed2( TNode n, std::map< TNode, TNode >& subs, bool subsRep,
       }
     }
     return !simPol;
-  }else if( n.getKind()==IFF || n.getKind()==ITE ){
+  //Boolean equality here
+  }else if( n.getKind()==EQUAL || n.getKind()==ITE ){
     for( unsigned i=0; i<2; i++ ){
       if( isEntailed2( n[0], subs, subsRep, hasSubs, i==0, qy ) ){
-        unsigned ch = ( n.getKind()==IFF || i==0 ) ? 1 : 2;
+        unsigned ch = ( n.getKind()==EQUAL || i==0 ) ? 1 : 2;
         bool reqPol = ( n.getKind()==ITE || i==0 ) ? pol : !pol;
         return isEntailed2( n[ch], subs, subsRep, hasSubs, reqPol, qy );
       }
@@ -578,7 +581,7 @@ bool TermDb::hasTermCurrent( Node n, bool useMode ) {
   if( !useMode ){
     return d_has_map.find( n )!=d_has_map.end();
   }else{
-    //return d_quantEngine->getMasterEqualityEngine()->hasTerm( n ); //some assertions are not sent to EE
+    //return d_quantEngine->getActiveEqualityEngine()->hasTerm( n ); //some assertions are not sent to EE
     if( options::termDbMode()==TERM_DB_ALL ){
       return true;
     }else if( options::termDbMode()==TERM_DB_RELEVANT ){
@@ -630,7 +633,7 @@ Node TermDb::getEligibleTermInEqc( TNode r ) {
     std::map< Node, Node >::iterator it = d_term_elig_eqc.find( r );
     if( it==d_term_elig_eqc.end() ){
       Node h;
-      eq::EqualityEngine* ee = d_quantEngine->getMasterEqualityEngine();
+      eq::EqualityEngine* ee = d_quantEngine->getActiveEqualityEngine();
       eq::EqClassIterator eqc_i = eq::EqClassIterator( r, ee );
       while( h.isNull() && !eqc_i.isFinished() ){
         TNode n = (*eqc_i);
@@ -680,7 +683,7 @@ bool TermDb::reset( Theory::Effort effort ){
   d_func_map_rel_dom.clear();
   d_consistent_ee = true;
 
-  eq::EqualityEngine* ee = d_quantEngine->getMasterEqualityEngine();
+  eq::EqualityEngine* ee = d_quantEngine->getActiveEqualityEngine();
   //compute has map
   if( options::termDbMode()==TERM_DB_RELEVANT || options::lteRestrictInstClosure() ){
     d_has_map.clear();
@@ -1088,7 +1091,7 @@ void getSelfSel( const Datatype& dt, const DatatypeConstructor& dc, Node n, Type
       }
     }
     /* TODO: more than weak structural induction
-    else if( datatypes::DatatypesRewriter::isTypeDatatype( tn ) && std::find( visited.begin(), visited.end(), tn )==visited.end() ){
+    else if( tn.isDatatype() && std::find( visited.begin(), visited.end(), tn )==visited.end() ){
       visited.push_back( tn );
       const Datatype& dt = ((DatatypeType)(subs[0].getType()).toType()).getDatatype();
       std::vector< Node > disj;
@@ -1160,7 +1163,7 @@ Node TermDb::mkSkolemizedBody( Node f, Node n, std::vector< TypeNode >& argTypes
     Node nret = ret.substitute( ind_vars[0], k );
     //note : everything is under a negation
     //the following constructs ~( R( x, k ) => ~P( x ) )
-    if( options::dtStcInduction() && datatypes::DatatypesRewriter::isTypeDatatype(tn) ){
+    if( options::dtStcInduction() && tn.isDatatype() ){
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
       std::vector< Node > disj;
       for( unsigned i=0; i<dt.getNumConstructors(); i++ ){
@@ -1273,7 +1276,7 @@ bool TermDb::isClosedEnumerableType( TypeNode tn ) {
       ret = false;
     }else if( tn.isSet() ){
       ret = isClosedEnumerableType( tn.getSetElementType() );
-    }else if( datatypes::DatatypesRewriter::isTypeDatatype(tn) ){
+    }else if( tn.isDatatype() ){
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
       for( unsigned i=0; i<dt.getNumConstructors(); i++ ){
         for( unsigned j=0; j<dt[i].getNumArgs(); j++ ){
@@ -1838,20 +1841,6 @@ Node TermDb::ensureType( Node n, TypeNode tn ) {
   }
 }
 
-bool TermDb::getEnsureTypeCondition( Node n, TypeNode tn, std::vector< Node >& cond ) {
-  TypeNode ntn = n.getType();
-  Assert( ntn.isComparableTo( tn ) );
-  if( !ntn.isSubtypeOf( tn ) ){
-    if( tn.isInteger() ){
-      cond.push_back( NodeManager::currentNM()->mkNode( IS_INTEGER, n ) );
-      return true;
-    }
-    return false;
-  }else{
-    return true;
-  }
-}
-
 void TermDb::getRelevancyCondition( Node n, std::vector< Node >& cond ) {
   if( n.getKind()==APPLY_SELECTOR_TOTAL ){
     unsigned scindex = Datatype::cindexOf(n.getOperator().toExpr());
@@ -1957,18 +1946,24 @@ Node TermDb::simpleNegate( Node n ){
 }
 
 bool TermDb::isAssoc( Kind k ) {
-  return k==PLUS || k==MULT || k==AND || k==OR || k==XOR || k==IFF ||
+  return k==PLUS || k==MULT || k==AND || k==OR || 
          k==BITVECTOR_PLUS || k==BITVECTOR_MULT || k==BITVECTOR_AND || k==BITVECTOR_OR || k==BITVECTOR_XOR || k==BITVECTOR_XNOR || k==BITVECTOR_CONCAT ||
          k==STRING_CONCAT;
 }
 
 bool TermDb::isComm( Kind k ) {
-  return k==EQUAL || k==PLUS || k==MULT || k==AND || k==OR || k==XOR || k==IFF ||
+  return k==EQUAL || k==PLUS || k==MULT || k==AND || k==OR || k==XOR || 
          k==BITVECTOR_PLUS || k==BITVECTOR_MULT || k==BITVECTOR_AND || k==BITVECTOR_OR || k==BITVECTOR_XOR || k==BITVECTOR_XNOR;
 }
 
 bool TermDb::isBoolConnective( Kind k ) {
-  return k==OR || k==AND || k==IFF || k==ITE || k==FORALL || k==NOT || k==SEP_STAR;
+  return k==OR || k==AND || k==EQUAL || k==ITE || k==FORALL || k==NOT || k==SEP_STAR;
+}
+
+bool TermDb::isBoolConnectiveTerm( TNode n ) {
+  return isBoolConnective( n.getKind() ) &&
+         ( n.getKind()!=EQUAL || n[0].getType().isBoolean() ) && 
+         ( n.getKind()!=ITE || n.getType().isBoolean() );
 }
 
 void TermDb::registerTrigger( theory::inst::Trigger* tr, Node op ){
@@ -1978,8 +1973,9 @@ void TermDb::registerTrigger( theory::inst::Trigger* tr, Node op ){
 }
 
 bool TermDb::isInductionTerm( Node n ) {
-  if( options::dtStcInduction() && datatypes::DatatypesRewriter::isTermDatatype( n ) ){
-    const Datatype& dt = ((DatatypeType)(n.getType()).toType()).getDatatype();
+  TypeNode tn = n.getType();
+  if( options::dtStcInduction() && tn.isDatatype() ){
+    const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
     return !dt.isCodatatype();
   }
   if( options::intWfInduction() && n.getType().isInteger() ){
@@ -2018,7 +2014,7 @@ bool TermDb::isFunDefAnnotation( Node ipl ) {
 }
 
 Node TermDb::getFunDefHead( Node q ) {
-  //&& ( q[1].getKind()==EQUAL || q[1].getKind()==IFF ) && q[1][0].getKind()==APPLY_UF &&
+  //&& q[1].getKind()==EQUAL && q[1][0].getKind()==APPLY_UF &&
   if( q.getKind()==FORALL && q.getNumChildren()==3 ){
 
     for( unsigned i=0; i<q[2].getNumChildren(); i++ ){
@@ -2034,7 +2030,7 @@ Node TermDb::getFunDefHead( Node q ) {
 Node TermDb::getFunDefBody( Node q ) {
   Node h = getFunDefHead( q );
   if( !h.isNull() ){
-    if( q[1].getKind()==EQUAL || q[1].getKind()==IFF ){
+    if( q[1].getKind()==EQUAL ){
       if( q[1][0]==h ){
         return q[1][1];
       }else if( q[1][1]==h ){
@@ -2295,7 +2291,7 @@ TNode TermDbSygus::getVar( TypeNode tn, int i ) {
   while( i>=(int)d_fv[tn].size() ){
     std::stringstream ss;
     TypeNode vtn = tn;
-    if( datatypes::DatatypesRewriter::isTypeDatatype( tn ) ){
+    if( tn.isDatatype() ){
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
       ss << "fv_" << dt.getName() << "_" << i;
       if( !dt.getSygusType().isNull() ){
@@ -2373,7 +2369,7 @@ bool TermDbSygus::getMatch2( Node p, Node n, std::map< int, Node >& s, std::vect
 }
 
 bool TermDbSygus::getMatch( Node t, TypeNode st, int& index_found, std::vector< Node >& args, int index_exc, int index_start ) {
-  Assert( datatypes::DatatypesRewriter::isTypeDatatype( st ) );
+  Assert( st.isDatatype() );
   const Datatype& dt = ((DatatypeType)(st).toType()).getDatatype();
   Assert( dt.isSygus() );
   std::map< Kind, std::vector< Node > > kgens;
@@ -2530,7 +2526,7 @@ Node TermDbSygus::builtinToSygusConst( Node c, TypeNode tn, int rcons_depth ) {
     Node sc;
     d_builtin_const_to_sygus[tn][c] = sc;
     Assert( c.isConst() );
-    Assert( datatypes::DatatypesRewriter::isTypeDatatype( tn ) );
+    Assert( tn.isDatatype() );
     const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
     Trace("csi-rcons-debug") << "Try to reconstruct " << c << " in " << dt.getName() << std::endl;
     Assert( dt.isSygus() );
@@ -2718,7 +2714,7 @@ bool TermDbSygus::isIdempotentArg( Node n, Kind ik, int arg ) {
       return arg==1;
     }
   }else if( n==getTypeMaxValue( tn ) ){
-    if( ik==IFF || ik==BITVECTOR_AND || ik==BITVECTOR_XNOR ){
+    if( ik==EQUAL || ik==BITVECTOR_AND || ik==BITVECTOR_XNOR ){
       return true;
     }
   }
@@ -2839,7 +2835,7 @@ struct sortConstants {
 
 void TermDbSygus::registerSygusType( TypeNode tn ){
   if( d_register.find( tn )==d_register.end() ){
-    if( !datatypes::DatatypesRewriter::isTypeDatatype( tn ) ){
+    if( !tn.isDatatype() ){
       d_register[tn] = TypeNode::null();
     }else{
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
@@ -3063,15 +3059,17 @@ Node TermDbSygus::minimizeBuiltinTerm( Node n ) {
 }
 
 Node TermDbSygus::expandBuiltinTerm( Node t ){
-  if( t.getKind()==EQUAL && ( t[0].getType().isInteger() || t[0].getType().isReal() ) ){
-    return NodeManager::currentNM()->mkNode( AND, NodeManager::currentNM()->mkNode( LEQ, t[0], t[1] ),
-                                                  NodeManager::currentNM()->mkNode( LEQ, t[1], t[0] ) );
+  if( t.getKind()==EQUAL ){
+    if( t[0].getType().isReal() ){
+      return NodeManager::currentNM()->mkNode( AND, NodeManager::currentNM()->mkNode( LEQ, t[0], t[1] ),
+                                                    NodeManager::currentNM()->mkNode( LEQ, t[1], t[0] ) );
+    }else if( t[0].getType().isBoolean() ){
+      return NodeManager::currentNM()->mkNode( OR, NodeManager::currentNM()->mkNode( AND, t[0], t[1] ),
+                                                   NodeManager::currentNM()->mkNode( AND, t[0].negate(), t[1].negate() ) );
+    }
   }else if( t.getKind()==ITE && t.getType().isBoolean() ){
     return NodeManager::currentNM()->mkNode( OR, NodeManager::currentNM()->mkNode( AND, t[0], t[1] ),
                                                  NodeManager::currentNM()->mkNode( AND, t[0].negate(), t[2] ) );
-  }else if( t.getKind()==IFF ){
-    return NodeManager::currentNM()->mkNode( OR, NodeManager::currentNM()->mkNode( AND, t[0], t[1] ),
-                                                 NodeManager::currentNM()->mkNode( AND, t[0].negate(), t[1].negate() ) );
   }
   return Node::null();
 }
@@ -3234,7 +3232,7 @@ void TermDbSygus::registerEvalTerm( Node n ) {
     if( n.getKind()==APPLY_UF && !n.getType().isBoolean() ){
       Trace("sygus-eager") << "TermDbSygus::eager: Register eval term : " << n << std::endl;
       TypeNode tn = n[0].getType();
-      if( datatypes::DatatypesRewriter::isTypeDatatype(tn) ){
+      if( tn.isDatatype() ){
         const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
         if( dt.isSygus() ){
           Node f = n.getOperator();
@@ -3242,19 +3240,19 @@ void TermDbSygus::registerEvalTerm( Node n ) {
           if( n[0].getKind()!=APPLY_CONSTRUCTOR ){
             d_evals[n[0]].push_back( n );
             TypeNode tn = n[0].getType();
-            Assert( datatypes::DatatypesRewriter::isTypeDatatype(tn) );
+            Assert( tn.isDatatype() );
             const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
             Node var_list = Node::fromExpr( dt.getSygusVarList() );
             Assert( dt.isSygus() );
             d_eval_args[n[0]].push_back( std::vector< Node >() );
             for( unsigned j=1; j<n.getNumChildren(); j++ ){
-              if( var_list[j-1].getType().isBoolean() ){
-                //TODO: remove this case when boolean term conversion is eliminated
-                Node c = NodeManager::currentNM()->mkConst(BitVector(1u, 1u));
-                d_eval_args[n[0]].back().push_back( n[j].eqNode( c ) );
-              }else{
+              //if( var_list[j-1].getType().isBoolean() ){
+              //  //TODO: remove this case when boolean term conversion is eliminated
+              //  Node c = NodeManager::currentNM()->mkConst(BitVector(1u, 1u));
+              //  d_eval_args[n[0]].back().push_back( n[j].eqNode( c ) );
+              //}else{
                 d_eval_args[n[0]].back().push_back( n[j] );
-              }
+              //}
             }
             Node a = getAnchor( n[0] );
             d_subterms[a][n[0]] = true;
@@ -3265,7 +3263,7 @@ void TermDbSygus::registerEvalTerm( Node n ) {
   }
 }
 
-void TermDbSygus::registerModelValue( Node a, Node v, std::vector< Node >& lems ) {
+void TermDbSygus::registerModelValue( Node a, Node v, std::vector< Node >& terms, std::vector< Node >& vals, std::vector< Node >& exps ) {
   std::map< Node, std::map< Node, bool > >::iterator its = d_subterms.find( a );
   if( its!=d_subterms.end() ){
     Trace("sygus-eager") << "registerModelValue : " << a << ", has " << its->second.size() << " registered subterms." << std::endl;
@@ -3279,9 +3277,9 @@ void TermDbSygus::registerModelValue( Node a, Node v, std::vector< Node >& lems 
         Node vn = n.substitute( at, vt );
         vn = Rewriter::rewrite( vn );
         unsigned start = d_node_mv_args_proc[n][vn];
-        Node antec = n.eqNode( vn ).negate();
+        Node antec = n.eqNode( vn );
         TypeNode tn = n.getType();
-        Assert( datatypes::DatatypesRewriter::isTypeDatatype(tn) );
+        Assert( tn.isDatatype() );
         const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
         Assert( dt.isSygus() );
         Trace("sygus-eager") << "TermDbSygus::eager: Register model value : " << vn << " for " << n << std::endl;
@@ -3297,15 +3295,89 @@ void TermDbSygus::registerModelValue( Node a, Node v, std::vector< Node >& lems 
         for( unsigned i=start; i<it->second.size(); i++ ){
           Assert( vars.size()==it->second[i].size() );
           Node sBTerm = bTerm.substitute( vars.begin(), vars.end(), it->second[i].begin(), it->second[i].end() );
-          Node lem = NodeManager::currentNM()->mkNode( n.getType().isBoolean() ? IFF : EQUAL, d_evals[n][i], sBTerm ); 
-          lem = NodeManager::currentNM()->mkNode( OR, antec, lem );
-          Trace("sygus-eager") << "Lemma : " << lem << std::endl;
-          lems.push_back( lem );
+          sBTerm = Rewriter::rewrite( sBTerm );
+          //Node lem = NodeManager::currentNM()->mkNode(EQUAL, d_evals[n][i], sBTerm ); 
+          //lem = NodeManager::currentNM()->mkNode( OR, antec.negate(), lem );
+          terms.push_back( d_evals[n][i] );
+          vals.push_back( sBTerm );
+          exps.push_back( antec );
+          Trace("sygus-eager") << "Conclude : " << d_evals[n][i] << " == " << sBTerm << std::endl;
+          Trace("sygus-eager") << "   from " << antec << std::endl;
+          //Trace("sygus-eager") << "Lemma : " << lem << std::endl;
+          //lems.push_back( lem );
         }
         d_node_mv_args_proc[n][vn] = it->second.size();
       }
     }
   }
+}
+
+
+Node TermDbSygus::unfold( Node en, std::map< Node, Node >& vtm, std::vector< Node >& exp, bool track_exp ) {
+  if( en.getKind()==kind::APPLY_UF ){
+    Node ev = en[0];
+    if( track_exp ){
+      std::map< Node, Node >::iterator itv = vtm.find( en[0] );
+      if( itv!=vtm.end() ){
+        ev = itv->second;
+      }else{
+        Assert( false );
+      }
+      Assert( en[0].getType()==ev.getType() );
+      Assert( ev.isConst() );
+    }
+    Assert( ev.getKind()==kind::APPLY_CONSTRUCTOR );
+    std::vector< Node > args;
+    for( unsigned i=1; i<en.getNumChildren(); i++ ){
+      args.push_back( en[i] );
+    }
+    const Datatype& dt = ((DatatypeType)(ev.getType()).toType()).getDatatype();
+    unsigned i = Datatype::indexOf( ev.getOperator().toExpr() );
+    if( track_exp ){
+      //explanation
+      Node ee = NodeManager::currentNM()->mkNode( kind::APPLY_TESTER, Node::fromExpr( dt[i].getTester() ), en[0] );
+      if( std::find( exp.begin(), exp.end(), ee )==exp.end() ){
+        exp.push_back( ee );
+      }
+    }
+    std::map< int, Node > pre;
+    for( unsigned j=0; j<dt[i].getNumArgs(); j++ ){
+      std::vector< Node > cc;
+      //get the evaluation argument for the selector
+      const Datatype & ad = ((DatatypeType)dt[i][j].getRangeType()).getDatatype();
+      cc.push_back( Node::fromExpr( ad.getSygusEvaluationFunc() ) );
+      Node s = en[0].getKind()==kind::APPLY_CONSTRUCTOR ? en[0][j] : NodeManager::currentNM()->mkNode( kind::APPLY_SELECTOR_TOTAL, Node::fromExpr( dt[i][j].getSelector() ), en[0] );
+      cc.push_back( s );
+      if( track_exp ){
+        //update vtm map
+        vtm[s] = ev[j];
+      }
+      cc.insert( cc.end(), args.begin(), args.end() );
+      pre[j] = NodeManager::currentNM()->mkNode( kind::APPLY_UF, cc );
+    }
+    std::map< TypeNode, int > var_count; 
+    Node ret = mkGeneric( dt, i, var_count, pre );
+    // if it is a variable, apply the substitution
+    if( ret.getKind()==kind::BOUND_VARIABLE ){
+      //replace by argument
+      Node var_list = Node::fromExpr( dt.getSygusVarList() );
+      //TODO : set argument # on sygus variables
+      for( unsigned j=0; j<var_list.getNumChildren(); j++ ){
+        if( var_list[j]==ret ){
+          ret = args[j];
+          break;
+        }
+      }
+      Assert( ret.isConst() );
+    }else if( ret.getKind()==APPLY ){
+      //must expand definitions to account for defined functions in sygus grammars
+      ret = Node::fromExpr( smt::currentSmtEngine()->expandDefinitions( ret.toExpr() ) );
+    }
+    return ret;
+  }else{
+    Assert( en.isConst() );
+  }
+  return en;
 }
 
 }/* CVC4::theory::quantifiers namespace */

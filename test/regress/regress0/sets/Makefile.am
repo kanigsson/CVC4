@@ -63,7 +63,30 @@ TESTS =	\
 	union-1b.smt2 \
 	union-2.smt2 \
 	dt-simp-mem.smt2 \
-	card3-ground.smt2
+	card3-ground.smt2 \
+	card-3sets.cvc \
+	card.smt2 \
+	card-2.smt2 \
+	card-3.smt2 \
+	card-4.smt2 \
+	card-5.smt2 \
+	card-6.smt2 \
+	card-7.smt2 \
+	abt-min.smt2 \
+	abt-te-exh.smt2 \
+	abt-te-exh2.smt2 \
+	univset-simp.smt2 \
+	complement.cvc \
+	complement2.cvc \
+	complement3.cvc \
+	sharing-simp.smt2 \
+	pre-proc-univ.smt2 \
+	nonvar-univ.smt2 \
+	sets-poly-int-real.smt2 \
+	sets-poly-nonint.smt2 \
+	int-real-univ.smt2 \
+	int-real-univ-unsat.smt2 \
+	sets-tuple-poly.cvc
 
 EXTRA_DIST = $(TESTS)
 

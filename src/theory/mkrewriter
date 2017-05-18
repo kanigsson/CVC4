@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # mkrewriter
 # Morgan Deters <mdeters@cs.nyu.edu> for CVC4
@@ -208,6 +208,12 @@ function parameterized {
 
 function constant {
   # constant K T Hasher header ["comment"]
+  lineno=${BASH_LINENO[0]}
+  check_theory_seen
+}
+
+function nullaryoperator {
+  # nullaryoperator K ["comment"]
   lineno=${BASH_LINENO[0]}
   check_theory_seen
 }

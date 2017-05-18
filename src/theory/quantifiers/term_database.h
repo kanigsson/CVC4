@@ -473,8 +473,6 @@ public:
   bool containsVtsInfinity( Node n, bool isFree = false );
   /** ensure type */
   static Node ensureType( Node n, TypeNode tn );
-  /** get ensure type condition */
-  static bool getEnsureTypeCondition( Node n, TypeNode tn, std::vector< Node >& cond );
   /** get relevancy condition */
   static void getRelevancyCondition( Node n, std::vector< Node >& cond );
 private:
@@ -499,6 +497,8 @@ public:
   static bool isComm( Kind k );
   /** is bool connective */
   static bool isBoolConnective( Kind k );
+  /** is bool connective term */
+  static bool isBoolConnectiveTerm( TNode n );
 
 //for sygus
 private:
@@ -670,7 +670,13 @@ private:
   std::map< Node, std::map< Node, unsigned > > d_node_mv_args_proc;
 public:
   void registerEvalTerm( Node n );
-  void registerModelValue( Node n, Node v, std::vector< Node >& lems );
+  void registerModelValue( Node n, Node v, std::vector< Node >& exps, std::vector< Node >& terms, std::vector< Node >& vals );
+  Node unfold( Node en, std::map< Node, Node >& vtm, std::vector< Node >& exp, bool track_exp = true );
+  Node unfold( Node en ){
+    std::map< Node, Node > vtm;
+    std::vector< Node > exp;
+    return unfold( en, vtm, exp, false );
+  }
 };
 
 }/* CVC4::theory::quantifiers namespace */

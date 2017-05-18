@@ -147,7 +147,7 @@ bool QuantifierMacros::containsBadOp( Node n, Node op, std::vector< Node >& opc,
 }
 
 bool QuantifierMacros::isMacroLiteral( Node n, bool pol ){
-  return pol && ( n.getKind()==EQUAL || n.getKind()==IFF );
+  return pol && n.getKind()==EQUAL;
 }
 
 bool QuantifierMacros::isGroundUfTerm( Node f, Node n ) {
@@ -211,7 +211,7 @@ void QuantifierMacros::getMacroCandidates( Node n, std::vector< Node >& candidat
 }
 
 Node QuantifierMacros::solveInEquality( Node n, Node lit ){
-  if( lit.getKind()==IFF || lit.getKind()==EQUAL ){
+  if( lit.getKind()==EQUAL ){
     //return the opposite side of the equality if defined that way
     for( int i=0; i<2; i++ ){
       if( lit[i]==n ){
@@ -419,13 +419,16 @@ Node QuantifierMacros::simplify( Node n ){
           std::vector< Node > cond;
           TypeNode tno = op.getType();
           for( unsigned i=0; i<children.size(); i++ ){
-            if( !TermDb::getEnsureTypeCondition( children[i], tno[i], cond ) ){
+            Node etc = TypeNode::getEnsureTypeCondition( children[i], tno[i] );
+            if( etc.isNull() ){
               //if this does fail, we are incomplete, since we are eliminating quantified formula corresponding to op, 
               //  and not ensuring it applies to n when its types are correct.
               //however, this should never fail: we never process types for which we cannot constuct conditions that ensure correct types, e.g. (is-int t).
               Assert( false );
               success = false;
               break;
+            }else if( !etc.isConst() ){
+              cond.push_back( etc );
             }
           }
           if( success ){

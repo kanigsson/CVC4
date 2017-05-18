@@ -42,6 +42,7 @@ ArithCongruenceManager::ArithCongruenceManager(context::Context* c, ConstraintDa
     d_avariables(avars),
     d_ee(d_notify, c, "theory::arith::ArithCongruenceManager", true)
 {
+  d_ee.addFunctionKind(kind::NONLINEAR_MULT);
   //module to infer additional equalities based on normalization
   if( options::sNormInferEq() ){
     d_eq_infer = new quantifiers::EqualityInference(c, true);
@@ -109,11 +110,7 @@ bool ArithCongruenceManager::ArithCongruenceNotify::eqNotifyTriggerTermEquality(
 }
 void ArithCongruenceManager::ArithCongruenceNotify::eqNotifyConstantTermMerge(TNode t1, TNode t2) {
   Debug("arith::congruences") << "ArithCongruenceNotify::eqNotifyConstantTermMerge(" << t1 << ", " << t2 << std::endl;
-  if (t1.getKind() == kind::CONST_BOOLEAN) {
-    d_acm.propagate(t1.iffNode(t2));
-  } else {
-    d_acm.propagate(t1.eqNode(t2));
-  }
+  d_acm.propagate(t1.eqNode(t2));
 }
 void ArithCongruenceManager::ArithCongruenceNotify::eqNotifyNewClass(TNode t) {
   d_acm.eqNotifyNewClass(t);
@@ -516,8 +513,6 @@ bool ArithCongruenceManager::fixpointInfer() {
   }
   return inConflict();
 }
-
-
 
 }/* CVC4::theory::arith namespace */
 }/* CVC4::theory namespace */

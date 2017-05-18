@@ -651,6 +651,10 @@ public:
   static TypeNode leastCommonTypeNode(TypeNode t0, TypeNode t1);
   static TypeNode mostCommonTypeNode(TypeNode t0, TypeNode t1);
 
+  /** get ensure type condition 
+   *  Return value is a condition that implies that n has type tn.
+  */
+  static Node getEnsureTypeCondition( Node n, TypeNode tn );
 private:
   static TypeNode commonTypeNode(TypeNode t0, TypeNode t1, bool isLeast);
 
@@ -969,7 +973,7 @@ inline bool TypeNode::isBitVector() const {
 
 /** Is this a datatype type */
 inline bool TypeNode::isDatatype() const {
-  return getKind() == kind::DATATYPE_TYPE ||
+  return getKind() == kind::DATATYPE_TYPE || getKind() == kind::PARAMETRIC_DATATYPE ||
     ( isPredicateSubtype() && getSubtypeParentType().isDatatype() );
 }
 
@@ -1023,9 +1027,13 @@ inline bool TypeNode::isBitVector(unsigned size) const {
 /** Get the datatype specification from a datatype type */
 inline const Datatype& TypeNode::getDatatype() const {
   Assert(isDatatype());
-  //return getConst<Datatype>();
-  DatatypeIndexConstant dic = getConst<DatatypeIndexConstant>();
-  return NodeManager::currentNM()->getDatatypeForIndex( dic.getIndex() );
+  if( getKind() == kind::DATATYPE_TYPE ){
+    DatatypeIndexConstant dic = getConst<DatatypeIndexConstant>();
+    return NodeManager::currentNM()->getDatatypeForIndex( dic.getIndex() );
+  }else{
+    Assert( getKind() == kind::PARAMETRIC_DATATYPE );
+    return (*this)[0].getDatatype();
+  }
 }
 
 /** Get the exponent size of this floating-point type */

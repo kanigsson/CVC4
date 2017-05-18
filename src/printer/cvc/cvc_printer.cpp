@@ -105,6 +105,15 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
     }
     return;
   }
+  if(n.isNullaryOp()) {
+    if( n.getKind() == kind::UNIVERSE_SET ){
+      out << "UNIVERSE :: " << n.getType();
+    }else{
+      //unknown printer
+      out << n.getKind();
+    }
+    return;
+  }
 
   // constants
   if(n.getMetaKind() == kind::metakind::CONSTANT) {
@@ -225,7 +234,11 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
 
     // BUILTIN
     case kind::EQUAL:
-      op << '=';
+      if( n[0].getType().isBoolean() ){
+        op << "<=>";
+      }else{
+        op << '=';
+      }
       opType = INFIX;
       break;
     case kind::ITE:
@@ -292,10 +305,6 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       break;
     case kind::XOR:
       op << "XOR";
-      opType = INFIX;
-      break;
-    case kind::IFF:
-      op << "<=>";
       opType = INFIX;
       break;
     case kind::IMPLIES:
@@ -495,6 +504,7 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       opType = INFIX;
       break;
     case kind::MULT:
+    case kind::NONLINEAR_MULT:
       op << '*';
       opType = INFIX;
       break;
@@ -507,14 +517,17 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       opType = PREFIX;
       break;
     case kind::DIVISION:
+    case kind::DIVISION_TOTAL:
       op << '/';
       opType = INFIX;
       break;
     case kind::INTS_DIVISION:
+    case kind::INTS_DIVISION_TOTAL:
       op << "DIV";
       opType = INFIX;
       break;
     case kind::INTS_MODULUS:
+    case kind::INTS_MODULUS_TOTAL:
       op << "MOD";
       opType = INFIX;
       break;
@@ -777,6 +790,10 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       op << "IS_IN";
       opType = INFIX;
       break;
+    case kind::COMPLEMENT:
+      op << "~";
+      opType = PREFIX;
+      break;
     case kind::PRODUCT:
       op << "PRODUCT";
       opType = INFIX;
@@ -793,6 +810,14 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       op << "TCLOSURE";
       opType = PREFIX;
       break;
+    case kind::IDEN:
+      op << "IDEN";
+      opType = PREFIX;
+      break;
+    case kind::JOIN_IMAGE:
+      op << "JOIN_IMAGE";
+      opType = INFIX;
+      break;
     case kind::SINGLETON:
       out << "{";
       toStream(out, n[0], depth, types, false);
@@ -801,7 +826,7 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       break;
     case kind::INSERT: {
       if(bracket) {
-	out << '(';
+        out << '(';
       }
       out << '{';
       size_t i = 0;
@@ -813,15 +838,15 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       out << "} | ";
       toStream(out, n[i], depth, types, true);
       if(bracket) {
-	out << ')';
+        out << ')';
       }
       return;
       break;
     }
     case kind::CARD: {
-      out << "||";
+      out << "CARD(";
       toStream(out, n[0], depth, types, false);
-      out << "||";
+      out << ")";
       return;
       break;
     }

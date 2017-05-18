@@ -545,17 +545,23 @@ public:
    * @param type the type for the new bound variable
    */
   Expr mkBoundVar(Type type);
-  
+
   /**
    * Create unique variable of type 
    */
-  Expr mkUniqueVar( Type type, Kind k);
+  Expr mkNullaryOperator( Type type, Kind k);
 
   /** Get a reference to the statistics registry for this ExprManager */
   Statistics getStatistics() const throw();
 
   /** Get a reference to the statistics registry for this ExprManager */
   SExpr getStatistic(const std::string& name) const throw();
+
+  /**
+   * Flushes statistics for this ExprManager to a file descriptor. Safe to use
+   * in a signal handler.
+   */
+  void safeFlushStatistics(int fd) const;
 
   /** Export an expr to a different ExprManager */
   //static Expr exportExpr(const Expr& e, ExprManager* em);

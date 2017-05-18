@@ -15,7 +15,6 @@
 #include "theory/quantifiers/quantifiers_rewriter.h"
 
 #include "options/quantifiers_options.h"
-#include "theory/datatypes/datatypes_rewriter.h"
 #include "theory/quantifiers/term_database.h"
 #include "theory/quantifiers/trigger.h"
 
@@ -56,7 +55,6 @@ bool QuantifiersRewriter::isLiteral( Node n ){
   case IMPLIES:
   case XOR:
   case ITE:
-  case IFF:
     return false;
     break;
   case EQUAL:
@@ -252,7 +250,7 @@ Node QuantifiersRewriter::computeElimSymbols( Node body ) {
     k = OR;
     negCh1 = true;
   }else if( ok==XOR ){
-    k = IFF;
+    k = EQUAL;
     negCh1 = true;
   }else if( ok==NOT ){
     if( body[0].getKind()==NOT ){
@@ -266,9 +264,9 @@ Node QuantifiersRewriter::computeElimSymbols( Node body ) {
       k = OR;
       negAllCh = true;
       body = body[0];
-    }else if( body[0].getKind()==XOR || body[0].getKind()==IFF ){
-      k = IFF;
-      negCh1 = ( body[0].getKind()==IFF );
+    }else if( body[0].getKind()==XOR || ( body[0].getKind()==EQUAL && body[0][0].getType().isBoolean() ) ){
+      k = EQUAL;
+      negCh1 = ( body[0].getKind()==EQUAL );
       body = body[0];
     }else if( body[0].getKind()==ITE ){
       k = body[0].getKind();
@@ -278,7 +276,7 @@ Node QuantifiersRewriter::computeElimSymbols( Node body ) {
     }else{
       return body;
     }
-  }else if( ok!=IFF && ok!=ITE && ok!=AND && ok!=OR ){
+  }else if( ( ok!=EQUAL || !body[0].getType().isBoolean() ) && ok!=ITE && ok!=AND && ok!=OR ){
     //a literal
     return body;
   }
@@ -411,8 +409,8 @@ int getEntailedCond( Node n, std::map< Node, bool >& currCond ){
     }else if( res==-1 ){
       return getEntailedCond( n[2], currCond );
     }
-  }else if( n.getKind()==IFF || n.getKind()==ITE ){
-    unsigned start = n.getKind()==IFF ? 0 : 1;
+  }else if( ( n.getKind()==EQUAL && n[0].getType().isBoolean() ) || n.getKind()==ITE ){
+    unsigned start = n.getKind()==EQUAL ? 0 : 1;
     int res1 = 0;
     for( unsigned j=start; j<=(start+1); j++ ){
       int res = getEntailedCond( n[j], currCond );
@@ -424,7 +422,7 @@ int getEntailedCond( Node n, std::map< Node, bool >& currCond ){
         Assert( res!=0 );
         if( n.getKind()==ITE ){
           return res1==res ? res : 0;
-        }else if( n.getKind()==IFF ){
+        }else if( n.getKind()==EQUAL ){
           return res1==res ? 1 : -1;
         }
       }
@@ -512,16 +510,17 @@ Node QuantifiersRewriter::computeProcessTerms( Node body, std::vector< Node >& n
     Node fbody = TermDb::getFunDefBody( q );
     Assert( !body.isNull() );
     Trace("quantifiers-rewrite-debug") << "Decompose " << h << " / " << fbody << " as function definition for " << q << "." << std::endl;
-    Node r = computeProcessTerms2( fbody, true, true, curr_cond, 0, cache, icache, new_vars, new_conds );
-    return Rewriter::rewrite( NodeManager::currentNM()->mkNode( h.getType().isBoolean() ? IFF : EQUAL, h, r ) );
+    Node r = computeProcessTerms2( fbody, true, true, curr_cond, 0, cache, icache, new_vars, new_conds, false );
+    Assert( new_vars.size()==h.getNumChildren() );
+    return Rewriter::rewrite( NodeManager::currentNM()->mkNode( EQUAL, h, r ) );
   }else{
-    return computeProcessTerms2( body, true, true, curr_cond, 0, cache, icache, new_vars, new_conds );
+    return computeProcessTerms2( body, true, true, curr_cond, 0, cache, icache, new_vars, new_conds, options::elimExtArithQuant() );
   }
 }
 
 Node QuantifiersRewriter::computeProcessTerms2( Node body, bool hasPol, bool pol, std::map< Node, bool >& currCond, int nCurrCond,
                                                 std::map< Node, Node >& cache, std::map< Node, Node >& icache,
-                                                std::vector< Node >& new_vars, std::vector< Node >& new_conds ) {
+                                                std::vector< Node >& new_vars, std::vector< Node >& new_conds, bool elimExtArith ) {
   Trace("quantifiers-rewrite-term-debug2") << "computeProcessTerms " << body << " " << hasPol << " " << pol << std::endl;
   Node ret;
   std::map< Node, Node >::iterator iti = cache.find( body );
@@ -595,14 +594,14 @@ Node QuantifiersRewriter::computeProcessTerms2( Node body, bool hasPol, bool pol
           bool newHasPol;
           bool newPol;
           QuantPhaseReq::getPolarity( body, i, hasPol, pol, newHasPol, newPol );
-          Node nn = computeProcessTerms2( body[i], newHasPol, newPol, currCond, nCurrCond, cache, icache, new_vars, new_conds );
+          Node nn = computeProcessTerms2( body[i], newHasPol, newPol, currCond, nCurrCond, cache, icache, new_vars, new_conds, elimExtArith );
           if( body.getKind()==ITE && i==0 ){
             int res = getEntailedCond( nn, currCond );
             Trace("quantifiers-rewrite-term-debug") << "Condition for " << body << " is " << nn << ", entailment check=" << res << std::endl;
             if( res==1 ){
-              ret = computeProcessTerms2( body[1], hasPol, pol, currCond, nCurrCond, cache, icache, new_vars, new_conds );
+              ret = computeProcessTerms2( body[1], hasPol, pol, currCond, nCurrCond, cache, icache, new_vars, new_conds, elimExtArith );
             }else if( res==-1 ){
-              ret = computeProcessTerms2( body[2], hasPol, pol, currCond, nCurrCond, cache, icache, new_vars, new_conds );
+              ret = computeProcessTerms2( body[2], hasPol, pol, currCond, nCurrCond, cache, icache, new_vars, new_conds, elimExtArith );
             }
           }
           children.push_back( nn );
@@ -683,7 +682,7 @@ Node QuantifiersRewriter::computeProcessTerms2( Node body, bool hasPol, bool pol
         ret = ite_v;
       }
       */
-    }else if( options::elimExtArithQuant() ){
+    }else if( elimExtArith ){
       if( ret.getKind()==INTS_DIVISION_TOTAL || ret.getKind()==INTS_MODULUS_TOTAL ){
         Node num = ret[0];
         Node den = ret[1];
@@ -774,7 +773,7 @@ Node QuantifiersRewriter::computeCondSplit( Node body, QAttributes& qa ){
     }
   }
   if( options::condVarSplitQuant() ){
-    if( body.getKind()==ITE || ( body.getKind()==IFF && options::condVarSplitQuantAgg() ) ){
+    if( body.getKind()==ITE || ( body.getKind()==EQUAL && body[0].getType().isBoolean() && options::condVarSplitQuantAgg() ) ){
       Assert( !qa.isFunDef() );
       Trace("quantifiers-rewrite-debug") << "Conditional var elim split " << body << "?" << std::endl;
       bool do_split = false;
@@ -1101,7 +1100,7 @@ Node QuantifiersRewriter::computePrenex( Node body, std::vector< Node >& args, s
               NodeManager::currentNM()->mkNode( kind::OR, body[0].notNode(), body[1] ),
               NodeManager::currentNM()->mkNode( kind::OR, body[0], body[2] ) );
     return computePrenex( nn, args, nargs, pol, prenexAgg );
-  }else if( prenexAgg && body.getKind()==kind::IFF ){
+  }else if( prenexAgg && body.getKind()==kind::EQUAL && body[0].getType().isBoolean() ){
     Node nn = NodeManager::currentNM()->mkNode( kind::AND,
               NodeManager::currentNM()->mkNode( kind::OR, body[0].notNode(), body[1] ),
               NodeManager::currentNM()->mkNode( kind::OR, body[0], body[1].notNode() ) );
@@ -1632,11 +1631,7 @@ Node QuantifiersRewriter::rewriteRewriteRule( Node r ) {
   case kind::RR_REWRITE:
     // Equality
     pattern.push_back( head );
-    if( head.getType().isBoolean() ){
-      body = head.iffNode(body);
-    }else{
-      body = head.eqNode(body);
-    }
+    body = head.eqNode(body);
     break;
   case kind::RR_REDUCTION:
   case kind::RR_DEDUCTION:
@@ -1781,7 +1776,7 @@ Node QuantifiersRewriter::preSkolemizeQuantifiers( Node n, bool polarity, std::v
     //check if it contains a quantifier as a subterm
     //if so, we will write this node
     if( containsQuantifiers( n ) ){
-      if( ( n.getKind()==kind::ITE && n.getType().isBoolean() ) || n.getKind()==kind::IFF ){
+      if( ( n.getKind()==kind::ITE && n.getType().isBoolean() ) || ( n.getKind()==kind::EQUAL && n[0].getType().isBoolean() ) ){
         if( options::preSkolemQuantAgg() ){
           Node nn;
           //must remove structure
@@ -1789,12 +1784,10 @@ Node QuantifiersRewriter::preSkolemizeQuantifiers( Node n, bool polarity, std::v
             nn = NodeManager::currentNM()->mkNode( kind::AND,
                   NodeManager::currentNM()->mkNode( kind::OR, n[0].notNode(), n[1] ),
                   NodeManager::currentNM()->mkNode( kind::OR, n[0], n[2] ) );
-          }else if( n.getKind()==kind::IFF || n.getKind()==kind::XOR ){
+          }else if( n.getKind()==kind::EQUAL ){
             nn = NodeManager::currentNM()->mkNode( kind::AND,
                   NodeManager::currentNM()->mkNode( kind::OR, n[0].notNode(), n.getKind()==kind::XOR ? n[1].notNode() : n[1] ),
                   NodeManager::currentNM()->mkNode( kind::OR, n[0], n.getKind()==kind::XOR ? n[1] : n[1].notNode() ) );
-          }else if( n.getKind()==kind::IMPLIES ){
-            nn = NodeManager::currentNM()->mkNode( kind::OR, n[0].notNode(), n[1] );
           }
           return preSkolemizeQuantifiers( nn, polarity, fvTypes, fvs );
         }

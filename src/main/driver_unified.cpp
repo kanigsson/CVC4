@@ -61,7 +61,7 @@ namespace CVC4 {
     const char *progPath;
 
     /** Just the basename component of argv[0] */
-    const char *progName;
+    const std::string *progName;
 
     /** A pointer to the CommandExecutor (the signal handlers need it) */
     CVC4::main::CommandExecutor* pExecutor = NULL;
@@ -112,7 +112,8 @@ int runCvc4(int argc, char* argv[], Options& opts) {
   }
 # endif
 
-  progName = opts.getBinaryName().c_str();
+  string progNameStr = opts.getBinaryName();
+  progName = &progNameStr;
 
   if( opts.getHelp() ) {
     printUsage(opts, true);
@@ -146,16 +147,22 @@ int runCvc4(int argc, char* argv[], Options& opts) {
   }
 
   // Auto-detect input language by filename extension
-  const char* filename = inputFromStdin ? "<stdin>" : filenames[0].c_str();
+  std::string filenameStr("<stdin>");
+  if (!inputFromStdin) {
+    // Use swap to avoid copying the string
+    // TODO: use std::move() when switching to c++11
+    filenameStr.swap(filenames[0]);
+  }
+  const char* filename = filenameStr.c_str();
 
   if(opts.getInputLanguage() == language::input::LANG_AUTO) {
     if( inputFromStdin ) {
       // We can't do any fancy detection on stdin
       opts.setInputLanguage(language::input::LANG_CVC4);
     } else {
-      unsigned len = strlen(filename);
+      unsigned len = filenameStr.size();
       if(len >= 5 && !strcmp(".smt2", filename + len - 5)) {
-        opts.setInputLanguage(language::input::LANG_SMTLIB_V2_0);
+        opts.setInputLanguage(language::input::LANG_SMTLIB_V2_5);
       } else if(len >= 4 && !strcmp(".smt", filename + len - 4)) {
         opts.setInputLanguage(language::input::LANG_SMTLIB_V1);
       } else if(len >= 5 && !strcmp(".smt1", filename + len - 5)) {
@@ -264,7 +271,7 @@ int runCvc4(int argc, char* argv[], Options& opts) {
                                     pTotalTime);
 
     // Filename statistics
-    ReferenceStat< const char* > s_statFilename("filename", filename);
+    ReferenceStat<std::string> s_statFilename("filename", filenameStr);
     RegisterStatistic statFilenameReg(&pExecutor->getStatisticsRegistry(),
                                       &s_statFilename);
 
@@ -320,7 +327,9 @@ int runCvc4(int argc, char* argv[], Options& opts) {
         delete cmd;
       }
     } else if( opts.getTearDownIncremental() > 0) {
-      if(!opts.getIncrementalSolving()) {
+      if(!opts.getIncrementalSolving() && opts.getTearDownIncremental() > 1) {
+        // For tear-down-incremental values greater than 1, need incremental
+        // on too.
         cmd = new SetOptionCommand("incremental", SExpr(true));
         cmd->setMuted(true);
         pExecutor->doCommand(cmd);

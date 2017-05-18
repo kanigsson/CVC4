@@ -39,19 +39,17 @@ namespace theory {
 
 class QuantifiersEngine;
 
-namespace quantifiers {
-  class TermDb;
-  class TermDbSygus;
-}
-
 class InstantiationNotify {
 public:
   InstantiationNotify(){}
+  virtual ~InstantiationNotify() {}
   virtual bool notifyInstantiation( unsigned quant_e, Node q, Node lem, std::vector< Node >& terms, Node body ) = 0;
   virtual void filterInstantiations() = 0;
 };
 
 namespace quantifiers {
+  class TermDb;
+  class TermDbSygus;
   class FirstOrderModel;
   //modules
   class InstantiationEngine;
@@ -164,6 +162,8 @@ private:  //this information is reset during check
   context::CDO< bool > d_conflict_c;
   /** has added lemma this round */
   bool d_hasAddedLemma;
+  /** whether to use model equality engine */
+  bool d_useModelEe;
 private:
   /** list of all quantifiers seen */
   std::map< Node, bool > d_quants;
@@ -271,13 +271,15 @@ public:
   void setOwner( Node q, QuantifiersModule * m, int priority = 0 );
   /** considers */
   bool hasOwnership( Node q, QuantifiersModule * m = NULL );
+  /** is finite bound */
+  bool isFiniteBound( Node q, Node v );
 public:
   /** initialize */
   void finishInit();
   /** presolve */
   void presolve();
   /** notify preprocessed assertion */
-  void ppNotifyAssertions( std::vector< Node >& assertions );
+  void ppNotifyAssertions(const std::vector<Node>& assertions);
   /** check at level */
   void check( Theory::Effort e );
   /** notify that theories were combined */
@@ -303,9 +305,9 @@ private:
   bool removeInstantiationInternal( Node q, std::vector< Node >& terms );
   /** set instantiation level attr */
   static void setInstantiationLevelAttr( Node n, Node qn, uint64_t level );
-public:
   /** flush lemmas */
   void flushLemmas();
+public:
   /** get instantiation */
   Node getInstantiation( Node q, std::vector< Node >& vars, std::vector< Node >& terms, bool doVts = false );
   /** get instantiation */
@@ -338,6 +340,8 @@ public:
   bool hasAddedLemma() { return !d_lemmas_waiting.empty() || d_hasAddedLemma; }
   /** is in conflict */
   bool inConflict() { return d_conflict; }
+  /** set conflict */
+  void setConflict();
   /** get number of waiting lemmas */
   unsigned getNumLemmasWaiting() { return d_lemmas_waiting.size(); }
   /** get needs check */
@@ -363,9 +367,13 @@ public:
   void eqNotifyPostMerge(TNode t1, TNode t2);
   void eqNotifyDisequal(TNode t1, TNode t2, TNode reason);
   /** get the master equality engine */
-  eq::EqualityEngine* getMasterEqualityEngine() ;
+  eq::EqualityEngine* getMasterEqualityEngine();
+  /** get the active equality engine */
+  eq::EqualityEngine* getActiveEqualityEngine();
   /** debug print equality engine */
   void debugPrintEqualityEngine( const char * c );
+  /** get internal representative */
+  Node getInternalRepresentative( Node a, Node q, int index );
 public:
   /** print instantiations */
   void printInstantiations( std::ostream& out );
@@ -399,6 +407,7 @@ public:
     IntStat d_inst_duplicate;
     IntStat d_inst_duplicate_eq;
     IntStat d_inst_duplicate_ent;
+    IntStat d_inst_duplicate_model_true;
     IntStat d_triggers;
     IntStat d_simple_triggers;
     IntStat d_multi_triggers;

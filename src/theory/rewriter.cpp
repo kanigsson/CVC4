@@ -84,14 +84,14 @@ struct RewriteStackElement {
   }
 };
 
-Node Rewriter::rewrite(TNode node) throw (UnsafeInterruptException){
+Node Rewriter::rewrite(TNode node) {
   return rewriteTo(theoryOf(node), node);
 }
 
 Node Rewriter::rewriteTo(theory::TheoryId theoryId, Node node) {
 
 #ifdef CVC4_ASSERTIONS
-  bool isEquality = node.getKind() == kind::EQUAL;
+  bool isEquality = node.getKind() == kind::EQUAL && (!node[0].getType().isBoolean());
 
   if(s_rewriteStack == NULL) {
     s_rewriteStack = new std::hash_set<Node, NodeHashFunction>();

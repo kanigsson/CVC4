@@ -91,7 +91,7 @@ bool EqualityQueryInstProp::areDisequal( Node a, Node b ) {
 
 /** get the equality engine associated with this query */
 eq::EqualityEngine* EqualityQueryInstProp::getEngine() {
-  return d_qe->getMasterEqualityEngine();
+  return d_qe->getActiveEqualityEngine();
 }
 
 /** get the equivalence class of a */
@@ -366,8 +366,13 @@ bool EqualityQueryInstProp::isPropagateLiteral( Node n ) {
     return false;
   }else{
     Kind ak = n.getKind()==NOT ? n[0].getKind() : n.getKind();
-    Assert( ak!=NOT );
-    return ak!=AND && ak!=OR && ak!=IFF && ak!=ITE;
+    if( ak==EQUAL ){
+      Node atom = n.getKind()==NOT ? n[0] : n;
+      return !atom[0].getType().isBoolean();
+    }else{
+      Assert( ak!=NOT );
+      return ak!=AND && ak!=OR && ak!=ITE;
+    }
   }
 }
 
@@ -466,7 +471,7 @@ Node EqualityQueryInstProp::evaluateTermExp( Node n, std::vector< Node >& exp, s
                 addArgument( c, args, watch, is_watch );
                 abort_i = i;
                 break;
-              }else if( k==kind::AND || k==kind::OR || k==kind::ITE || k==IFF ){
+              }else if( k==kind::AND || k==kind::OR || k==kind::ITE || ( k==EQUAL && n[0].getType().isBoolean() ) ){
                 Trace("qip-eval-debug") << "Adding argument " << c << " to " << k << ", isProp = " << newHasPol << std::endl;
                 if( ( k==kind::AND || k==kind::OR  ) && c.getKind()==k ){
                   //flatten

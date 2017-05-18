@@ -19,7 +19,7 @@
 #include <stack>
 #include <vector>
 
-#include "base/output.h"
+#include "smt/logic_exception.h"
 #include "theory/arith/arith_rewriter.h"
 #include "theory/arith/arith_utilities.h"
 #include "theory/arith/normal_form.h"
@@ -31,7 +31,8 @@ namespace arith {
 
 bool ArithRewriter::isAtom(TNode n) {
   Kind k = n.getKind();
-  return arith::isRelationOperator(k) || k == kind::IS_INTEGER || k == kind::DIVISIBLE;
+  return arith::isRelationOperator(k) || k == kind::IS_INTEGER
+      || k == kind::DIVISIBLE;
 }
 
 RewriteResponse ArithRewriter::rewriteConstant(TNode t){
@@ -99,6 +100,7 @@ RewriteResponse ArithRewriter::preRewriteTerm(TNode t){
     case kind::PLUS:
       return preRewritePlus(t);
     case kind::MULT:
+    case kind::NONLINEAR_MULT:
       return preRewriteMult(t);
     case kind::INTS_DIVISION:
     case kind::INTS_MODULUS:
@@ -147,6 +149,7 @@ RewriteResponse ArithRewriter::postRewriteTerm(TNode t){
     case kind::PLUS:
       return postRewritePlus(t);
     case kind::MULT:
+    case kind::NONLINEAR_MULT:
       return postRewriteMult(t);
     case kind::INTS_DIVISION:
     case kind::INTS_MODULUS:
@@ -209,9 +212,9 @@ RewriteResponse ArithRewriter::postRewriteTerm(TNode t){
         // Todo improve the exception thrown
         std::stringstream ss;
         ss << "The POW(^) operator can only be used with a natural number ";
-        ss << "in the exponent.  Exception occured in:" << std::endl;
+        ss << "in the exponent.  Exception occurred in:" << std::endl;
         ss << "  " << t;
-        throw Exception(ss.str());
+        throw LogicException(ss.str());
       }
     default:
       Unreachable();
@@ -221,7 +224,7 @@ RewriteResponse ArithRewriter::postRewriteTerm(TNode t){
 
 
 RewriteResponse ArithRewriter::preRewriteMult(TNode t){
-  Assert(t.getKind()== kind::MULT);
+  Assert(t.getKind()== kind::MULT || t.getKind()== kind::NONLINEAR_MULT);
 
   if(t.getNumChildren() == 2){
     if(t[0].getKind() == kind::CONST_RATIONAL
@@ -315,7 +318,7 @@ RewriteResponse ArithRewriter::postRewritePlus(TNode t){
 }
 
 RewriteResponse ArithRewriter::postRewriteMult(TNode t){
-  Assert(t.getKind()== kind::MULT);
+  Assert(t.getKind()== kind::MULT || t.getKind()==kind::NONLINEAR_MULT);
 
   Polynomial res = Polynomial::mkOne();
 

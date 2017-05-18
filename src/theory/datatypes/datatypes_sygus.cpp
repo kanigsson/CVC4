@@ -57,7 +57,7 @@ void SygusSplit::getSygusSplits( Node n, const Datatype& dt, std::vector< Node >
         if( sIndex==1 && pdt[csIndex].getNumArgs()==2 ){
           arg1 = NodeManager::currentNM()->mkNode( APPLY_SELECTOR_TOTAL, Node::fromExpr( pdt[csIndex][0].getSelector() ), n[0] );
           tn1 = arg1.getType();
-          if( !DatatypesRewriter::isTypeDatatype( tn1 ) ){
+          if( !tn1.isDatatype() ){
             arg1 = Node::null();
           }
         }
@@ -193,7 +193,7 @@ void SygusSplit::getSygusSplits( Node n, const Datatype& dt, std::vector< Node >
 
 void SygusSplit::registerSygusType( TypeNode tn ) {
   if( d_register.find( tn )==d_register.end() ){
-    if( !DatatypesRewriter::isTypeDatatype( tn ) ){
+    if( !tn.isDatatype() ){
       d_register[tn] = TypeNode::null();
     }else{
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
@@ -319,7 +319,7 @@ void SygusSplit::registerSygusTypeConstructorArg( TypeNode tnn, const Datatype& 
       if( parentKind!=UNDEFINED_KIND && pdt[csIndex].getNumArgs()==2 ){
         int osIndex = sIndex==0 ? 1 : 0;
         TypeNode tnno = d_tds->getArgType( pdt[csIndex], osIndex );
-        if( DatatypesRewriter::isTypeDatatype( tnno ) ){
+        if( tnno.isDatatype() ){
           const Datatype& dto = ((DatatypeType)(tnno).toType()).getDatatype();
           registerSygusTypeConstructorArg( tnno, dto, tnnp, pdt, csIndex, osIndex );
           //compute relationships when doing 0-arg
@@ -492,10 +492,11 @@ bool SygusSplit::considerSygusSplitKind( const Datatype& dt, const Datatype& pdt
           rt.d_req_kind = OR;reqk = NOT;
         }else if( k==OR ){
           rt.d_req_kind = AND;reqk = NOT;
-        }else if( k==IFF ) {
+        //AJR : eliminate this if we eliminate xor
+        }else if( k==EQUAL ) {
           rt.d_req_kind = XOR;
         }else if( k==XOR ) {
-          rt.d_req_kind = IFF;
+          rt.d_req_kind = EQUAL;
         }else if( k==ITE ){
           rt.d_req_kind = ITE;reqkc[1] = NOT;reqkc[2] = NOT;
           rt.d_children[0].d_req_type = d_tds->getArgType( dt[c], 0 );
@@ -700,7 +701,7 @@ int SygusSplit::getFirstArgOccurrence( const DatatypeConstructor& c, const Datat
 
 bool SygusSplit::isArgDatatype( const DatatypeConstructor& c, int i, const Datatype& dt ) {
   TypeNode tni = d_tds->getArgType( c, i );
-  if( datatypes::DatatypesRewriter::isTypeDatatype( tni ) ){
+  if( tni.isDatatype() ){
     const Datatype& adt = ((DatatypeType)(tni).toType()).getDatatype();
     if( adt==dt ){
       return true;
@@ -784,7 +785,7 @@ void SygusSymBreak::addTester( int tindex, Node n, Node exp ) {
     if( it==d_prog_search.end() ){
       //check if sygus type
       TypeNode tn = a.getType();
-      Assert( DatatypesRewriter::isTypeDatatype( tn ) );
+      Assert( tn.isDatatype() );
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
       if( dt.isSygus() ){
         ps = new ProgSearch( this, a, d_context );
@@ -837,7 +838,7 @@ void SygusSymBreak::ProgSearch::addTester( int tindex, Node n, Node exp ) {
 bool SygusSymBreak::ProgSearch::assignTester( int tindex, Node n, int depth ) {
   Trace("sygus-sym-break-debug") << "SymBreak : Assign tester : " << tindex << " " << n << ", depth = " << depth << " of " << d_anchor << std::endl;
   TypeNode tn = n.getType();
-  Assert( DatatypesRewriter::isTypeDatatype( tn ) );
+  Assert( tn.isDatatype() );
   const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
   std::vector< Node > tst_waiting;
   for( unsigned i=0; i<dt[tindex].getNumArgs(); i++ ){
@@ -941,7 +942,7 @@ Node SygusSymBreak::ProgSearch::getCandidateProgramAtDepth( int depth, Node prog
     int tindex = DatatypesRewriter::isTester( tst );//Datatype::indexOf( tst.getOperator().toExpr() );
     Assert( tindex!=-1 );
     TypeNode tn = prog.getType();
-    Assert( DatatypesRewriter::isTypeDatatype( tn ) );
+    Assert( tn.isDatatype() );
     const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
     std::map< int, Node > pre;
     if( curr_depth<depth ){
@@ -1331,7 +1332,7 @@ Node SygusSymBreak::getSeparationTemplate( TypeNode tn,  Node rep_prog, Node anc
 bool SygusSymBreak::processConstantArg( TypeNode tnp, const Datatype & pdt, int pc,
                                         Kind k, int i, Node arg, std::map< unsigned, bool >& rlv ) {
   Assert( d_tds->hasKind( tnp, k ) );
-  if( k==AND || k==OR || k==IFF || k==XOR || k==IMPLIES || ( k==ITE && i==0 ) ){
+  if( k==AND || k==OR || ( k==EQUAL && arg.getType().isBoolean() ) || k==XOR || k==IMPLIES || ( k==ITE && i==0 ) ){
     return false;
   }else if( d_tds->isIdempotentArg( arg, k, i ) ){
     if( pdt[pc].getNumArgs()==2 ){

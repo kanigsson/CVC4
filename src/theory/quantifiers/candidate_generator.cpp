@@ -227,7 +227,7 @@ Node CandidateGeneratorQELitEq::getNextCandidate(){
 CandidateGeneratorQELitDeq::CandidateGeneratorQELitDeq( QuantifiersEngine* qe, Node mpat ) :
 CandidateGenerator( qe ), d_match_pattern( mpat ){
 
-  Assert( d_match_pattern.getKind()==EQUAL || d_match_pattern.getKind()==IFF );
+  Assert( d_match_pattern.getKind()==EQUAL );
   d_match_pattern_type = d_match_pattern[0].getType();
 }
 
@@ -284,7 +284,7 @@ Node CandidateGeneratorQEAll::getNextCandidate() {
       TNode nh = d_qe->getTermDatabase()->getEligibleTermInEqc( n );
       if( !nh.isNull() ){
         if( options::instMaxLevel()!=-1 || options::lteRestrictInstClosure() ){
-          nh = d_qe->getEqualityQuery()->getInternalRepresentative( nh, d_f, d_index );
+          nh = d_qe->getInternalRepresentative( nh, d_f, d_index );
           //don't consider this if already the instantiation is ineligible
           if( !d_qe->getTermDatabase()->isTermEligibleForInstantiation( nh, d_f, false ) ){
             nh = Node::null();

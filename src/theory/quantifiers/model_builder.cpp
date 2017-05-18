@@ -35,22 +35,68 @@ using namespace CVC4::theory::quantifiers;
 
 
 QModelBuilder::QModelBuilder( context::Context* c, QuantifiersEngine* qe ) :
-TheoryEngineModelBuilder( qe->getTheoryEngine() ), d_curr_model( c, NULL ), d_qe( qe ){
+TheoryEngineModelBuilder( qe->getTheoryEngine() ), d_qe( qe ){
 
 }
-
-bool QModelBuilder::isQuantifierActive( Node f ) {
-  return d_qe->hasOwnership( f );
-}
-
 
 bool QModelBuilder::optUseModel() {
   return options::mbqiMode()!=MBQI_NONE || options::fmfBound();
 }
 
-void QModelBuilder::debugModel( FirstOrderModel* fm ){
+bool QModelBuilder::preProcessBuildModel(TheoryModel* m) {
+  return preProcessBuildModelStd( m );
+}
+
+bool QModelBuilder::preProcessBuildModelStd(TheoryModel* m) {
+  d_addedLemmas = 0;
+  d_triedLemmas = 0;
+  if( options::fmfEmptySorts() || options::fmfFunWellDefinedRelevant() ){
+    FirstOrderModel * fm = (FirstOrderModel*)m;
+    //traverse equality engine
+    std::map< TypeNode, bool > eqc_usort;
+    eq::EqClassesIterator eqcs_i = eq::EqClassesIterator( fm->d_equalityEngine );
+    while( !eqcs_i.isFinished() ){
+      TypeNode tr = (*eqcs_i).getType();
+      eqc_usort[tr] = true;
+      ++eqcs_i;
+    }
+    //look at quantified formulas
+    for( unsigned i=0; i<fm->getNumAssertedQuantifiers(); i++ ){
+      Node q = fm->getAssertedQuantifier( i, true );
+      if( fm->isQuantifierActive( q ) ){
+        //check if any of these quantified formulas can be set inactive
+        if( options::fmfEmptySorts() ){
+          for( unsigned i=0; i<q[0].getNumChildren(); i++ ){
+            TypeNode tn = q[0][i].getType();
+            //we are allowed to assume the type is empty
+            if( tn.isSort() && eqc_usort.find( tn )==eqc_usort.end() ){
+              Trace("model-engine-debug") << "Empty domain quantified formula : " << q << std::endl;
+              fm->setQuantifierActive( q, false );
+            }
+          }
+        }else if( options::fmfFunWellDefinedRelevant() ){
+          if( q[0].getNumChildren()==1 ){
+            TypeNode tn = q[0][0].getType();
+            if( tn.getAttribute(AbsTypeFunDefAttribute()) ){
+              //Trace("model-engine-debug2") << "...possible irrelevant function def : " << q << ", #rr = " << d_quantEngine->getModel()->d_rep_set.getNumRelevantGroundReps( tn ) << std::endl;
+              //we are allowed to assume the introduced type is empty
+              if( eqc_usort.find( tn )==eqc_usort.end() ){
+                Trace("model-engine-debug") << "Irrelevant function definition : " << q << std::endl;
+                fm->setQuantifierActive( q, false );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
+void QModelBuilder::debugModel( TheoryModel* m ){
   //debug the model: cycle through all instantiations for all quantifiers, report ones that are not true
   if( Trace.isOn("quant-check-model") ){
+    FirstOrderModel* fm = (FirstOrderModel*)m;
     Trace("quant-check-model") << "Testing quantifier instantiations..." << std::endl;
     int tests = 0;
     int bad = 0;
@@ -120,137 +166,119 @@ QModelBuilder( c, qe ), d_basisNoMatch( c ) {
 
 }
 
+/*
 Node QModelBuilderIG::getCurrentUfModelValue( FirstOrderModel* fm, Node n, std::vector< Node > & args, bool partial ) {
   return n;
 }
+*/
 
-void QModelBuilderIG::processBuildModel( TheoryModel* m, bool fullModel ) {
+bool QModelBuilderIG::processBuildModel( TheoryModel* m ) {
   FirstOrderModel* f = (FirstOrderModel*)m;
   FirstOrderModelIG* fm = f->asFirstOrderModelIG();
-  Trace("model-engine-debug") << "Process build model, fullModel = " << fullModel << " " << optUseModel() << std::endl;
-  if( fullModel ){
-    Assert( d_curr_model==fm );
-    //update models
-    for( std::map< Node, uf::UfModelTree >::iterator it = fm->d_uf_model_tree.begin(); it != fm->d_uf_model_tree.end(); ++it ){
-      it->second.update( fm );
-      Trace("model-func") << "QModelBuilder: Make function value from tree " << it->first << std::endl;
-      //construct function values
-      fm->d_uf_models[ it->first ] = it->second.getFunctionValue( "$x" );
+  Trace("model-engine-debug") << "Process build model " << optUseModel() << std::endl;
+  d_didInstGen = false;
+  //reset the internal information
+  reset( fm );
+  //only construct first order model if optUseModel() is true
+  if( optUseModel() ){
+    Trace("model-engine-debug") << "Initializing " << fm->getNumAssertedQuantifiers() << " quantifiers..." << std::endl;
+    //check if any quantifiers are un-initialized
+    for( unsigned i=0; i<fm->getNumAssertedQuantifiers(); i++ ){
+      Node q = fm->getAssertedQuantifier( i );
+      if( d_qe->getModel()->isQuantifierActive( q ) ){
+        int lems = initializeQuantifier( q, q );
+        d_statistics.d_init_inst_gen_lemmas += lems;
+        d_addedLemmas += lems;
+        if( d_qe->inConflict() ){
+          break;
+        }
+      }
     }
-    TheoryEngineModelBuilder::processBuildModel( m, fullModel );
-    //mark that the model has been set
-    fm->markModelSet();
-    //debug the model
-    debugModel( fm );
-  }else{
-    d_curr_model = fm;
-    d_didInstGen = false;
-    //reset the internal information
-    reset( fm );
-    //only construct first order model if optUseModel() is true
-    if( optUseModel() ){
-      Trace("model-engine-debug") << "Initializing " << fm->getNumAssertedQuantifiers() << " quantifiers..." << std::endl;
-      //check if any quantifiers are un-initialized
+    if( d_addedLemmas>0 ){
+      Trace("model-engine") << "Initialize, Added Lemmas = " << d_addedLemmas << std::endl;
+      return false;
+    }else{
+      Assert( !d_qe->inConflict() );
+      //initialize model
+      fm->initialize();
+      //analyze the functions
+      Trace("model-engine-debug") << "Analyzing model..." << std::endl;
+      analyzeModel( fm );
+      //analyze the quantifiers
+      Trace("model-engine-debug") << "Analyzing quantifiers..." << std::endl;
+      d_uf_prefs.clear();
       for( unsigned i=0; i<fm->getNumAssertedQuantifiers(); i++ ){
-        Node f = fm->getAssertedQuantifier( i );
-        if( isQuantifierActive( f ) ){
-          int lems = initializeQuantifier( f, f );
-          d_statistics.d_init_inst_gen_lemmas += lems;
-          d_addedLemmas += lems;
-          if( d_qe->inConflict() ){
-            break;
+        Node q = fm->getAssertedQuantifier( i );
+        analyzeQuantifier( fm, q );
+      }
+
+      //if applicable, find exceptions to model via inst-gen
+      if( options::fmfInstGen() ){
+        d_didInstGen = true;
+        d_instGenMatches = 0;
+        d_numQuantSat = 0;
+        d_numQuantInstGen = 0;
+        d_numQuantNoInstGen = 0;
+        d_numQuantNoSelForm = 0;
+        //now, see if we know that any exceptions via InstGen exist
+        Trace("model-engine-debug") << "Perform InstGen techniques for quantifiers..." << std::endl;
+        for( unsigned i=0; i<fm->getNumAssertedQuantifiers(); i++ ){
+          Node f = fm->getAssertedQuantifier( i );
+          if( d_qe->getModel()->isQuantifierActive( f ) ){
+            int lems = doInstGen( fm, f );
+            d_statistics.d_inst_gen_lemmas += lems;
+            d_addedLemmas += lems;
+            //temporary
+            if( lems>0 ){
+              d_numQuantInstGen++;
+            }else if( hasInstGen( f ) ){
+              d_numQuantNoInstGen++;
+            }else{
+              d_numQuantNoSelForm++;
+            }
+            if( d_qe->inConflict() || ( options::fmfInstGenOneQuantPerRound() && lems>0 ) ){
+              break;
+            }
+          }else{
+            d_numQuantSat++;
+          }
+        }
+        Trace("model-engine-debug") << "Quantifiers sat/ig/n-ig/null " << d_numQuantSat << " / " << d_numQuantInstGen << " / ";
+        Trace("model-engine-debug") << d_numQuantNoInstGen << " / " << d_numQuantNoSelForm << std::endl;
+        Trace("model-engine-debug") << "Inst-gen # matches examined = " << d_instGenMatches << std::endl;
+        if( Trace.isOn("model-engine") ){
+          if( d_addedLemmas>0 ){
+            Trace("model-engine") << "InstGen, added lemmas = " << d_addedLemmas << std::endl;
+          }else{
+            Trace("model-engine") << "No InstGen lemmas..." << std::endl;
           }
         }
       }
-      if( d_addedLemmas>0 ){
-        Trace("model-engine") << "Initialize, Added Lemmas = " << d_addedLemmas << std::endl;
+      //construct the model if necessary
+      if( d_addedLemmas==0 ){
+        //if no immediate exceptions, build the model
+        //  this model will be an approximation that will need to be tested via exhaustive instantiation
+        Trace("model-engine-debug") << "Building model..." << std::endl;
+        //build model for UF
+        for( std::map< Node, uf::UfModelTree >::iterator it = fm->d_uf_model_tree.begin(); it != fm->d_uf_model_tree.end(); ++it ){
+          Trace("model-engine-debug-uf") << "Building model for " << it->first << "..." << std::endl;
+          constructModelUf( fm, it->first );
+        }
+        Trace("model-engine-debug") << "Done building models." << std::endl;
       }else{
-        Assert( !d_qe->inConflict() );
-        //initialize model
-        fm->initialize();
-        //analyze the functions
-        Trace("model-engine-debug") << "Analyzing model..." << std::endl;
-        analyzeModel( fm );
-        //analyze the quantifiers
-        Trace("model-engine-debug") << "Analyzing quantifiers..." << std::endl;
-        d_quant_sat.clear();
-        d_uf_prefs.clear();
-        for( unsigned i=0; i<fm->getNumAssertedQuantifiers(); i++ ){
-          Node f = fm->getAssertedQuantifier( i );
-          if( isQuantifierActive( f ) ){
-            analyzeQuantifier( fm, f );
-          }
-        }
-
-        //if applicable, find exceptions to model via inst-gen
-        if( options::fmfInstGen() ){
-          d_didInstGen = true;
-          d_instGenMatches = 0;
-          d_numQuantSat = 0;
-          d_numQuantInstGen = 0;
-          d_numQuantNoInstGen = 0;
-          d_numQuantNoSelForm = 0;
-          //now, see if we know that any exceptions via InstGen exist
-          Trace("model-engine-debug") << "Perform InstGen techniques for quantifiers..." << std::endl;
-          for( unsigned i=0; i<fm->getNumAssertedQuantifiers(); i++ ){
-            Node f = fm->getAssertedQuantifier( i );
-            if( isQuantifierActive( f ) ){
-              int lems = doInstGen( fm, f );
-              d_statistics.d_inst_gen_lemmas += lems;
-              d_addedLemmas += lems;
-              //temporary
-              if( lems>0 ){
-                d_numQuantInstGen++;
-              }else if( d_quant_sat.find( f )!=d_quant_sat.end() ){
-                d_numQuantSat++;
-              }else if( hasInstGen( f ) ){
-                d_numQuantNoInstGen++;
-              }else{
-                d_numQuantNoSelForm++;
-              }
-              if( d_qe->inConflict() || ( options::fmfInstGenOneQuantPerRound() && lems>0 ) ){
-                break;
-              }
-            }else if( d_quant_sat.find( f )!=d_quant_sat.end() ){
-              d_numQuantSat++;
-            }
-          }
-          Trace("model-engine-debug") << "Quantifiers sat/ig/n-ig/null " << d_numQuantSat << " / " << d_numQuantInstGen << " / ";
-          Trace("model-engine-debug") << d_numQuantNoInstGen << " / " << d_numQuantNoSelForm << std::endl;
-          Trace("model-engine-debug") << "Inst-gen # matches examined = " << d_instGenMatches << std::endl;
-          if( Trace.isOn("model-engine") ){
-            if( d_addedLemmas>0 ){
-              Trace("model-engine") << "InstGen, added lemmas = " << d_addedLemmas << std::endl;
-            }else{
-              Trace("model-engine") << "No InstGen lemmas..." << std::endl;
-            }
-          }
-        }
-        //construct the model if necessary
-        if( d_addedLemmas==0 ){
-          //if no immediate exceptions, build the model
-          //  this model will be an approximation that will need to be tested via exhaustive instantiation
-          Trace("model-engine-debug") << "Building model..." << std::endl;
-          //build model for UF
-          for( std::map< Node, uf::UfModelTree >::iterator it = fm->d_uf_model_tree.begin(); it != fm->d_uf_model_tree.end(); ++it ){
-            Trace("model-engine-debug-uf") << "Building model for " << it->first << "..." << std::endl;
-            constructModelUf( fm, it->first );
-          }
-          /*
-          //build model for arrays
-          for( std::map< Node, arrays::ArrayModel >::iterator it = fm->d_array_model.begin(); it != fm->d_array_model.end(); ++it ){
-            //consult the model basis select term
-            // i.e. the default value for array A is the value of select( A, e ), where e is the model basis term
-            TypeNode tn = it->first.getType();
-            Node selModelBasis = NodeManager::currentNM()->mkNode( SELECT, it->first, fm->getTermDatabase()->getModelBasisTerm( tn[0] ) );
-            it->second.setDefaultValue( fm->getRepresentative( selModelBasis ) );
-          }
-          */
-          Trace("model-engine-debug") << "Done building models." << std::endl;
-        }
+        return false;
       }
     }
   }
+  //update models
+  for( std::map< Node, uf::UfModelTree >::iterator it = fm->d_uf_model_tree.begin(); it != fm->d_uf_model_tree.end(); ++it ){
+    it->second.update( fm );
+    Trace("model-func") << "QModelBuilder: Make function value from tree " << it->first << std::endl;
+    //construct function values
+    fm->d_uf_models[ it->first ] = it->second.getFunctionValue( "$x" );
+  }
+  Assert( d_addedLemmas==0 );
+  return TheoryEngineModelBuilder::processBuildModel( m );
 }
 
 int QModelBuilderIG::initializeQuantifier( Node f, Node fp ){
@@ -301,10 +329,11 @@ void QModelBuilderIG::analyzeModel( FirstOrderModel* fm ){
   for( std::map< Node, uf::UfModelTree >::iterator it = fmig->d_uf_model_tree.begin(); it != fmig->d_uf_model_tree.end(); ++it ){
     Node op = it->first;
     TermArgBasisTrie tabt;
-    for( size_t i=0; i<fmig->d_uf_terms[op].size(); i++ ){
-      Node n = fmig->d_uf_terms[op][i];
-      //for calculating if op is constant
-      if( d_qe->getTermDatabase()->isTermActive( n ) ){
+    std::map< Node, std::vector< Node > >::iterator itut = fmig->d_uf_terms.find( op );
+    if( itut!=fmig->d_uf_terms.end() ){
+      for( size_t i=0; i<itut->second.size(); i++ ){
+        Node n = fmig->d_uf_terms[op][i];
+        //for calculating if op is constant
         Node v = fmig->getRepresentative( n );
         if( i==0 ){
           d_uf_prefs[op].d_const_val = v;
@@ -312,9 +341,8 @@ void QModelBuilderIG::analyzeModel( FirstOrderModel* fm ){
           d_uf_prefs[op].d_const_val = Node::null();
           break;
         }
-      }
-      //for calculating terms that we don't need to consider
-      if( d_qe->getTermDatabase()->isTermActive( n ) || n.getAttribute(ModelBasisArgAttribute())!=0 ){
+        //for calculating terms that we don't need to consider
+        //if( d_qe->getTermDatabase()->isTermActive( n ) || n.getAttribute(ModelBasisArgAttribute())!=0 ){
         if( d_basisNoMatch.find( n )==d_basisNoMatch.end() ){
           //need to consider if it is not congruent modulo model basis
           if( !tabt.addTerm( fmig, n ) ){
@@ -377,18 +405,6 @@ QModelBuilderIG::Statistics::~Statistics(){
   smtStatisticsRegistry()->unregisterStat(&d_eval_lits);
   smtStatisticsRegistry()->unregisterStat(&d_eval_lits_unknown);
 }
-
-bool QModelBuilderIG::isQuantifierActive( Node f ){
-  return d_qe->hasOwnership( f ) && d_quant_sat.find( f )==d_quant_sat.end();
-}
-
-bool QModelBuilderIG::isTermActive( Node n ){
-  return d_qe->getTermDatabase()->isTermActive( n ) || //it is not congruent to another active term
-         ( n.getAttribute(ModelBasisArgAttribute())!=0 && d_basisNoMatch.find( n )==d_basisNoMatch.end() ); //or it has model basis arguments
-                                                                                                      //and is not congruent modulo model basis
-                                                                                                      //to another active term
-}
-
 
 //do exhaustive instantiation
 int QModelBuilderIG::doExhaustiveInstantiation( FirstOrderModel * fm, Node f, int effort ) {
@@ -502,133 +518,135 @@ int QModelBuilderDefault::getSelectionScore( std::vector< Node >& uf_terms ) {
 }
 
 void QModelBuilderDefault::analyzeQuantifier( FirstOrderModel* fm, Node f ){
-  FirstOrderModelIG* fmig = fm->asFirstOrderModelIG();
-  Debug("fmf-model-prefs") << "Analyze quantifier " << f << std::endl;
-  //the pro/con preferences for this quantifier
-  std::vector< Node > pro_con[2];
-  //the terms in the selection literal we choose
-  std::vector< Node > selectionLitTerms;
-  Trace("inst-gen-debug-quant") << "Inst-gen analyze " << f << std::endl;
-  //for each asserted quantifier f,
-  // - determine selection literals
-  // - check which function/predicates have good and bad definitions for satisfying f
-  if( d_phase_reqs.find( f )==d_phase_reqs.end() ){
-    d_phase_reqs[f].initialize( d_qe->getTermDatabase()->getInstConstantBody( f ), true );
-  }
-  int selectLitScore = -1;
-  for( std::map< Node, bool >::iterator it = d_phase_reqs[f].d_phase_reqs.begin(); it != d_phase_reqs[f].d_phase_reqs.end(); ++it ){
-    //the literal n is phase-required for quantifier f
-    Node n = it->first;
-    Node gn = d_qe->getTermDatabase()->getModelBasis( f, n );
-    Debug("fmf-model-req") << "   Req: " << n << " -> " << it->second << std::endl;
-    bool value;
-    //if the corresponding ground abstraction literal has a SAT value
-    if( d_qe->getValuation().hasSatValue( gn, value ) ){
-      //collect the non-ground uf terms that this literal contains
-      //  and compute if all of the symbols in this literal have
-      //  constant definitions.
-      bool isConst = true;
-      std::vector< Node > uf_terms;
-      if( TermDb::hasInstConstAttr(n) ){
-        isConst = false;
-        if( gn.getKind()==APPLY_UF ){
-          uf_terms.push_back( gn );
-          isConst = hasConstantDefinition( gn );
-        }else if( gn.getKind()==EQUAL ){
-          isConst = true;
-          for( int j=0; j<2; j++ ){
-            if( TermDb::hasInstConstAttr(n[j]) ){
-              if( n[j].getKind()==APPLY_UF &&
-                  fmig->d_uf_model_tree.find( gn[j].getOperator() )!=fmig->d_uf_model_tree.end() ){
-                uf_terms.push_back( gn[j] );
-                isConst = isConst && hasConstantDefinition( gn[j] );
-              }else{
-                isConst = false;
+  if( d_qe->getModel()->isQuantifierActive( f ) ){
+    FirstOrderModelIG* fmig = fm->asFirstOrderModelIG();
+    Debug("fmf-model-prefs") << "Analyze quantifier " << f << std::endl;
+    //the pro/con preferences for this quantifier
+    std::vector< Node > pro_con[2];
+    //the terms in the selection literal we choose
+    std::vector< Node > selectionLitTerms;
+    Trace("inst-gen-debug-quant") << "Inst-gen analyze " << f << std::endl;
+    //for each asserted quantifier f,
+    // - determine selection literals
+    // - check which function/predicates have good and bad definitions for satisfying f
+    if( d_phase_reqs.find( f )==d_phase_reqs.end() ){
+      d_phase_reqs[f].initialize( d_qe->getTermDatabase()->getInstConstantBody( f ), true );
+    }
+    int selectLitScore = -1;
+    for( std::map< Node, bool >::iterator it = d_phase_reqs[f].d_phase_reqs.begin(); it != d_phase_reqs[f].d_phase_reqs.end(); ++it ){
+      //the literal n is phase-required for quantifier f
+      Node n = it->first;
+      Node gn = d_qe->getTermDatabase()->getModelBasis( f, n );
+      Debug("fmf-model-req") << "   Req: " << n << " -> " << it->second << std::endl;
+      bool value;
+      //if the corresponding ground abstraction literal has a SAT value
+      if( d_qe->getValuation().hasSatValue( gn, value ) ){
+        //collect the non-ground uf terms that this literal contains
+        //  and compute if all of the symbols in this literal have
+        //  constant definitions.
+        bool isConst = true;
+        std::vector< Node > uf_terms;
+        if( TermDb::hasInstConstAttr(n) ){
+          isConst = false;
+          if( gn.getKind()==APPLY_UF ){
+            uf_terms.push_back( gn );
+            isConst = hasConstantDefinition( gn );
+          }else if( gn.getKind()==EQUAL ){
+            isConst = true;
+            for( int j=0; j<2; j++ ){
+              if( TermDb::hasInstConstAttr(n[j]) ){
+                if( n[j].getKind()==APPLY_UF &&
+                    fmig->d_uf_model_tree.find( gn[j].getOperator() )!=fmig->d_uf_model_tree.end() ){
+                  uf_terms.push_back( gn[j] );
+                  isConst = isConst && hasConstantDefinition( gn[j] );
+                }else{
+                  isConst = false;
+                }
               }
             }
           }
         }
-      }
-      //check if the value in the SAT solver matches the preference according to the quantifier
-      int pref = 0;
-      if( value!=it->second ){
-        //we have a possible selection literal
-        bool selectLit = d_quant_selection_lit[f].isNull();
-        bool selectLitConstraints = true;
-        //it is a constantly defined selection literal : the quantifier is sat
-        if( isConst ){
-          selectLit = selectLit || d_quant_sat.find( f )==d_quant_sat.end();
-          d_quant_sat[f] = true;
-          //check if choosing this literal would add any additional constraints to default definitions
-          selectLitConstraints = false;
-          for( int j=0; j<(int)uf_terms.size(); j++ ){
-            Node op = uf_terms[j].getOperator();
-            if( d_uf_prefs[op].d_reconsiderModel ){
-              selectLitConstraints = true;
+        //check if the value in the SAT solver matches the preference according to the quantifier
+        int pref = 0;
+        if( value!=it->second ){
+          //we have a possible selection literal
+          bool selectLit = d_quant_selection_lit[f].isNull();
+          bool selectLitConstraints = true;
+          //it is a constantly defined selection literal : the quantifier is sat
+          if( isConst ){
+            selectLit = selectLit || d_qe->getModel()->isQuantifierActive( f );
+            d_qe->getModel()->setQuantifierActive( f, false );
+            //check if choosing this literal would add any additional constraints to default definitions
+            selectLitConstraints = false;
+            for( int j=0; j<(int)uf_terms.size(); j++ ){
+              Node op = uf_terms[j].getOperator();
+              if( d_uf_prefs[op].d_reconsiderModel ){
+                selectLitConstraints = true;
+              }
+            }
+            if( !selectLitConstraints ){
+              selectLit = true;
             }
           }
-          if( !selectLitConstraints ){
-            selectLit = true;
+          //also check if it is naturally a better literal
+          if( !selectLit ){
+            int score = getSelectionScore( uf_terms );
+            //Trace("inst-gen-debug") << "Check " << score << " < " << selectLitScore << std::endl;
+            selectLit = score<selectLitScore;
           }
-        }
-        //also check if it is naturally a better literal
-        if( !selectLit ){
-          int score = getSelectionScore( uf_terms );
-          //Trace("inst-gen-debug") << "Check " << score << " < " << selectLitScore << std::endl;
-          selectLit = score<selectLitScore;
-        }
-        //see if we wish to choose this as a selection literal
-        d_quant_selection_lit_candidates[f].push_back( value ? n : n.notNode() );
-        if( selectLit ){
-          selectLitScore = getSelectionScore( uf_terms );
-          Trace("inst-gen-debug") << "Choose selection literal " << gn << std::endl;
-          Trace("inst-gen-debug") << "  flags: " << isConst << " " << selectLitConstraints << " " << selectLitScore << std::endl;
-          d_quant_selection_lit[f] = value ? n : n.notNode();
-          selectionLitTerms.clear();
-          selectionLitTerms.insert( selectionLitTerms.begin(), uf_terms.begin(), uf_terms.end() );
-          if( !selectLitConstraints ){
-            break;
+          //see if we wish to choose this as a selection literal
+          d_quant_selection_lit_candidates[f].push_back( value ? n : n.notNode() );
+          if( selectLit ){
+            selectLitScore = getSelectionScore( uf_terms );
+            Trace("inst-gen-debug") << "Choose selection literal " << gn << std::endl;
+            Trace("inst-gen-debug") << "  flags: " << isConst << " " << selectLitConstraints << " " << selectLitScore << std::endl;
+            d_quant_selection_lit[f] = value ? n : n.notNode();
+            selectionLitTerms.clear();
+            selectionLitTerms.insert( selectionLitTerms.begin(), uf_terms.begin(), uf_terms.end() );
+            if( !selectLitConstraints ){
+              break;
+            }
           }
+          pref = 1;
+        }else{
+          pref = -1;
         }
-        pref = 1;
-      }else{
-        pref = -1;
-      }
-      //if we are not yet SAT, so we will add to preferences
-      if( d_quant_sat.find( f )==d_quant_sat.end() ){
-        Debug("fmf-model-prefs") << "  It is " << ( pref==1 ? "pro" : "con" );
-        Debug("fmf-model-prefs") << " the definition of " << n << std::endl;
-        for( int j=0; j<(int)uf_terms.size(); j++ ){
-          pro_con[ pref==1 ? 0 : 1 ].push_back( uf_terms[j] );
+        //if we are not yet SAT, so we will add to preferences
+        if( d_qe->getModel()->isQuantifierActive( f ) ){
+          Debug("fmf-model-prefs") << "  It is " << ( pref==1 ? "pro" : "con" );
+          Debug("fmf-model-prefs") << " the definition of " << n << std::endl;
+          for( int j=0; j<(int)uf_terms.size(); j++ ){
+            pro_con[ pref==1 ? 0 : 1 ].push_back( uf_terms[j] );
+          }
         }
       }
     }
-  }
-  //process information about selection literal for f
-  if( !d_quant_selection_lit[f].isNull() ){
-    d_quant_selection_lit_terms[f].insert( d_quant_selection_lit_terms[f].begin(), selectionLitTerms.begin(), selectionLitTerms.end() );
-    for( int i=0; i<(int)selectionLitTerms.size(); i++ ){
-      d_term_selection_lit[ selectionLitTerms[i] ] = d_quant_selection_lit[f];
-      d_op_selection_terms[ selectionLitTerms[i].getOperator() ].push_back( selectionLitTerms[i] );
+    //process information about selection literal for f
+    if( !d_quant_selection_lit[f].isNull() ){
+      d_quant_selection_lit_terms[f].insert( d_quant_selection_lit_terms[f].begin(), selectionLitTerms.begin(), selectionLitTerms.end() );
+      for( int i=0; i<(int)selectionLitTerms.size(); i++ ){
+        d_term_selection_lit[ selectionLitTerms[i] ] = d_quant_selection_lit[f];
+        d_op_selection_terms[ selectionLitTerms[i].getOperator() ].push_back( selectionLitTerms[i] );
+      }
+    }else{
+      Trace("inst-gen-warn") << "WARNING: " << f << " has no selection literals" << std::endl;
     }
-  }else{
-    Trace("inst-gen-warn") << "WARNING: " << f << " has no selection literals" << std::endl;
-  }
-  //process information about requirements and preferences of quantifier f
-  if( d_quant_sat.find( f )!=d_quant_sat.end() ){
-    Debug("fmf-model-prefs") << "  * Constant SAT due to definition of ops: ";
-    for( int i=0; i<(int)selectionLitTerms.size(); i++ ){
-      Debug("fmf-model-prefs") << selectionLitTerms[i] << " ";
-      d_uf_prefs[ selectionLitTerms[i].getOperator() ].d_reconsiderModel = false;
-    }
-    Debug("fmf-model-prefs") << std::endl;
-  }else{
-    //note quantifier's value preferences to models
-    for( int k=0; k<2; k++ ){
-      for( int j=0; j<(int)pro_con[k].size(); j++ ){
-        Node op = pro_con[k][j].getOperator();
-        Node r = fmig->getRepresentative( pro_con[k][j] );
-        d_uf_prefs[op].setValuePreference( f, pro_con[k][j], r, k==0 );
+    //process information about requirements and preferences of quantifier f
+    if( !d_qe->getModel()->isQuantifierActive( f ) ){
+      Debug("fmf-model-prefs") << "  * Constant SAT due to definition of ops: ";
+      for( int i=0; i<(int)selectionLitTerms.size(); i++ ){
+        Debug("fmf-model-prefs") << selectionLitTerms[i] << " ";
+        d_uf_prefs[ selectionLitTerms[i].getOperator() ].d_reconsiderModel = false;
+      }
+      Debug("fmf-model-prefs") << std::endl;
+    }else{
+      //note quantifier's value preferences to models
+      for( int k=0; k<2; k++ ){
+        for( int j=0; j<(int)pro_con[k].size(); j++ ){
+          Node op = pro_con[k][j].getOperator();
+          Node r = fmig->getRepresentative( pro_con[k][j] );
+          d_uf_prefs[op].setValuePreference( f, pro_con[k][j], r, k==0 );
+        }
       }
     }
   }
@@ -648,7 +666,7 @@ int QModelBuilderDefault::doInstGen( FirstOrderModel* fm, Node f ){
       std::vector< Node > tr_terms;
       if( lit.getKind()==APPLY_UF ){
         //only match predicates that are contrary to this one, use literal matching
-        Node eq = NodeManager::currentNM()->mkNode( IFF, lit, !phase ? fm->d_true : fm->d_false );
+        Node eq = NodeManager::currentNM()->mkNode( EQUAL, lit, !phase ? fm->d_true : fm->d_false );
         tr_terms.push_back( eq );
       }else if( lit.getKind()==EQUAL ){
         //collect trigger terms
@@ -707,9 +725,11 @@ void QModelBuilderDefault::constructModelUf( FirstOrderModel* fm, Node op ){
     Node defaultTerm = d_qe->getTermDatabase()->getModelBasisOpTerm( op );
     Trace("fmf-model-cons") << "Construct model for " << op << "..." << std::endl;
     //set the values in the model
-    for( size_t i=0; i<fmig->d_uf_terms[op].size(); i++ ){
-      Node n = fmig->d_uf_terms[op][i];
-      if( isTermActive( n ) ){
+    std::map< Node, std::vector< Node > >::iterator itut = fmig->d_uf_terms.find( op );
+    if( itut!=fmig->d_uf_terms.end() ){
+      for( size_t i=0; i<itut->second.size(); i++ ){
+        Node n = itut->second[i];
+        // only consider unique up to congruence (in model equality engine)?
         Node v = fmig->getRepresentative( n );
         Trace("fmf-model-cons") << "Set term " << n << " : " << fmig->d_rep_set.getIndexFor( v ) << " " << v << std::endl;
         //if this assertion did not help the model, just consider it ground

@@ -16,7 +16,6 @@
 
 #include "expr/datatype.h"
 #include "options/quantifiers_options.h"
-#include "theory/datatypes/datatypes_rewriter.h"
 #include "theory/quantifiers/ce_guided_instantiation.h"
 #include "theory/quantifiers/ce_guided_single_inv_ei.h"
 #include "theory/quantifiers/first_order_model.h"
@@ -147,7 +146,7 @@ void CegConjectureSingleInv::initialize( Node q ) {
         d_has_ites = false;
       }
     }
-    Assert( datatypes::DatatypesRewriter::isTypeDatatype(tn) );
+    Assert( tn.isDatatype() );
     const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
     Assert( dt.isSygus() );
     if( !dt.getSygusAllowAll() ){
@@ -759,13 +758,7 @@ Node CegConjectureSingleInv::getSolution( unsigned sol_index, TypeNode stn, int&
     Assert( d_single_inv_arg_sk.size()==varList.getNumChildren() );
     for( unsigned i=0; i<d_single_inv_arg_sk.size(); i++ ){
       Trace("csi-sol") << d_single_inv_arg_sk[i] << " ";
-      if( varList[i].getType().isBoolean() ){
-        //TODO force boolean term conversion mode
-        Node c = NodeManager::currentNM()->mkConst(BitVector(1u, 1u));
-        vars.push_back( d_single_inv_arg_sk[i].eqNode( c ) );
-      }else{
-        vars.push_back( d_single_inv_arg_sk[i] );
-      }
+      vars.push_back( d_single_inv_arg_sk[i] );
       d_sol->d_varList.push_back( varList[i] );
     }
     Trace("csi-sol") << std::endl;
@@ -824,6 +817,7 @@ Node CegConjectureSingleInv::getSolution( unsigned sol_index, TypeNode stn, int&
 Node CegConjectureSingleInv::reconstructToSyntax( Node s, TypeNode stn, int& reconstructed, bool rconsSygus ) {
   d_solution = s;
   const Datatype& dt = ((DatatypeType)(stn).toType()).getDatatype();
+  Trace("csi-sol") << "Reconstruct to syntax " << s << ", allow all = " << dt.getSygusAllowAll() << " " << stn << ", reconstruct = " << rconsSygus << std::endl;
 
   //reconstruct the solution into sygus if necessary
   reconstructed = 0;

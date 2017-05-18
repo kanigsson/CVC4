@@ -56,6 +56,7 @@ public:
 private:
   bool ee_areEqual( Node a, Node b );
   bool ee_areDisequal( Node a, Node b );
+  bool ee_areCareDisequal( Node a, Node b );
   NodeIntMap d_members;
   std::map< Node, std::vector< Node > > d_members_data;
   bool assertFact( Node fact, Node exp );
@@ -69,15 +70,19 @@ private:
   // send lemma ( n OR (NOT n) ) immediately
   void split( Node n, int reqPol=0 );
   void fullEffortCheck();
+  void checkSubtypes( std::vector< Node >& lemmas );
   void checkDownwardsClosure( std::vector< Node >& lemmas );
   void checkUpwardsClosure( std::vector< Node >& lemmas );
   void checkDisequalities( std::vector< Node >& lemmas );
   bool isMember( Node x, Node s );
+  bool isSetDisequalityEntailed( Node s, Node t );
   
-  void flushLemmas( std::vector< Node >& lemmas );
+  void flushLemmas( std::vector< Node >& lemmas, bool preprocess = false );
+  void flushLemma( Node lem, bool preprocess = false );
   Node getProxy( Node n );
   Node getCongruent( Node n );
   Node getEmptySet( TypeNode tn );
+  Node getUnivSet( TypeNode tn );
   bool hasLemmaCached( Node lem );
   bool hasProcessed();
   
@@ -111,16 +116,23 @@ private:
   
   bool d_sentLemma;
   bool d_addedFact;
+  bool d_full_check_incomplete;
   NodeMap d_proxy;  
   NodeMap d_proxy_to_term;  
   NodeSet d_lemmas_produced;
   std::vector< Node > d_set_eqc;
+  std::map< Node, bool > d_set_eqc_relevant;
   std::map< Node, std::vector< Node > > d_set_eqc_list;
   std::map< TypeNode, Node > d_eqc_emptyset;
+  std::map< TypeNode, Node > d_eqc_univset;
   std::map< Node, Node > d_eqc_singleton;
   std::map< TypeNode, Node > d_emptyset;
+  std::map< TypeNode, Node > d_univset;
   std::map< Node, Node > d_congruent;
   std::map< Node, std::vector< Node > > d_nvar_sets;
+  std::map< Node, Node > d_var_set;
+  std::map< Node, TypeNode > d_most_common_type;
+  std::map< Node, Node > d_most_common_type_term;
   std::map< Node, std::map< Node, Node > > d_pol_mems[2];
   std::map< Node, std::map< Node, Node > > d_members_index;
   std::map< Node, Node > d_singleton_index;
@@ -129,6 +141,7 @@ private:
   //cardinality
 private:
   bool d_card_enabled;
+  bool d_rels_enabled;
   std::map< Node, Node > d_eqc_to_card_term;
   NodeSet d_card_processed;
   std::map< Node, std::vector< Node > > d_card_parent;
@@ -142,6 +155,9 @@ private:
   void checkNormalForms( std::vector< Node >& lemmas, std::vector< Node >& intro_sets );
   void checkNormalForm( Node eqc, std::vector< Node >& intro_sets );
   void checkMinCard( std::vector< Node >& lemmas );
+private: //for universe set
+  NodeBoolMap d_var_elim;
+  void lastCallEffortCheck();
 public:
 
   /**
@@ -159,8 +175,10 @@ public:
   void addSharedTerm(TNode);
 
   void check(Theory::Effort);
+  
+  bool needsCheckLastEffort();
 
-  void collectModelInfo(TheoryModel*, bool fullModel);
+  void collectModelInfo(TheoryModel* m);
 
   void computeCareGraph();
 
@@ -170,6 +188,8 @@ public:
 
   void preRegisterTerm(TNode node);
 
+  Theory::PPAssertStatus ppAssert(TNode in, SubstitutionMap& outSubstitutions);
+  
   void presolve();
 
   void propagate(Theory::Effort);

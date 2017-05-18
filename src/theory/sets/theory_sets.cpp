@@ -39,15 +39,19 @@ void TheorySets::addSharedTerm(TNode n) {
 }
 
 void TheorySets::check(Effort e) {
-  if (done() && !fullEffort(e)) {
+  if (done() && e < Theory::EFFORT_FULL) {
     return;
   }
   TimerStat::CodeTimer checkTimer(d_checkTime);
   d_internal->check(e);
 }
 
-void TheorySets::collectModelInfo(TheoryModel* m, bool fullModel) {
-  d_internal->collectModelInfo(m, fullModel);
+bool TheorySets::needsCheckLastEffort() {
+  return d_internal->needsCheckLastEffort();
+}
+
+void TheorySets::collectModelInfo(TheoryModel* m) {
+  d_internal->collectModelInfo(m);
 }
 
 void TheorySets::computeCareGraph() {
@@ -68,6 +72,10 @@ Node TheorySets::getModelValue(TNode node) {
 
 void TheorySets::preRegisterTerm(TNode node) {
   d_internal->preRegisterTerm(node);
+}
+
+Theory::PPAssertStatus TheorySets::ppAssert(TNode in, SubstitutionMap& outSubstitutions) {
+  return d_internal->ppAssert( in, outSubstitutions );
 }
 
 void TheorySets::presolve() {

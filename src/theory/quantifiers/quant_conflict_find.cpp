@@ -622,7 +622,8 @@ bool QuantInfo::isPropagatingInstance( QuantConflictFind * p, Node n ) {
   if( n.getKind()==FORALL ){
     //TODO?
     return true;
-  }else if( n.getKind()==NOT || n.getKind()==AND || n.getKind()==OR || n.getKind()==EQUAL || n.getKind()==ITE || n.getKind()==IFF ){
+  }else if( n.getKind()==NOT || n.getKind()==AND || n.getKind()==OR || n.getKind()==EQUAL || n.getKind()==ITE || 
+            ( n.getKind()==EQUAL && n[0].getType().isBoolean() ) ){
     for( unsigned i=0; i<n.getNumChildren(); i++ ){
       if( !isPropagatingInstance( p, n[i] ) ){
         return false;
@@ -1098,7 +1099,7 @@ void MatchGen::collectBoundVar( QuantInfo * qi, Node n, std::vector< int >& cbva
 
 void MatchGen::determineVariableOrder( QuantInfo * qi, std::vector< int >& bvars ) {
   Trace("qcf-qregister-debug") << "Determine variable order " << d_n << ", #bvars = " << bvars.size() << std::endl;
-  bool isComm = d_type==typ_formula && ( d_n.getKind()==OR || d_n.getKind()==AND || d_n.getKind()==IFF );
+  bool isComm = d_type==typ_formula && ( d_n.getKind()==OR || d_n.getKind()==AND || d_n.getKind()==EQUAL );
   if( isComm ){
     std::map< int, std::vector< int > > c_to_vars;
     std::map< int, std::vector< int > > vars_to_c;
@@ -1563,7 +1564,7 @@ bool MatchGen::getNextMatch( QuantConflictFind * p, QuantInfo * qi ) {
               success = true;
             }
           }
-        }else if( d_n.getKind()==IFF ){
+        }else if( d_n.getKind()==EQUAL ){
           //construct match based on both children
           if( d_child_counter%2==0 ){
             if( getChild( 0 )->getNextMatch( p, qi ) ){
@@ -1660,7 +1661,7 @@ bool MatchGen::getExplanation( QuantConflictFind * p, QuantInfo * qi, std::vecto
       }else{
         return getChild( d_child_counter )->getExplanation( p, qi, exp );
       }
-    }else if( d_n.getKind()==IFF ){
+    }else if( d_n.getKind()==EQUAL ){
       for( unsigned i=0; i<2; i++ ){
         if( !getChild( i )->getExplanation( p, qi, exp ) ){
           return false;
@@ -1861,7 +1862,7 @@ void MatchGen::setInvalid() {
 }
 
 bool MatchGen::isHandledBoolConnective( TNode n ) {
-  return TermDb::isBoolConnective( n.getKind() ) && ( n.getKind()!=ITE || n.getType().isBoolean() ) && n.getKind()!=SEP_STAR;
+  return TermDb::isBoolConnectiveTerm( n ) && n.getKind()!=SEP_STAR;
 }
 
 bool MatchGen::isHandledUfTerm( TNode n ) {
@@ -1904,11 +1905,7 @@ d_conflict( c, false ) {
 }
 
 Node QuantConflictFind::mkEqNode( Node a, Node b ) {
-  if( a.getType().isBoolean() ){
-    return a.iffNode( b );
-  }else{
-    return a.eqNode( b );
-  }
+  return a.eqNode( b );
 }
 
 //-------------------------------------------------- registration
@@ -2082,70 +2079,76 @@ void QuantConflictFind::check( Theory::Effort level, unsigned quant_e ) {
                 //try to make a matches making the body false
                 Trace("qcf-check-debug") << "Get next match..." << std::endl;
                 while( qi->getNextMatch( this ) ){
-                  Trace("qcf-inst") << "*** Produced match at effort " << e << " : " << std::endl;
-                  qi->debugPrintMatch("qcf-inst");
-                  Trace("qcf-inst") << std::endl;
-                  if( !qi->isMatchSpurious( this ) ){
-                    std::vector< int > assigned;
-                    if( qi->completeMatch( this, assigned ) ){
-                      std::vector< Node > terms;
-                      qi->getMatch( terms );
-                      bool tcs = qi->isTConstraintSpurious( this, terms );
-                      if( !tcs ){
-                        //for debugging
-                        if( Debug.isOn("qcf-check-inst") ){
-                          Node inst = d_quantEngine->getInstantiation( q, terms );
-                          Debug("qcf-check-inst") << "Check instantiation " << inst << "..." << std::endl;
-                          Assert( !getTermDatabase()->isEntailed( inst, true ) );
-                          Assert( getTermDatabase()->isEntailed( inst, false ) || e>effort_conflict );
-                        }
-                        if( d_quantEngine->addInstantiation( q, terms ) ){
-                          Trace("qcf-check") << "   ... Added instantiation" << std::endl;
-                          Trace("qcf-inst") << "*** Was from effort " << e << " : " << std::endl;
-                          qi->debugPrintMatch("qcf-inst");
-                          Trace("qcf-inst") << std::endl;
-                          ++addedLemmas;
-                          if( e==effort_conflict ){
-                            d_quantEngine->markRelevant( q );
-                            ++(d_quantEngine->d_statistics.d_instantiations_qcf);
-                            if( options::qcfAllConflict() ){
-                              isConflict = true;
-                            }else{
-                              d_conflict.set( true );
+                  if( d_quantEngine->inConflict() ){
+                    Trace("qcf-check") << "   ... Quantifiers engine discovered conflict, ";
+                    Trace("qcf-check") << "probably related to disequal congruent terms in master equality engine" << std::endl;
+                    break;
+                  }else{
+                    Trace("qcf-inst") << "*** Produced match at effort " << e << " : " << std::endl;
+                    qi->debugPrintMatch("qcf-inst");
+                    Trace("qcf-inst") << std::endl;
+                    if( !qi->isMatchSpurious( this ) ){
+                      std::vector< int > assigned;
+                      if( qi->completeMatch( this, assigned ) ){
+                        std::vector< Node > terms;
+                        qi->getMatch( terms );
+                        bool tcs = qi->isTConstraintSpurious( this, terms );
+                        if( !tcs ){
+                          //for debugging
+                          if( Debug.isOn("qcf-check-inst") ){
+                            Node inst = d_quantEngine->getInstantiation( q, terms );
+                            Debug("qcf-check-inst") << "Check instantiation " << inst << "..." << std::endl;
+                            Assert( !getTermDatabase()->isEntailed( inst, true ) );
+                            Assert( getTermDatabase()->isEntailed( inst, false ) || e>effort_conflict );
+                          }
+                          if( d_quantEngine->addInstantiation( q, terms ) ){
+                            Trace("qcf-check") << "   ... Added instantiation" << std::endl;
+                            Trace("qcf-inst") << "*** Was from effort " << e << " : " << std::endl;
+                            qi->debugPrintMatch("qcf-inst");
+                            Trace("qcf-inst") << std::endl;
+                            ++addedLemmas;
+                            if( e==effort_conflict ){
+                              d_quantEngine->markRelevant( q );
+                              ++(d_quantEngine->d_statistics.d_instantiations_qcf);
+                              if( options::qcfAllConflict() ){
+                                isConflict = true;
+                              }else{
+                                d_conflict.set( true );
+                              }
+                              break;
+                            }else if( e==effort_prop_eq ){
+                              d_quantEngine->markRelevant( q );
+                              ++(d_quantEngine->d_statistics.d_instantiations_qcf);
                             }
+                          }else{
+                            Trace("qcf-inst") << "   ... Failed to add instantiation" << std::endl;
+                            //this should only happen if the algorithm generates the same propagating instance twice this round
+                            //in this case, break to avoid exponential behavior
                             break;
-                          }else if( e==effort_prop_eq ){
-                            d_quantEngine->markRelevant( q );
-                            ++(d_quantEngine->d_statistics.d_instantiations_qcf);
                           }
                         }else{
-                          Trace("qcf-inst") << "   ... Failed to add instantiation" << std::endl;
-                          //this should only happen if the algorithm generates the same propagating instance twice this round
-                          //in this case, break to avoid exponential behavior
-                          break;
+                          Trace("qcf-inst") << "   ... Spurious instantiation (match is T-inconsistent)" << std::endl;
                         }
+                        //clean up assigned
+                        qi->revertMatch( this, assigned );
+                        d_tempCache.clear();
                       }else{
-                        Trace("qcf-inst") << "   ... Spurious instantiation (match is T-inconsistent)" << std::endl;
+                        Trace("qcf-inst") << "   ... Spurious instantiation (cannot assign unassigned variables)" << std::endl;
                       }
-                      //clean up assigned
-                      qi->revertMatch( this, assigned );
-                      d_tempCache.clear();
                     }else{
-                      Trace("qcf-inst") << "   ... Spurious instantiation (cannot assign unassigned variables)" << std::endl;
+                      Trace("qcf-inst") << "   ... Spurious instantiation (match is inconsistent)" << std::endl;
                     }
-                  }else{
-                    Trace("qcf-inst") << "   ... Spurious instantiation (match is inconsistent)" << std::endl;
                   }
                 }
                 Trace("qcf-check") << "Done, conflict = " << d_conflict << std::endl;
-                if( d_conflict ){
+                if( d_conflict || d_quantEngine->inConflict() ){
                   break;
                 }
               }
             }
           }
         }
-        if( addedLemmas>0 ){
+        if( addedLemmas>0 || d_quantEngine->inConflict() ){
           break;
         }
       }

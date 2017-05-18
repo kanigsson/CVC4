@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # mkexpr
 # Morgan Deters <mdeters@cs.nyu.edu> for CVC4
@@ -246,6 +246,12 @@ template <> $2 const & Expr::getConst() const {
 "
   exportConstant_cases="${exportConstant_cases}
   case $1: return to->mkConst(n.getConst< $2 >());"
+}
+
+function nullaryoperator {
+  # nullaryoperator K ["comment"]
+  lineno=${BASH_LINENO[0]}
+  check_theory_seen
 }
 
 function check_theory_seen {

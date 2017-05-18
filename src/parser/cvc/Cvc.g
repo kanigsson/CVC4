@@ -209,6 +209,8 @@ tokens {
   TRANSPOSE_TOK = 'TRANSPOSE';
   PRODUCT_TOK = 'PRODUCT';
   TRANSCLOSURE_TOK = 'TCLOSURE';
+  IDEN_TOK = 'IDEN';
+  JOIN_IMAGE_TOK = 'JOIN_IMAGE';  
 
   // Strings
 
@@ -242,8 +244,10 @@ tokens {
   //REGEXP_EMPTY_TOK
   //REGEXP_SIGMA_TOK
   
+  SETS_CARD_TOK = 'CARD';
   
   FMF_CARD_TOK = 'HAS_CARD';
+  UNIVSET_TOK = 'UNIVERSE';
 
   // these are parsed by special NUMBER_OR_RANGEOP rule, below
   DECIMAL_LITERAL;
@@ -322,12 +326,15 @@ int getOperatorPrecedence(int type) {
   case JOIN_TOK:
   case TRANSPOSE_TOK:
   case PRODUCT_TOK:
+  case IDEN_TOK:
+  case JOIN_IMAGE_TOK:  
   case TRANSCLOSURE_TOK: return 24;
   case LEQ_TOK:
   case LT_TOK:
   case GEQ_TOK:
   case GT_TOK:
   case MEMBER_TOK: 
+  case SETS_CARD_TOK:
   case FMF_CARD_TOK: return 25;
   case EQUAL_TOK:
   case DISEQUAL_TOK: return 26;
@@ -354,7 +361,7 @@ Kind getOperatorKind(int type, bool& negate) {
 
   switch(type) {
     // booleanBinop
-  case IFF_TOK: return kind::IFF;
+  case IFF_TOK: return kind::EQUAL;
   case IMPLIES_TOK: return kind::IMPLIES;
   case OR_TOK: return kind::OR;
   case XOR_TOK: return kind::XOR;
@@ -362,6 +369,7 @@ Kind getOperatorKind(int type, bool& negate) {
   
   case PRODUCT_TOK: return kind::PRODUCT;
   case JOIN_TOK: return kind::JOIN;
+  case JOIN_IMAGE_TOK: return kind::JOIN_IMAGE;  
 
     // comparisonBinop
   case EQUAL_TOK: return kind::EQUAL;
@@ -371,6 +379,7 @@ Kind getOperatorKind(int type, bool& negate) {
   case LT_TOK: return kind::LT;
   case LEQ_TOK: return kind::LEQ;
   case MEMBER_TOK: return kind::MEMBER;
+  case SETS_CARD_TOK: return kind::CARD;
   case FMF_CARD_TOK: return kind::CARDINALITY_CONSTRAINT;
 
     // arithmeticBinop
@@ -437,16 +446,6 @@ Expr createPrecedenceTree(Parser* parser, ExprManager* em,
   Expr rhs = createPrecedenceTree(parser, em, expressions, operators, pivot + 1, stopIndex);
 
   switch(k) {
-  case kind::EQUAL: {
-    if(lhs.getType().isBoolean()) {
-      if(parser->strictModeEnabled()) {
-        WarningOnce() << "Warning: in strict parsing mode, will not convert BOOL = BOOL to BOOL <=> BOOL" << std::endl;
-      } else {
-        k = kind::IFF;
-      }
-    }
-    break;
-  }
   case kind::LEQ          : if(lhs.getType().isSet()) { k = kind::SUBSET; } break;
   case kind::MINUS        : if(lhs.getType().isSet()) { k = kind::SETMINUS; } break;
   case kind::BITVECTOR_AND: if(lhs.getType().isSet()) { k = kind::INTERSECTION; } break;
@@ -1515,6 +1514,7 @@ booleanBinop[unsigned& op]
   | AND_TOK
   | JOIN_TOK
   | PRODUCT_TOK
+  | JOIN_IMAGE_TOK  
   ;
 
 comparison[CVC4::Expr& f]
@@ -1693,21 +1693,28 @@ bvBinop[unsigned& op]
 bvNegTerm[CVC4::Expr& f]
     /* BV neg */
   : BVNEG_TOK bvNegTerm[f]
-    { f = MK_EXPR(CVC4::kind::BITVECTOR_NOT, f); }
-  | TRANSPOSE_TOK bvNegTerm[f]
+    { f = f.getType().isSet() ? MK_EXPR(CVC4::kind::COMPLEMENT, f) : MK_EXPR(CVC4::kind::BITVECTOR_NOT, f); }
+  | relationTerm[f]
+  ;
+
+relationTerm[CVC4::Expr& f]
+    /* relation terms */
+  : TRANSPOSE_TOK relationTerm[f]
     { f = MK_EXPR(CVC4::kind::TRANSPOSE, f); } 
-  | TRANSCLOSURE_TOK bvNegTerm[f]
+  | TRANSCLOSURE_TOK relationTerm[f]
     { f = MK_EXPR(CVC4::kind::TCLOSURE, f); }
-  | TUPLE_TOK LPAREN bvNegTerm[f] RPAREN
+  | TUPLE_TOK LPAREN relationTerm[f] RPAREN
     { std::vector<Type> types;
       std::vector<Expr> args;
       args.push_back(f);
-	  types.push_back(f.getType());
+	    types.push_back(f.getType());
       DatatypeType t = EXPR_MANAGER->mkTupleType(types);
       const Datatype& dt = t.getDatatype();
       args.insert( args.begin(), dt[0].getConstructor() );
       f = MK_EXPR(kind::APPLY_CONSTRUCTOR, args);
-    }             
+    }
+  | IDEN_TOK relationTerm[f]
+    { f = MK_EXPR(CVC4::kind::IDEN, f); }                 
   | postfixTerm[f]
   ;
 
@@ -1839,6 +1846,8 @@ postfixTerm[CVC4::Expr& f]
           f = MK_EXPR(CVC4::kind::APPLY_CONSTRUCTOR, v);
         } else if(f.getKind() == CVC4::kind::EMPTYSET && t.isSet()) {
           f = MK_CONST(CVC4::EmptySet(t));
+        } else if(f.getKind() == CVC4::kind::UNIVERSE_SET && t.isSet()) {
+          f = EXPR_MANAGER->mkNullaryOperator(t, kind::UNIVERSE_SET);
         } else {
           if(f.getType() != t) {
             PARSER_STATE->parseError("Type ascription not satisfied.");
@@ -1945,7 +1954,7 @@ bvTerm[CVC4::Expr& f]
     { f = MK_EXPR(MK_CONST(BitVectorRepeat(k)), f); }
     /* BV rotate right */
   | BVROTR_TOK LPAREN formula[f] COMMA k=numeral RPAREN
-    { f = MK_EXPR(MK_CONST(BitVectorSignExtend(k)), f); }
+    { f = MK_EXPR(MK_CONST(BitVectorRotateRight(k)), f); }
     /* BV rotate left */
   | BVROTL_TOK LPAREN formula[f] COMMA k=numeral RPAREN
     { f = MK_EXPR(MK_CONST(BitVectorRotateLeft(k)), f); }
@@ -2012,8 +2021,18 @@ stringTerm[CVC4::Expr& f]
   | str[s]
     { f = MK_CONST(CVC4::String(s)); }
 
+  | setsTerm[f]
+  ;
+  
+setsTerm[CVC4::Expr& f]
+@init {
+}
+    /* Sets prefix operators */
+  : SETS_CARD_TOK LPAREN formula[f] RPAREN
+    { f = MK_EXPR(CVC4::kind::CARD, f); }
   | simpleTerm[f]
   ;
+  
 
 /** Parses a simple term. */
 simpleTerm[CVC4::Expr& f]
@@ -2062,6 +2081,10 @@ simpleTerm[CVC4::Expr& f]
     /* empty set literal */
   | LBRACE RBRACE
     { f = MK_CONST(EmptySet(Type())); }
+  | UNIVSET_TOK
+    { //booleanType is placeholder
+      f = EXPR_MANAGER->mkNullaryOperator(EXPR_MANAGER->booleanType(), kind::UNIVERSE_SET);
+    }
 
     /* finite set literal */
   | LBRACE formula[f] { args.push_back(f); }

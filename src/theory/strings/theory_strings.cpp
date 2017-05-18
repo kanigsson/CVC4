@@ -97,18 +97,18 @@ TheoryStrings::TheoryStrings(context::Context* c, context::UserContext* u,
       d_cardinality_lits(u),
       d_curr_cardinality(c, 0)
 {
-  d_extt = new ExtTheory( this );
-  d_extt->addFunctionKind( kind::STRING_SUBSTR );
-  d_extt->addFunctionKind( kind::STRING_STRIDOF );
-  d_extt->addFunctionKind( kind::STRING_ITOS );
-  d_extt->addFunctionKind( kind::STRING_U16TOS );
-  d_extt->addFunctionKind( kind::STRING_U32TOS );
-  d_extt->addFunctionKind( kind::STRING_STOI );
-  d_extt->addFunctionKind( kind::STRING_STOU16 );
-  d_extt->addFunctionKind( kind::STRING_STOU32 );
-  d_extt->addFunctionKind( kind::STRING_STRREPL );
-  d_extt->addFunctionKind( kind::STRING_STRCTN );
-  d_extt->addFunctionKind( kind::STRING_IN_REGEXP );
+  setupExtTheory();
+  getExtTheory()->addFunctionKind(kind::STRING_SUBSTR);
+  getExtTheory()->addFunctionKind(kind::STRING_STRIDOF);
+  getExtTheory()->addFunctionKind(kind::STRING_ITOS);
+  getExtTheory()->addFunctionKind(kind::STRING_U16TOS);
+  getExtTheory()->addFunctionKind(kind::STRING_U32TOS);
+  getExtTheory()->addFunctionKind(kind::STRING_STOI);
+  getExtTheory()->addFunctionKind(kind::STRING_STOU16);
+  getExtTheory()->addFunctionKind(kind::STRING_STOU32);
+  getExtTheory()->addFunctionKind(kind::STRING_STRREPL);
+  getExtTheory()->addFunctionKind(kind::STRING_STRCTN);
+  getExtTheory()->addFunctionKind(kind::STRING_IN_REGEXP);
 
   // The kinds we are treating as function application in congruence
   d_equalityEngine.addFunctionKind(kind::STRING_IN_REGEXP);
@@ -142,7 +142,6 @@ TheoryStrings::~TheoryStrings() {
   for( std::map< Node, EqcInfo* >::iterator it = d_eqc_info.begin(); it != d_eqc_info.end(); ++it ){
     delete it->second;
   }
-  delete d_extt;
 }
 
 Node TheoryStrings::getRepresentative( Node t ) {
@@ -181,6 +180,20 @@ bool TheoryStrings::areDisequal( Node a, Node b ){
       return ar!=br && ar.isConst() && br.isConst();
     }
   }
+}
+
+bool TheoryStrings::areCareDisequal( TNode x, TNode y ) {
+  Assert( d_equalityEngine.hasTerm(x) );
+  Assert( d_equalityEngine.hasTerm(y) );
+  if( d_equalityEngine.isTriggerTerm(x, THEORY_STRINGS) && d_equalityEngine.isTriggerTerm(y, THEORY_STRINGS) ){
+    TNode x_shared = d_equalityEngine.getTriggerTermRepresentative(x, THEORY_STRINGS);
+    TNode y_shared = d_equalityEngine.getTriggerTermRepresentative(y, THEORY_STRINGS);
+    EqualityStatus eqStatus = d_valuation.getEqualityStatus(x_shared, y_shared);
+    if( eqStatus==EQUALITY_FALSE_AND_PROPAGATED || eqStatus==EQUALITY_FALSE || eqStatus==EQUALITY_FALSE_IN_MODEL ){
+      return true;
+    }
+  }
+  return false;
 }
 
 Node TheoryStrings::getLengthExp( Node t, std::vector< Node >& exp, Node te ){
@@ -257,8 +270,10 @@ void TheoryStrings::explain(TNode literal, std::vector<TNode>& assumptions) {
   TNode atom = polarity ? literal : literal[0];
   unsigned ps = assumptions.size();
   std::vector< TNode > tassumptions;
-  if (atom.getKind() == kind::EQUAL || atom.getKind() == kind::IFF) {
+  if (atom.getKind() == kind::EQUAL) {
     if( atom[0]!=atom[1] ){
+      Assert( hasTerm( atom[0] ) );
+      Assert( hasTerm( atom[1] ) );
       d_equalityEngine.explainEquality(atom[0], atom[1], polarity, tassumptions);
     }
   } else {
@@ -276,6 +291,7 @@ void TheoryStrings::explain(TNode literal, std::vector<TNode>& assumptions) {
 }
 
 Node TheoryStrings::explain( TNode literal ){
+  Debug("strings-explain") << "explain called on " << literal << std::endl;
   std::vector< TNode > assumptions;
   explain( literal, assumptions );
   if( assumptions.empty() ){
@@ -399,7 +415,7 @@ int TheoryStrings::getReduction( int effort, Node n, Node& nr ) {
           std::vector< Node > new_nodes;
           Node res = d_preproc.simplify( n, new_nodes );
           Assert( res!=n );
-          new_nodes.push_back( NodeManager::currentNM()->mkNode( res.getType().isBoolean() ? kind::IFF : kind::EQUAL, res, n ) );
+          new_nodes.push_back( NodeManager::currentNM()->mkNode( kind::EQUAL, res, n ) );
           Node nnlem = new_nodes.size()==1 ? new_nodes[0] : NodeManager::currentNM()->mkNode( kind::AND, new_nodes );
           nnlem = Rewriter::rewrite( nnlem );
           Trace("strings-red-lemma") << "Reduction_" << effort << " lemma : " << nnlem << std::endl;
@@ -436,10 +452,19 @@ void TheoryStrings::presolve() {
 /////////////////////////////////////////////////////////////////////////////
 
 
-void TheoryStrings::collectModelInfo( TheoryModel* m, bool fullModel ) {
-  Trace("strings-model") << "TheoryStrings : Collect model info, fullModel = " << fullModel << std::endl;
+void TheoryStrings::collectModelInfo( TheoryModel* m ) {
+  Trace("strings-model") << "TheoryStrings : Collect model info" << std::endl;
   Trace("strings-model") << "TheoryStrings : assertEqualityEngine." << std::endl;
+  
+  //AJR : no use doing this since we cannot preregister terms with finite types that don't belong to strings.
+  //      change this if we generalize to sequences.
+  //set<Node> termSet;
+  // Compute terms appearing in assertions and shared terms
+  //computeRelevantTerms(termSet);
+  //m->assertEqualityEngine( &d_equalityEngine, &termSet );
+  
   m->assertEqualityEngine( &d_equalityEngine );
+  
   // Generate model
   std::vector< Node > nodes;
   getEquivalenceClasses( nodes );
@@ -618,7 +643,7 @@ void TheoryStrings::preRegisterTerm(TNode n) {
           if( options::stringExp() ){
             //collect extended functions here: some may not be asserted to strings (such as those with return type Int),
             //  but we need to record them so they are treated properly
-            d_extt->registerTermRec( n );       
+            getExtTheory()->registerTermRec( n );
           }
         }
         //concat terms do not contribute to theory combination?  TODO: verify
@@ -771,10 +796,9 @@ bool TheoryStrings::needsCheckLastEffort() {
 void TheoryStrings::checkExtfReductions( int effort ) {
   //standardize this?
   //std::vector< Node > nred;
-  //d_extt->doReductions( effort, nred, false );
+  //getExtTheory()->doReductions( effort, nred, false );
 
-  std::vector< Node > extf;
-  d_extt->getActive( extf );
+  std::vector< Node > extf = getExtTheory()->getActive();
   Trace("strings-process") << "checking " << extf.size() << " active extf" << std::endl;
   for( unsigned i=0; i<extf.size(); i++ ){
     Node n = extf[i];
@@ -783,7 +807,7 @@ void TheoryStrings::checkExtfReductions( int effort ) {
     int ret = getReduction( effort, n, nr );
     Assert( nr.isNull() );
     if( ret!=0 ){
-      d_extt->markReduced( extf[i] );
+      getExtTheory()->markReduced( extf[i] );
       if( options::stringOpt1() && hasProcessed() ){
         return;
       }
@@ -817,11 +841,7 @@ void TheoryStrings::conflict(TNode a, TNode b){
     Debug("strings-conflict") << "Making conflict..." << std::endl;
     d_conflict = true;
     Node conflictNode;
-    if (a.getKind() == kind::CONST_BOOLEAN) {
-      conflictNode = explain( a.iffNode(b) );
-    } else {
-      conflictNode = explain( a.eqNode(b) );
-    }
+    conflictNode = explain( a.eqNode(b) );
     Trace("strings-conflict") << "CONFLICT: Eq engine conflict : " << conflictNode << std::endl;
     d_out->conflict( conflictNode );
   }
@@ -837,7 +857,7 @@ void TheoryStrings::eqNotifyNewClass(TNode t){
     //we care about the length of this string
     registerTerm( t[0], 1 );
   }else{
-    //d_extt->registerTerm( t );
+    //getExtTheory()->registerTerm( t );
   }
 }
 
@@ -886,17 +906,12 @@ void TheoryStrings::addCarePairs( quantifiers::TermArgTrie * t1, quantifiers::Te
           Assert( d_equalityEngine.hasTerm(x) );
           Assert( d_equalityEngine.hasTerm(y) );
           Assert( !d_equalityEngine.areDisequal( x, y, false ) );
+          Assert( !areCareDisequal( x, y ) );
           if( !d_equalityEngine.areEqual( x, y ) ){
             if( d_equalityEngine.isTriggerTerm(x, THEORY_STRINGS) && d_equalityEngine.isTriggerTerm(y, THEORY_STRINGS) ){
               TNode x_shared = d_equalityEngine.getTriggerTermRepresentative(x, THEORY_STRINGS);
               TNode y_shared = d_equalityEngine.getTriggerTermRepresentative(y, THEORY_STRINGS);
-              EqualityStatus eqStatus = d_valuation.getEqualityStatus(x_shared, y_shared);
-              if( eqStatus==EQUALITY_FALSE_AND_PROPAGATED || eqStatus==EQUALITY_FALSE || eqStatus==EQUALITY_FALSE_IN_MODEL ){
-                //an argument is disequal, we are done
-                return;
-              }else{
-                currentPairs.push_back(make_pair(x_shared, y_shared));
-              }
+              currentPairs.push_back(make_pair(x_shared, y_shared));
             }
           }
         }
@@ -920,7 +935,9 @@ void TheoryStrings::addCarePairs( quantifiers::TermArgTrie * t1, quantifiers::Te
         ++it2;
         for( ; it2 != t1->d_data.end(); ++it2 ){
           if( !d_equalityEngine.areDisequal(it->first, it2->first, false) ){
-            addCarePairs( &it->second, &it2->second, arity, depth+1 );
+            if( !areCareDisequal(it->first, it2->first) ){
+              addCarePairs( &it->second, &it2->second, arity, depth+1 );
+            }
           }
         }
       }
@@ -929,7 +946,9 @@ void TheoryStrings::addCarePairs( quantifiers::TermArgTrie * t1, quantifiers::Te
       for( std::map< TNode, quantifiers::TermArgTrie >::iterator it = t1->d_data.begin(); it != t1->d_data.end(); ++it ){
         for( std::map< TNode, quantifiers::TermArgTrie >::iterator it2 = t2->d_data.begin(); it2 != t2->d_data.end(); ++it2 ){
           if( !d_equalityEngine.areDisequal(it->first, it2->first, false) ){
-            addCarePairs( &it->second, &it2->second, arity, depth+1 );
+            if( !areCareDisequal(it->first, it2->first) ){
+              addCarePairs( &it->second, &it2->second, arity, depth+1 );
+            }
           }
         }
       }
@@ -996,11 +1015,11 @@ void TheoryStrings::assertPendingFact(Node atom, bool polarity, Node exp) {
       }
     }
     //register the atom here, since it may not create a new equivalence class
-    //d_extt->registerTerm( atom );
+    //getExtTheory()->registerTerm( atom );
   }
   Trace("strings-pending-debug") << "  Now collect terms" << std::endl;
   //collect extended function terms in the atom
-  d_extt->registerTermRec( atom );
+  getExtTheory()->registerTermRec( atom );
   Trace("strings-pending-debug") << "  Finished collect terms" << std::endl;
 }
 
@@ -1127,9 +1146,9 @@ void TheoryStrings::checkInit() {
                   }
                   //infer the equality
                   sendInference( exp, n.eqNode( nc ), "I_Norm" );
-                }else if( d_extt->hasFunctionKind( n.getKind() ) ){
+                }else if( getExtTheory()->hasFunctionKind( n.getKind() ) ){
                   //mark as congruent : only process if neither has been reduced
-                  d_extt->markCongruent( nc, n );
+                  getExtTheory()->markCongruent( nc, n );
                 }
                 //this node is congruent to another one, we can ignore it
                 Trace("strings-process-debug") << "  congruent term : " << n << std::endl;
@@ -1286,11 +1305,10 @@ void TheoryStrings::checkExtfEval( int effort ) {
   Trace("strings-extf-list") << "Active extended functions, effort=" << effort << " : " << std::endl;
   d_extf_info_tmp.clear();
   bool has_nreduce = false;
-  std::vector< Node > terms; 
+  std::vector< Node > terms = getExtTheory()->getActive();
   std::vector< Node > sterms; 
   std::vector< std::vector< Node > > exp;
-  d_extt->getActive( terms );
-  d_extt->getSubstitutedTerms( effort, terms, sterms, exp );
+  getExtTheory()->getSubstitutedTerms( effort, terms, sterms, exp );
   for( unsigned i=0; i<terms.size(); i++ ){
     Node n = terms[i];
     Node sn = sterms[i];
@@ -1314,7 +1332,7 @@ void TheoryStrings::checkExtfEval( int effort ) {
       //if rewrites to a constant, then do the inference and mark as reduced
       if( nrc.isConst() ){
         if( effort<3 ){
-          d_extt->markReduced( n );
+          getExtTheory()->markReduced( n );
           Trace("strings-extf-debug") << "  resolvable by evaluation..." << std::endl;
           std::vector< Node > exps;
           Trace("strings-extf-debug") << "  get symbolic definition..." << std::endl;
@@ -1374,7 +1392,7 @@ void TheoryStrings::checkExtfEval( int effort ) {
       //if it reduces to a conjunction, infer each and reduce
       }else if( ( nrc.getKind()==kind::OR && itit->second.d_pol==-1 ) || ( nrc.getKind()==kind::AND && itit->second.d_pol==1 ) ){
         Assert( effort<3 );
-        d_extt->markReduced( n );
+        getExtTheory()->markReduced( n );
         itit->second.d_exp.push_back( itit->second.d_pol==-1 ? n.negate() : n );
         Trace("strings-extf-debug") << "  decomposable..." << std::endl;
         Trace("strings-extf") << "  resolve extf : " << sn << " -> " << nrc << ", pol = " << itit->second.d_pol << std::endl;
@@ -1404,7 +1422,7 @@ void TheoryStrings::checkExtfEval( int effort ) {
         }
         Trace("strings-extf-list") << std::endl;
       }  
-      if( d_extt->isActive( n ) && itit->second.d_model_active ){
+      if( getExtTheory()->isActive( n ) && itit->second.d_model_active ){
         has_nreduce = true;
       }
     }
@@ -1436,7 +1454,7 @@ void TheoryStrings::checkExtfInference( Node n, Node nr, ExtfInfoTmp& in, int ef
             children[index] = nr[index][i];
             Node conc = NodeManager::currentNM()->mkNode( kind::STRING_STRCTN, children );
             //can mark as reduced, since model for n => model for conc
-            d_extt->markReduced( conc );
+            getExtTheory()->markReduced( conc );
             sendInference( in.d_exp, in.d_pol==1 ? conc : conc.negate(), "CTN_Decompose" );
           }
           
@@ -1473,7 +1491,7 @@ void TheoryStrings::checkExtfInference( Node n, Node nr, ExtfInfoTmp& in, int ef
           }
         }else{
           Trace("strings-extf-debug") << "  redundant." << std::endl;
-          d_extt->markReduced( n );
+          getExtTheory()->markReduced( n );
         }
       }
     }
@@ -2071,6 +2089,27 @@ void TheoryStrings::normalizeEquivalenceClass( Node eqc ) {
   }
 }
 
+void trackNfExpDependency( std::vector< Node >& nf_exp_n, std::map< Node, std::map< bool, int > >& nf_exp_depend_n, Node exp, int new_val, int new_rev_val ){
+  if( std::find( nf_exp_n.begin(), nf_exp_n.end(), exp )==nf_exp_n.end() ){
+    nf_exp_n.push_back( exp );
+  }
+  for( unsigned k=0; k<2; k++ ){
+    int val = k==0 ? new_val : new_rev_val;
+    std::map< bool, int >::iterator itned = nf_exp_depend_n[exp].find( k==1 );
+    if( itned==nf_exp_depend_n[exp].end() ){
+      Trace("strings-process-debug") << "Deps : set dependency on " << exp << " to " << val << " isRev=" << (k==0) << std::endl;
+      nf_exp_depend_n[exp][k==1] = val;
+    }else{
+      Trace("strings-process-debug") << "Deps : Multiple dependencies on " << exp << " : " << itned->second << " " << val << " isRev=" << (k==0) << std::endl;
+      //if we already have a dependency (in the case of non-linear string equalities), it is min/max
+      bool cmp = val > itned->second;
+      if( cmp==(k==1) ){
+        nf_exp_depend_n[exp][k==1] = val;
+      }
+    }
+  }
+}
+
 void TheoryStrings::getNormalForms( Node &eqc, std::vector< std::vector< Node > > &normal_forms, std::vector< Node > &normal_form_src,
                                     std::vector< std::vector< Node > > &normal_forms_exp, std::vector< std::map< Node, std::map< bool, int > > >& normal_forms_exp_depend ) {
   //constant for equivalence class
@@ -2115,25 +2154,16 @@ void TheoryStrings::getNormalForms( Node &eqc, std::vector< std::vector< Node > 
 
             for( unsigned j=0; j<d_normal_forms_exp[nr].size(); j++ ){
               Node exp = d_normal_forms_exp[nr][j];
-              nf_exp_n.push_back( exp );
               //track depends
-              for( unsigned k=0; k<2; k++ ){
-                int prev_dep = d_normal_forms_exp_depend[nr][exp][k==1];
-                if( k==0 ){
-                  nf_exp_depend_n[exp][false] = orig_size + prev_dep;
-                }else if( k==1 ){
-                  //store forward index (converted back to reverse index below)
-                  nf_exp_depend_n[exp][true] = orig_size + ( add_size - prev_dep );
-                }
-              }
+              trackNfExpDependency( nf_exp_n, nf_exp_depend_n, exp,
+                                    orig_size + d_normal_forms_exp_depend[nr][exp][false], 
+                                    orig_size + ( add_size - d_normal_forms_exp_depend[nr][exp][true] ) );
             }
             if( d_normal_forms_base[nr]!=n[i] ){
               Assert( d_normal_forms_base.find( nr )!=d_normal_forms_base.end() );
               Node eq = n[i].eqNode( d_normal_forms_base[nr] );
-              nf_exp_n.push_back( eq );
-              //track depends
-              nf_exp_depend_n[eq][false] = orig_size;
-              nf_exp_depend_n[eq][true] = orig_size + add_size;
+              //track depends : entire current segment is dependent upon base equality
+              trackNfExpDependency( nf_exp_n, nf_exp_depend_n, eq, orig_size, orig_size + add_size );
             }
           }
           //convert forward indices to reverse indices
@@ -2182,7 +2212,7 @@ void TheoryStrings::getNormalForms( Node &eqc, std::vector< std::vector< Node > 
     normal_forms_exp_depend.push_back( std::map< Node, std::map< bool, int > >() );
   }else{
     if(Trace.isOn("strings-solve")) {
-      Trace("strings-solve") << "--- Normal forms for equivlance class " << eqc << " : " << std::endl;
+      Trace("strings-solve") << "--- Normal forms for equivalance class " << eqc << " : " << std::endl;
       for( unsigned i=0; i<normal_forms.size(); i++ ) {
         Trace("strings-solve") << "#" << i << " (from " << normal_form_src[i] << ") : ";
         for( unsigned j=0; j<normal_forms[i].size(); j++ ) {
@@ -3274,10 +3304,10 @@ void TheoryStrings::sendInference( std::vector< Node >& exp, Node eq, const char
 
 void TheoryStrings::sendLemma( Node ant, Node conc, const char * c ) {
   if( conc.isNull() || conc == d_false ) {
-    d_out->conflict(ant);
     Trace("strings-conflict") << "Strings::Conflict : " << c << " : " << ant << std::endl;
     Trace("strings-lemma") << "Strings::Conflict : " << c << " : " << ant << std::endl;
     Trace("strings-assert") << "(assert (not " << ant << ")) ; conflict " << c << std::endl;
+    d_out->conflict(ant);
     d_conflict = true;
   } else {
     Node lem;
@@ -3521,7 +3551,7 @@ Node TheoryStrings::mkExplain( std::vector< Node >& a, std::vector< Node >& an )
   } else {
     ant = NodeManager::currentNM()->mkNode( kind::AND, antec_exp );
   }
-  ant = Rewriter::rewrite( ant );
+  //ant = Rewriter::rewrite( ant );
   return ant;
 }
 
@@ -3695,9 +3725,32 @@ void TheoryStrings::checkCardinality() {
         card_need++;
       }
       Trace("strings-card") << "Need length " << card_need << " for this number of strings (where alphabet size is " << d_card_size << ")." << std::endl;
-      Node cmp = NodeManager::currentNM()->mkNode( kind::GEQ, lr, NodeManager::currentNM()->mkConst( Rational( card_need ) ) );
-      cmp = Rewriter::rewrite( cmp );
-      if( cmp!=d_true ){
+      //check if we need to split
+      bool needsSplit = true;
+      if( lr.isConst() ){
+        // if constant, compare
+        Node cmp = NodeManager::currentNM()->mkNode( kind::GEQ, lr, NodeManager::currentNM()->mkConst( Rational( card_need ) ) );
+        cmp = Rewriter::rewrite( cmp );
+        needsSplit = cmp!=d_true;
+      }else{
+        // find the minimimum constant that we are unknown to be disequal from, or otherwise stop if we increment such that cardinality does not apply
+        unsigned r=0; 
+        bool success = true;
+        while( r<card_need && success ){
+          Node rr = NodeManager::currentNM()->mkConst<Rational>( Rational(r) );
+          if( areDisequal( rr, lr ) ){
+            r++;
+          }else{
+            success = false;
+          }
+        }
+        if( r>0 ){
+          Trace("strings-card") << "Symbolic length " << lr << " must be at least " << r << " due to constant disequalities." << std::endl;
+        }
+        needsSplit = r<card_need;
+      }
+
+      if( needsSplit ){
         unsigned int int_k = (unsigned int)card_need;
         for( std::vector< Node >::iterator itr1 = cols[i].begin();
             itr1 != cols[i].end(); ++itr1) {
@@ -3940,10 +3993,10 @@ Node TheoryStrings::getMembership( Node n, bool isPos, unsigned i ) {
 
 Node TheoryStrings::mkRegExpAntec(Node atom, Node ant) {
   if(d_regexp_ant.find(atom) == d_regexp_ant.end()) {
-    return Rewriter::rewrite( NodeManager::currentNM()->mkNode(kind::AND, ant, atom) );
+    return NodeManager::currentNM()->mkNode(kind::AND, ant, atom);
   } else {
     Node n = d_regexp_ant[atom];
-    return Rewriter::rewrite( NodeManager::currentNM()->mkNode(kind::AND, ant, n) );
+    return NodeManager::currentNM()->mkNode(kind::AND, ant, n);
   }
 }
 
@@ -4256,15 +4309,17 @@ bool TheoryStrings::checkMemberships2() {
 
 void TheoryStrings::checkMemberships() {
   //add the memberships
-  std::vector< Node > mems;
-  d_extt->getActive( mems, kind::STRING_IN_REGEXP );
-  for( unsigned i=0; i<mems.size(); i++ ){
+  std::vector<Node> mems = getExtTheory()->getActive(kind::STRING_IN_REGEXP);
+  for (unsigned i = 0; i < mems.size(); i++) {
     Node n = mems[i];
     Assert( d_extf_info_tmp.find( n )!=d_extf_info_tmp.end() );
-    Assert( d_extf_info_tmp[n].d_pol==1 || d_extf_info_tmp[n].d_pol==-1 );
-    bool pol = d_extf_info_tmp[n].d_pol==1;
-    Trace("strings-process-debug") << "  add membership : " << n << ", pol = " << pol << std::endl;
-    addMembership( pol ? n : n.negate() );
+    if( d_extf_info_tmp[n].d_pol==1 || d_extf_info_tmp[n].d_pol==-1 ){
+      bool pol = d_extf_info_tmp[n].d_pol==1;
+      Trace("strings-process-debug") << "  add membership : " << n << ", pol = " << pol << std::endl;
+      addMembership( pol ? n : n.negate() );
+    }else{
+      Trace("strings-process-debug") << "  irrelevant (non-asserted) membership : " << n << std::endl;
+    }
   }
 
   bool addedLemma = false;
@@ -4338,6 +4393,7 @@ void TheoryStrings::checkMemberships() {
     for( unsigned i=0; i<d_regexp_memberships.size(); i++ ) {
       //check regular expression membership
       Node assertion = d_regexp_memberships[i];
+      Trace("regexp-debug") << "Check : " << assertion << " " << (d_regexp_ucached.find(assertion) == d_regexp_ucached.end()) << " " << (d_regexp_ccached.find(assertion) == d_regexp_ccached.end()) << std::endl;
       if( d_regexp_ucached.find(assertion) == d_regexp_ucached.end()
         && d_regexp_ccached.find(assertion) == d_regexp_ccached.end() ) {
         Trace("strings-regexp") << "We have regular expression assertion : " << assertion << std::endl;
@@ -4378,7 +4434,7 @@ void TheoryStrings::checkMemberships() {
         }
 
         if( polarity ) {
-          flag = checkPDerivative(x, r, atom, addedLemma, processed, cprocessed, rnfexp);
+          flag = checkPDerivative(x, r, atom, addedLemma, rnfexp);
           if(options::stringOpt2() && flag) {
             if(d_regexp_opr.checkConstRegExp(r) && x.getKind()==kind::STRING_CONCAT) {
               std::vector< std::pair< Node, Node > > vec_can;
@@ -4453,7 +4509,7 @@ void TheoryStrings::checkMemberships() {
                 }
               }
             }
-            antec = Rewriter::rewrite( NodeManager::currentNM()->mkNode(kind::AND, antec, mkExplain(rnfexp)) );
+            antec = NodeManager::currentNM()->mkNode(kind::AND, antec, mkExplain(rnfexp));
             Node conc = nvec.size()==1 ? nvec[0] : NodeManager::currentNM()->mkNode(kind::AND, nvec);
             conc = Rewriter::rewrite(conc);
             sendLemma( antec, conc, "REGEXP_Unfold" );
@@ -4573,17 +4629,18 @@ void TheoryStrings::checkMemberships() {
   if( addedLemma ) {
     if( !d_conflict ){
       for( unsigned i=0; i<processed.size(); i++ ) {
+        Trace("strings-regexp") << "...add " << processed[i] << " to u-cache." << std::endl;
         d_regexp_ucached.insert(processed[i]);
       }
       for( unsigned i=0; i<cprocessed.size(); i++ ) {
+        Trace("strings-regexp") << "...add " << cprocessed[i] << " to c-cache." << std::endl;
         d_regexp_ccached.insert(cprocessed[i]);
       }
     }
   }
 }
 
-bool TheoryStrings::checkPDerivative(Node x, Node r, Node atom, bool &addedLemma,
-  std::vector< Node > &processed, std::vector< Node > &cprocessed, std::vector< Node > &nf_exp) {
+bool TheoryStrings::checkPDerivative( Node x, Node r, Node atom, bool &addedLemma, std::vector< Node > &nf_exp ) {
   
   Node antnf = mkExplain(nf_exp);
 
@@ -4592,7 +4649,7 @@ bool TheoryStrings::checkPDerivative(Node x, Node r, Node atom, bool &addedLemma
     switch(d_regexp_opr.delta(r, exp)) {
       case 0: {
         Node antec = mkRegExpAntec(atom, x.eqNode(d_emptyString));
-        antec = Rewriter::rewrite(NodeManager::currentNM()->mkNode(kind::AND, antec, antnf));
+        antec = NodeManager::currentNM()->mkNode(kind::AND, antec, antnf);
         sendLemma(antec, exp, "RegExp Delta");
         addedLemma = true;
         d_regexp_ccached.insert(atom);
@@ -4604,7 +4661,7 @@ bool TheoryStrings::checkPDerivative(Node x, Node r, Node atom, bool &addedLemma
       }
       case 2: {
         Node antec = mkRegExpAntec(atom, x.eqNode(d_emptyString));
-        antec = Rewriter::rewrite(NodeManager::currentNM()->mkNode(kind::AND, antec, antnf));
+        antec = NodeManager::currentNM()->mkNode(kind::AND, antec, antnf);
         Node conc = Node::null();
         sendLemma(antec, conc, "RegExp Delta CONFLICT");
         addedLemma = true;
@@ -4633,10 +4690,10 @@ bool TheoryStrings::checkPDerivative(Node x, Node r, Node atom, bool &addedLemma
       }
     }*/
     Node sREant = mkRegExpAntec(atom, d_true);
-    sREant = Rewriter::rewrite(NodeManager::currentNM()->mkNode(kind::AND, sREant, antnf));
+    sREant = NodeManager::currentNM()->mkNode(kind::AND, sREant, antnf);
     if(deriveRegExp( x, r, sREant )) {
       addedLemma = true;
-      processed.push_back( atom );
+      d_regexp_ccached.insert(atom);
       return false;
     }
   }

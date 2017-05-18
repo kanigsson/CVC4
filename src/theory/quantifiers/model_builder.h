@@ -29,15 +29,16 @@ namespace quantifiers {
 class QModelBuilder : public TheoryEngineModelBuilder
 {
 protected:
-  //the model we are working with
-  context::CDO< FirstOrderModel* > d_curr_model;
   //quantifiers engine
   QuantifiersEngine* d_qe;
+  bool preProcessBuildModel(TheoryModel* m); //must call preProcessBuildModelStd
+  bool preProcessBuildModelStd(TheoryModel* m);
+  /** number of lemmas generated while building model */
+  unsigned d_addedLemmas;
+  unsigned d_triedLemmas;
 public:
   QModelBuilder( context::Context* c, QuantifiersEngine* qe );
   virtual ~QModelBuilder() throw() {}
-  // is quantifier active?
-  virtual bool isQuantifierActive( Node f );
   //do exhaustive instantiation  
   // 0 :  failed, but resorting to true exhaustive instantiation may work
   // >0 : success
@@ -45,13 +46,13 @@ public:
   virtual int doExhaustiveInstantiation( FirstOrderModel * fm, Node f, int effort ) { return false; }
   //whether to construct model
   virtual bool optUseModel();
-  /** number of lemmas generated while building model */
-  int d_addedLemmas;
-  int d_triedLemmas;
   /** exist instantiation ? */
   virtual bool existsInstantiation( Node f, InstMatch& m, bool modEq = true, bool modInst = false ) { return false; }
   //debug model
-  void debugModel( FirstOrderModel* fm );
+  virtual void debugModel( TheoryModel* m );
+  //statistics 
+  unsigned getNumAddedLemmas() { return d_addedLemmas; }
+  unsigned getNumTriedLemmas() { return d_triedLemmas; }
 };
 
 
@@ -87,9 +88,7 @@ protected:
   //whether inst gen was done
   bool d_didInstGen;
   /** process build model */
-  virtual void processBuildModel( TheoryModel* m, bool fullModel );
-  /** get current model value */
-  Node getCurrentUfModelValue( FirstOrderModel* fm, Node n, std::vector< Node > & args, bool partial );
+  virtual bool processBuildModel( TheoryModel* m );
 protected:
   //reset
   virtual void reset( FirstOrderModel* fm ) = 0;
@@ -105,7 +104,7 @@ protected:
   virtual void constructModelUf( FirstOrderModel* fm, Node op ) = 0;
 protected:
   //map from quantifiers to if are SAT
-  std::map< Node, bool > d_quant_sat;
+  //std::map< Node, bool > d_quant_sat;
   //which quantifiers have been initialized
   std::map< Node, bool > d_quant_basis_match_added;
   //map from quantifiers to model basis match
@@ -132,8 +131,6 @@ public:
     ~Statistics();
   };
   Statistics d_statistics;
-  // is term active
-  bool isTermActive( Node n );
   // is term selected
   virtual bool isTermSelected( Node n ) { return false; }
   /** quantifier has inst-gen definition */

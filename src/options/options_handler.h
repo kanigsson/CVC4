@@ -27,7 +27,6 @@
 #include "options/arith_propagation_mode.h"
 #include "options/arith_unate_lemma_mode.h"
 #include "options/base_handlers.h"
-#include "options/boolean_term_conversion_mode.h"
 #include "options/bv_bitblast_mode.h"
 #include "options/decision_mode.h"
 #include "options/language.h"
@@ -104,6 +103,7 @@ public:
   theory::quantifiers::MacrosQuantMode stringToMacrosQuantMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::QuantDSplitMode stringToQuantDSplitMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::QuantRepMode stringToQuantRepMode(std::string option, std::string optarg) throw(OptionException);
+  theory::quantifiers::FmfBoundMinMode stringToFmfBoundMinMode(std::string option, std::string optarg) throw(OptionException);
 
   // theory/bv/options_handlers.h
   void abcEnabledBuild(std::string option, bool value) throw(OptionException);
@@ -117,10 +117,6 @@ public:
 
   theory::bv::SatSolverMode stringToSatSolver(std::string option, std::string optarg) throw(OptionException);
     
-
-  // theory/booleans/options_handlers.h
-  theory::booleans::BooleanTermConversionMode stringToBooleanTermConversionMode(std::string option, std::string optarg) throw(OptionException);
-
   // theory/uf/options_handlers.h
   theory::uf::UfssMode stringToUfssMode(std::string option, std::string optarg) throw(OptionException);
 
@@ -225,6 +221,7 @@ public:
   static const std::string s_triggerActiveSelModeHelp;
   static const std::string s_ufssModeHelp;
   static const std::string s_userPatModeHelp;
+  static const std::string s_fmfBoundMinModeModeHelp;
   static const std::string s_errorSelectionRulesHelp;
   static const std::string s_arithPropagationModeHelp;
   static const std::string s_arithUnateLemmasHelp;

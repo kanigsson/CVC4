@@ -83,6 +83,8 @@ namespace inferbounds {
 }
 class InferBoundsResult;
 
+class NonlinearExtension;
+
 /**
  * Implementation of QF_LRA.
  * Based upon:
@@ -127,8 +129,6 @@ private:
   /** Static learner. */
   ArithStaticLearner d_learner;
 
-  /** quantifiers engine */
-  QuantifiersEngine * d_quantEngine;
   //std::vector<ArithVar> d_pool;
 public:
   void releaseArithVar(ArithVar v);
@@ -373,6 +373,9 @@ private:
   FCSimplexDecisionProcedure d_fcSimplex;
   SumOfInfeasibilitiesSPD d_soiSimplex;
   AttemptSolutionSDP d_attemptSolSimplex;
+  
+  /** non-linear algebraic approach */
+  NonlinearExtension * d_nonlinearExtension;
 
   bool solveRealRelaxation(Theory::Effort effortLevel);
 
@@ -398,20 +401,21 @@ private:
     virtual ~ModelException() throw ();
   };
 
-  /** Internal model value for the node */
-  DeltaRational getDeltaValue(TNode n) const throw (DeltaRationalException, ModelException);
-
-  /** Uninterpretted function symbol for use when interpreting
-   * division by zero.
+  /**
+   * Computes the delta rational value of a term from the current partial
+   * model. This returns the delta value assignment to the term if it is in the
+   * partial model. Otherwise, this is computed recursively for arithmetic terms
+   * from each subterm.
+   *
+   * This throws a DeltaRationalException if the value cannot be represented as
+   * a DeltaRational. This throws a ModelException if there is a term is not in
+   * the partial model and is not a theory of arithmetic term.
+   *
+   * precondition: The linear abstraction of the nodes must be satisfiable.
    */
-  Node d_realDivideBy0Func;
-  Node d_intDivideBy0Func;
-  Node d_intModulusBy0Func;
-  Node getRealDivideBy0Func();
-  Node getIntDivideBy0Func();
-  Node getIntModulusBy0Func();
+  DeltaRational getDeltaValue(TNode term) const
+      throw(DeltaRationalException, ModelException);
 
-  Node definingIteForDivLike(Node divLike);
   Node axiomIteForTotalDivision(Node div_tot);
   Node axiomIteForTotalIntDivision(Node int_div_like);
 
@@ -432,13 +436,15 @@ public:
   void setQuantifiersEngine(QuantifiersEngine* qe);
 
   void check(Theory::Effort e);
+  bool needsCheckLastEffort();
   void propagate(Theory::Effort e);
   Node explain(TNode n);
-
+  bool getCurrentSubstitution( int effort, std::vector< Node >& vars, std::vector< Node >& subs, std::map< Node, std::vector< Node > >& exp );
+  bool isExtfReduced( int effort, Node n, Node on, std::vector< Node >& exp );
 
   Rational deltaValueForTotalOrder() const;
 
-  void collectModelInfo( TheoryModel* m, bool fullModel );
+  void collectModelInfo( TheoryModel* m );
 
   void shutdown(){ }
 

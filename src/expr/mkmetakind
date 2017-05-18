@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # mkmetakind
 # Morgan Deters <mdeters@cs.nyu.edu> for CVC4
@@ -300,6 +300,15 @@ struct ConstantMapReverse< ::CVC4::kind::$1 > {
     std::allocator< $2 >().destroy(reinterpret_cast< $2* >(nv->d_children));
     break;
 "
+}
+
+function nullaryoperator {
+  # nullaryoperator K ["comment"]
+
+  lineno=${BASH_LINENO[0]}
+
+  check_theory_seen
+  register_metakind NULLARY_OPERATOR "$1" 0
 }
 
 function registerOperatorToKind {
