@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -657,7 +658,12 @@ TESTS = \
   csp-prefix-exp-bug.smt2 \
   cmu-substr-rw.smt2 \
   gm-inc-071516-2.smt2 \
-  cmu-inc-nlpp-071516.smt2
+  cmu-inc-nlpp-071516.smt2 \
+  strings-index-empty.smt2 \
+  bug768.smt2 \
+  username_checker_min.smt2 \
+  repl-empty-sem.smt2 \
+  bug799-min.smt2
 
 FAILING_TESTS = 
 
@@ -1302,6 +1308,41 @@ gm-inc-071516-2.smt2.log: gm-inc-071516-2.smt2
 cmu-inc-nlpp-071516.smt2.log: cmu-inc-nlpp-071516.smt2
 	@p='cmu-inc-nlpp-071516.smt2'; \
 	b='cmu-inc-nlpp-071516.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+strings-index-empty.smt2.log: strings-index-empty.smt2
+	@p='strings-index-empty.smt2'; \
+	b='strings-index-empty.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug768.smt2.log: bug768.smt2
+	@p='bug768.smt2'; \
+	b='bug768.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+username_checker_min.smt2.log: username_checker_min.smt2
+	@p='username_checker_min.smt2'; \
+	b='username_checker_min.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+repl-empty-sem.smt2.log: repl-empty-sem.smt2
+	@p='repl-empty-sem.smt2'; \
+	b='repl-empty-sem.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug799-min.smt2.log: bug799-min.smt2
+	@p='bug799-min.smt2'; \
+	b='bug799-min.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

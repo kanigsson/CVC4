@@ -78,7 +78,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = test/regress/regress0/arith
+subdir = test/regress/regress0/nl
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/test-driver
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -644,7 +644,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 zz_cvc4_use_personal_make_rules = @zz_cvc4_use_personal_make_rules@
-SUBDIRS = . integers
+SUBDIRS = .
 @mk_empty@BINARY = cvc4
 LOG_COMPILER = @srcdir@/../../run_regression
 AM_LOG_FLAGS = $(RUN_REGRESSION_ARGS) @abs_top_builddir@/src/main/$(BINARY)$(EXEEXT)
@@ -654,47 +654,38 @@ MAKEFLAGS = -k
 # If a test shouldn't be run in e.g. competition mode,
 # put it below in "TESTS +="
 TESTS = \
-	arith.01.cvc \
-	arith.02.cvc \
-	arith.03.cvc \
-	delta-minimized-row-vector-bug.smt \
-	fuzz_3-eq.smt \
-	leq.01.smt \
-	mod.01.smt2 \
-	mod.02.smt2 \
-	mod.03.smt2 \
-	div.01.smt2 \
-	div.02.smt2 \
-	div.03.smt2 \
-	div.04.smt2 \
-	div.05.smt2 \
-	div.06.smt2 \
-	div.07.smt2 \
-	div.08.smt2 \
-	mult.01.smt2 \
-	mult.02.smt2 \
-	bug443.delta01.smt \
-	miplib.cvc \
-	miplib2.cvc \
-	miplib3.cvc \
-	miplib4.cvc \
-	miplibtrick.smt \
-	bug547.1.smt2 \
-	bug547.2.smt2 \
-	bug569.smt2 \
-	div.09.smt2 \
-	bug716.0.smt2 \
-	bug716.1.cvc
+  quant-nl.smt2 \
+  dist-big.smt2 \
+  simple-mono.smt2 \
+  coeff-sat.smt2 \
+  combine.smt2 \
+  magnitude-wrong-1020-m.smt2 \
+  nl-unk-quant.smt2 \
+  mult-po.smt2 \
+  very-simple-unsat.smt2 \
+  subs0-unsat-confirm.smt2 \
+  simple-mono-unsat.smt2 \
+  ones.smt2 \
+  metitarski_3_4_2e.smt2 \
+  metitarski-1025.smt2 \
+  poly-1025.smt2 \
+  very-easy-sat.smt2 \
+  coeff-unsat.smt2 \
+  coeff-unsat-base.smt2 \
+  red-exp.smt2 \
+  zero-subset.smt2 \
+  nia-wrong-tl.smt2 \
+  nl-help-unsat-quant.smt2 \
+  metitarski-3-4.smt2 \
+  rewriting-sums.smt2 \
+  disj-eval.smt2 \
+  bug698.smt2  \
+  real-div-ufnra.smt2 \
+  div-mod-partial.smt2
 
-#	problem__003.smt2
-EXTRA_DIST = $(TESTS) \
-	miplib-opt1217--27.smt \
-	miplib-opt1217--27.smt2 \
-	miplib-pp08a-3000.smt \
-	miplib-pp08a-3000.smt2 \
-	miplib-opt1217--27.smt.expect \
-	miplib-pp08a-3000.smt.expect
 
+# unsolved : garbage_collect.cvc
+EXTRA_DIST = $(TESTS)
 all: all-recursive
 
 .SUFFIXES:
@@ -708,9 +699,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu test/regress/regress0/arith/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu test/regress/regress0/nl/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu test/regress/regress0/arith/Makefile
+	  $(AUTOMAKE) --gnu test/regress/regress0/nl/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -976,219 +967,198 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-arith.01.cvc.log: arith.01.cvc
-	@p='arith.01.cvc'; \
-	b='arith.01.cvc'; \
+quant-nl.smt2.log: quant-nl.smt2
+	@p='quant-nl.smt2'; \
+	b='quant-nl.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-arith.02.cvc.log: arith.02.cvc
-	@p='arith.02.cvc'; \
-	b='arith.02.cvc'; \
+dist-big.smt2.log: dist-big.smt2
+	@p='dist-big.smt2'; \
+	b='dist-big.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-arith.03.cvc.log: arith.03.cvc
-	@p='arith.03.cvc'; \
-	b='arith.03.cvc'; \
+simple-mono.smt2.log: simple-mono.smt2
+	@p='simple-mono.smt2'; \
+	b='simple-mono.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-delta-minimized-row-vector-bug.smt.log: delta-minimized-row-vector-bug.smt
-	@p='delta-minimized-row-vector-bug.smt'; \
-	b='delta-minimized-row-vector-bug.smt'; \
+coeff-sat.smt2.log: coeff-sat.smt2
+	@p='coeff-sat.smt2'; \
+	b='coeff-sat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fuzz_3-eq.smt.log: fuzz_3-eq.smt
-	@p='fuzz_3-eq.smt'; \
-	b='fuzz_3-eq.smt'; \
+combine.smt2.log: combine.smt2
+	@p='combine.smt2'; \
+	b='combine.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-leq.01.smt.log: leq.01.smt
-	@p='leq.01.smt'; \
-	b='leq.01.smt'; \
+magnitude-wrong-1020-m.smt2.log: magnitude-wrong-1020-m.smt2
+	@p='magnitude-wrong-1020-m.smt2'; \
+	b='magnitude-wrong-1020-m.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-mod.01.smt2.log: mod.01.smt2
-	@p='mod.01.smt2'; \
-	b='mod.01.smt2'; \
+nl-unk-quant.smt2.log: nl-unk-quant.smt2
+	@p='nl-unk-quant.smt2'; \
+	b='nl-unk-quant.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-mod.02.smt2.log: mod.02.smt2
-	@p='mod.02.smt2'; \
-	b='mod.02.smt2'; \
+mult-po.smt2.log: mult-po.smt2
+	@p='mult-po.smt2'; \
+	b='mult-po.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-mod.03.smt2.log: mod.03.smt2
-	@p='mod.03.smt2'; \
-	b='mod.03.smt2'; \
+very-simple-unsat.smt2.log: very-simple-unsat.smt2
+	@p='very-simple-unsat.smt2'; \
+	b='very-simple-unsat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.01.smt2.log: div.01.smt2
-	@p='div.01.smt2'; \
-	b='div.01.smt2'; \
+subs0-unsat-confirm.smt2.log: subs0-unsat-confirm.smt2
+	@p='subs0-unsat-confirm.smt2'; \
+	b='subs0-unsat-confirm.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.02.smt2.log: div.02.smt2
-	@p='div.02.smt2'; \
-	b='div.02.smt2'; \
+simple-mono-unsat.smt2.log: simple-mono-unsat.smt2
+	@p='simple-mono-unsat.smt2'; \
+	b='simple-mono-unsat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.03.smt2.log: div.03.smt2
-	@p='div.03.smt2'; \
-	b='div.03.smt2'; \
+ones.smt2.log: ones.smt2
+	@p='ones.smt2'; \
+	b='ones.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.04.smt2.log: div.04.smt2
-	@p='div.04.smt2'; \
-	b='div.04.smt2'; \
+metitarski_3_4_2e.smt2.log: metitarski_3_4_2e.smt2
+	@p='metitarski_3_4_2e.smt2'; \
+	b='metitarski_3_4_2e.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.05.smt2.log: div.05.smt2
-	@p='div.05.smt2'; \
-	b='div.05.smt2'; \
+metitarski-1025.smt2.log: metitarski-1025.smt2
+	@p='metitarski-1025.smt2'; \
+	b='metitarski-1025.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.06.smt2.log: div.06.smt2
-	@p='div.06.smt2'; \
-	b='div.06.smt2'; \
+poly-1025.smt2.log: poly-1025.smt2
+	@p='poly-1025.smt2'; \
+	b='poly-1025.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.07.smt2.log: div.07.smt2
-	@p='div.07.smt2'; \
-	b='div.07.smt2'; \
+very-easy-sat.smt2.log: very-easy-sat.smt2
+	@p='very-easy-sat.smt2'; \
+	b='very-easy-sat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.08.smt2.log: div.08.smt2
-	@p='div.08.smt2'; \
-	b='div.08.smt2'; \
+coeff-unsat.smt2.log: coeff-unsat.smt2
+	@p='coeff-unsat.smt2'; \
+	b='coeff-unsat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-mult.01.smt2.log: mult.01.smt2
-	@p='mult.01.smt2'; \
-	b='mult.01.smt2'; \
+coeff-unsat-base.smt2.log: coeff-unsat-base.smt2
+	@p='coeff-unsat-base.smt2'; \
+	b='coeff-unsat-base.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-mult.02.smt2.log: mult.02.smt2
-	@p='mult.02.smt2'; \
-	b='mult.02.smt2'; \
+red-exp.smt2.log: red-exp.smt2
+	@p='red-exp.smt2'; \
+	b='red-exp.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug443.delta01.smt.log: bug443.delta01.smt
-	@p='bug443.delta01.smt'; \
-	b='bug443.delta01.smt'; \
+zero-subset.smt2.log: zero-subset.smt2
+	@p='zero-subset.smt2'; \
+	b='zero-subset.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-miplib.cvc.log: miplib.cvc
-	@p='miplib.cvc'; \
-	b='miplib.cvc'; \
+nia-wrong-tl.smt2.log: nia-wrong-tl.smt2
+	@p='nia-wrong-tl.smt2'; \
+	b='nia-wrong-tl.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-miplib2.cvc.log: miplib2.cvc
-	@p='miplib2.cvc'; \
-	b='miplib2.cvc'; \
+nl-help-unsat-quant.smt2.log: nl-help-unsat-quant.smt2
+	@p='nl-help-unsat-quant.smt2'; \
+	b='nl-help-unsat-quant.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-miplib3.cvc.log: miplib3.cvc
-	@p='miplib3.cvc'; \
-	b='miplib3.cvc'; \
+metitarski-3-4.smt2.log: metitarski-3-4.smt2
+	@p='metitarski-3-4.smt2'; \
+	b='metitarski-3-4.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-miplib4.cvc.log: miplib4.cvc
-	@p='miplib4.cvc'; \
-	b='miplib4.cvc'; \
+rewriting-sums.smt2.log: rewriting-sums.smt2
+	@p='rewriting-sums.smt2'; \
+	b='rewriting-sums.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-miplibtrick.smt.log: miplibtrick.smt
-	@p='miplibtrick.smt'; \
-	b='miplibtrick.smt'; \
+disj-eval.smt2.log: disj-eval.smt2
+	@p='disj-eval.smt2'; \
+	b='disj-eval.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug547.1.smt2.log: bug547.1.smt2
-	@p='bug547.1.smt2'; \
-	b='bug547.1.smt2'; \
+bug698.smt2.log: bug698.smt2
+	@p='bug698.smt2'; \
+	b='bug698.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug547.2.smt2.log: bug547.2.smt2
-	@p='bug547.2.smt2'; \
-	b='bug547.2.smt2'; \
+real-div-ufnra.smt2.log: real-div-ufnra.smt2
+	@p='real-div-ufnra.smt2'; \
+	b='real-div-ufnra.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug569.smt2.log: bug569.smt2
-	@p='bug569.smt2'; \
-	b='bug569.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-div.09.smt2.log: div.09.smt2
-	@p='div.09.smt2'; \
-	b='div.09.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug716.0.smt2.log: bug716.0.smt2
-	@p='bug716.0.smt2'; \
-	b='bug716.0.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug716.1.cvc.log: bug716.1.cvc
-	@p='bug716.1.cvc'; \
-	b='bug716.1.cvc'; \
+div-mod-partial.smt2.log: div-mod-partial.smt2
+	@p='div-mod-partial.smt2'; \
+	b='div-mod-partial.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1389,17 +1359,7 @@ uninstall-am:
 @mk_if@eq ($(BINARY),)
 end@mk_if@
 
-#if CVC4_BUILD_PROFILE_COMPETITION
-#else
-#TESTS += \
-#	error.cvc
-#endif
-#
-# and make sure to distribute it
-#EXTRA_DIST += \
-#	error.cvc
-
-# synonyms for "check" in this directory
+# synonyms for "check"
 .PHONY: regress regress0 test
 regress regress0 test: check
 

@@ -424,6 +424,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -678,7 +679,10 @@ BUG_TESTS = \
   bug674.smt2 \
   inc-double-u.smt2 \
   fmf-fun-dbu.smt2 \
-  inc-define.smt2
+  inc-define.smt2 \
+  bug765.smt2 \
+  bug691.smt2 \
+  bug694-Unapply1.scala-0.smt2
 
 EXTRA_DIST = $(TESTS) \
 	bug216.smt2.expect \
@@ -1094,6 +1098,27 @@ fmf-fun-dbu.smt2.log: fmf-fun-dbu.smt2
 inc-define.smt2.log: inc-define.smt2
 	@p='inc-define.smt2'; \
 	b='inc-define.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug765.smt2.log: bug765.smt2
+	@p='bug765.smt2'; \
+	b='bug765.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug691.smt2.log: bug691.smt2
+	@p='bug691.smt2'; \
+	b='bug691.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug694-Unapply1.scala-0.smt2.log: bug694-Unapply1.scala-0.smt2
+	@p='bug694-Unapply1.scala-0.smt2'; \
+	b='bug694-Unapply1.scala-0.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

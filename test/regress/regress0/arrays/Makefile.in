@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -622,7 +623,9 @@ TESTS = \
 	constarr.cvc \
 	constarr2.cvc \
 	constarr3.cvc \
-	parsing_ringer.cvc
+	parsing_ringer.cvc \
+	bug637.delta.smt2 \
+	bool-array.smt2
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -1019,6 +1022,20 @@ constarr3.cvc.log: constarr3.cvc
 parsing_ringer.cvc.log: parsing_ringer.cvc
 	@p='parsing_ringer.cvc'; \
 	b='parsing_ringer.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug637.delta.smt2.log: bug637.delta.smt2
+	@p='bug637.delta.smt2'; \
+	b='bug637.delta.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bool-array.smt2.log: bool-array.smt2
+	@p='bool-array.smt2'; \
+	b='bool-array.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

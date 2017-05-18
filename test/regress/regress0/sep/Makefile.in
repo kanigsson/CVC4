@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -630,7 +631,8 @@ TESTS = \
   emp2-quant-unsat.smt2 \
   dispose-1.smt2 \
   finite-witness-sat.smt2 \
-  sep-fmf-priority.smt2
+  sep-fmf-priority.smt2 \
+  nil-no-elim.smt2
 
 FAILING_TESTS = 
 # loop-1220.smt2 (slow)
@@ -1090,6 +1092,13 @@ finite-witness-sat.smt2.log: finite-witness-sat.smt2
 sep-fmf-priority.smt2.log: sep-fmf-priority.smt2
 	@p='sep-fmf-priority.smt2'; \
 	b='sep-fmf-priority.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nil-no-elim.smt2.log: nil-no-elim.smt2
+	@p='nil-no-elim.smt2'; \
+	b='nil-no-elim.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

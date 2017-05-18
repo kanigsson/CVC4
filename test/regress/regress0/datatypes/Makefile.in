@@ -426,6 +426,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -672,7 +673,12 @@ TESTS = tuple.cvc tuple-model.cvc tuple-record-bug.cvc rec1.cvc \
 	cdt-non-canon-stream.smt2 stream-singleton.smt2 is_test.smt2 \
 	bug625.smt2 cdt-model-cade15.smt2 sc-cdt1.smt2 \
 	conqueue-dt-enum-iloop.smt2 coda_simp_model.smt2 \
-	Test1-tup-mp.cvc $(am__append_1)
+	Test1-tup-mp.cvc dt-param-card4-unsat.smt2 \
+	dt-param-card4-bool-sat.smt2 bug604.smt2 bug597-rbt.smt2 \
+	example-dailler-min.smt2 dt-2.6.smt2 dt-sel-2.6.smt2 \
+	dt-param-2.6.smt2 dt-color-2.6.smt2 \
+	dt-match-pat-param-2.6.smt2 tuple-no-clash.cvc jsat-2.6.smt2 \
+	$(am__append_1)
 FAILING_TESTS = \
 	datatype-dump.cvc
 
@@ -1301,6 +1307,90 @@ coda_simp_model.smt2.log: coda_simp_model.smt2
 Test1-tup-mp.cvc.log: Test1-tup-mp.cvc
 	@p='Test1-tup-mp.cvc'; \
 	b='Test1-tup-mp.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-param-card4-unsat.smt2.log: dt-param-card4-unsat.smt2
+	@p='dt-param-card4-unsat.smt2'; \
+	b='dt-param-card4-unsat.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-param-card4-bool-sat.smt2.log: dt-param-card4-bool-sat.smt2
+	@p='dt-param-card4-bool-sat.smt2'; \
+	b='dt-param-card4-bool-sat.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug604.smt2.log: bug604.smt2
+	@p='bug604.smt2'; \
+	b='bug604.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug597-rbt.smt2.log: bug597-rbt.smt2
+	@p='bug597-rbt.smt2'; \
+	b='bug597-rbt.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+example-dailler-min.smt2.log: example-dailler-min.smt2
+	@p='example-dailler-min.smt2'; \
+	b='example-dailler-min.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-2.6.smt2.log: dt-2.6.smt2
+	@p='dt-2.6.smt2'; \
+	b='dt-2.6.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-sel-2.6.smt2.log: dt-sel-2.6.smt2
+	@p='dt-sel-2.6.smt2'; \
+	b='dt-sel-2.6.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-param-2.6.smt2.log: dt-param-2.6.smt2
+	@p='dt-param-2.6.smt2'; \
+	b='dt-param-2.6.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-color-2.6.smt2.log: dt-color-2.6.smt2
+	@p='dt-color-2.6.smt2'; \
+	b='dt-color-2.6.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+dt-match-pat-param-2.6.smt2.log: dt-match-pat-param-2.6.smt2
+	@p='dt-match-pat-param-2.6.smt2'; \
+	b='dt-match-pat-param-2.6.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tuple-no-clash.cvc.log: tuple-no-clash.cvc
+	@p='tuple-no-clash.cvc'; \
+	b='tuple-no-clash.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+jsat-2.6.smt2.log: jsat-2.6.smt2
+	@p='jsat-2.6.smt2'; \
+	b='jsat-2.6.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

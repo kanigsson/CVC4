@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -587,6 +588,7 @@ zz_cvc4_use_personal_make_rules = @zz_cvc4_use_personal_make_rules@
 @mk_empty@BINARY = cvc4
 LOG_COMPILER = @srcdir@/../../run_regression
 AM_LOG_FLAGS = $(RUN_REGRESSION_ARGS) @abs_top_builddir@/src/main/$(BINARY)$(EXEEXT)
+MAKEFLAGS = -k
 
 # These are run for all build profiles.
 # If a test shouldn't be run in e.g. competition mode,
@@ -966,6 +968,9 @@ uninstall-am:
 # don't override a BINARY imported from a personal.mk
 @mk_if@eq ($(BINARY),)
 end@mk_if@
+
+override CVC4_REGRESSION_ARGS += --rewrite-rules
+export CVC4_REGRESSION_ARGS
 
 # synonyms for "check" in this directory
 .PHONY: regress regress1 test

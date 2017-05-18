@@ -81,6 +81,7 @@ target_triplet = @target@
 TESTS = $(SMT_TESTS) $(SMT2_TESTS) $(CVC_TESTS) $(am__EXEEXT_1) \
 	$(BUG_TESTS) $(am__append_1)
 @CVC4_BUILD_PROFILE_COMPETITION_FALSE@am__append_1 = \
+@CVC4_BUILD_PROFILE_COMPETITION_FALSE@	bug681.smt2 \
 @CVC4_BUILD_PROFILE_COMPETITION_FALSE@	error.cvc \
 @CVC4_BUILD_PROFILE_COMPETITION_FALSE@	errorcrash.smt2 \
 @CVC4_BUILD_PROFILE_COMPETITION_FALSE@	arrayinuf_error.smt2
@@ -430,6 +431,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -650,7 +652,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 zz_cvc4_use_personal_make_rules = @zz_cvc4_use_personal_make_rules@
-SUBDIRS = . arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep
+SUBDIRS = . expect arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep nl
 DIST_SUBDIRS = $(SUBDIRS)
 @mk_empty@BINARY = cvc4
 LOG_COMPILER = @srcdir@/../run_regression
@@ -752,7 +754,13 @@ CVC_TESTS = \
 	wiki.21.cvc \
 	queries0.cvc \
 	trim.cvc \
-	print_lambda.cvc 
+	print_lambda.cvc \
+	cvc3.userdoc.01.cvc \
+	cvc3.userdoc.02.cvc \
+	cvc3.userdoc.03.cvc \
+	cvc3.userdoc.04.cvc \
+	cvc3.userdoc.05.cvc \
+	cvc3.userdoc.06.cvc
 
 
 # Regression tests for TPTP inputs
@@ -813,13 +821,17 @@ BUG_TESTS = \
 	bug595.cvc \
 	bug596.cvc \
 	bug596b.cvc \
-	bug605.cvc
+	bug605.cvc \
+	bt-test-00.smt2 \
+	bt-test-01.smt2
 
 
 # bug512 -- taking too long, --time-per not working perhaps? in any case,
 # we have a minimized version still getting tested
+# bug639 -- still fails, reopened bug
 DISABLED_TESTS = \
-	bug512.smt2
+	bug512.smt2 \
+	bug639.smt2
 
 
 # and make sure to distribute it
@@ -1681,6 +1693,48 @@ print_lambda.cvc.log: print_lambda.cvc
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cvc3.userdoc.01.cvc.log: cvc3.userdoc.01.cvc
+	@p='cvc3.userdoc.01.cvc'; \
+	b='cvc3.userdoc.01.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cvc3.userdoc.02.cvc.log: cvc3.userdoc.02.cvc
+	@p='cvc3.userdoc.02.cvc'; \
+	b='cvc3.userdoc.02.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cvc3.userdoc.03.cvc.log: cvc3.userdoc.03.cvc
+	@p='cvc3.userdoc.03.cvc'; \
+	b='cvc3.userdoc.03.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cvc3.userdoc.04.cvc.log: cvc3.userdoc.04.cvc
+	@p='cvc3.userdoc.04.cvc'; \
+	b='cvc3.userdoc.04.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cvc3.userdoc.05.cvc.log: cvc3.userdoc.05.cvc
+	@p='cvc3.userdoc.05.cvc'; \
+	b='cvc3.userdoc.05.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cvc3.userdoc.06.cvc.log: cvc3.userdoc.06.cvc
+	@p='cvc3.userdoc.06.cvc'; \
+	b='cvc3.userdoc.06.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 smt2output.smt2.log: smt2output.smt2
 	@p='smt2output.smt2'; \
 	b='smt2output.smt2'; \
@@ -2055,6 +2109,27 @@ bug596b.cvc.log: bug596b.cvc
 bug605.cvc.log: bug605.cvc
 	@p='bug605.cvc'; \
 	b='bug605.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bt-test-00.smt2.log: bt-test-00.smt2
+	@p='bt-test-00.smt2'; \
+	b='bt-test-00.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bt-test-01.smt2.log: bt-test-01.smt2
+	@p='bt-test-01.smt2'; \
+	b='bt-test-01.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug681.smt2.log: bug681.smt2
+	@p='bug681.smt2'; \
+	b='bug681.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -592,7 +593,8 @@ AM_LOG_FLAGS = $(RUN_REGRESSION_ARGS) @abs_top_builddir@/src/main/$(BINARY)$(EXE
 # If a test shouldn't be run in e.g. competition mode,
 # put it below in "TESTS +="
 TESTS = \
-	hd-sdiv.sy
+	hd-sdiv.sy \
+	stopwatch-bt.sy
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -786,6 +788,13 @@ recheck: all
 hd-sdiv.sy.log: hd-sdiv.sy
 	@p='hd-sdiv.sy'; \
 	b='hd-sdiv.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+stopwatch-bt.sy.log: stopwatch-bt.sy
+	@p='stopwatch-bt.sy'; \
+	b='stopwatch-bt.sy'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

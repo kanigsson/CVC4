@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -593,7 +594,9 @@ AM_LOG_FLAGS = $(RUN_REGRESSION_ARGS) @abs_top_builddir@/src/main/$(BINARY)$(EXE
 # put it below in "TESTS +="
 TESTS = \
 	cmu-5042-0707-2.smt2 \
-	cmu-dis-0707-3.smt2
+	cmu-dis-0707-3.smt2 \
+	cmu-prereg-fmf.smt2 \
+	cmu-repl-len-nterm.smt2
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -794,6 +797,20 @@ cmu-5042-0707-2.smt2.log: cmu-5042-0707-2.smt2
 cmu-dis-0707-3.smt2.log: cmu-dis-0707-3.smt2
 	@p='cmu-dis-0707-3.smt2'; \
 	b='cmu-dis-0707-3.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cmu-prereg-fmf.smt2.log: cmu-prereg-fmf.smt2
+	@p='cmu-prereg-fmf.smt2'; \
+	b='cmu-prereg-fmf.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cmu-repl-len-nterm.smt2.log: cmu-repl-len-nterm.smt2
+	@p='cmu-repl-len-nterm.smt2'; \
+	b='cmu-repl-len-nterm.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

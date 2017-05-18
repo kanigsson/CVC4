@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -624,7 +625,8 @@ TESTS = \
 	cnf-iff-base.smt2 \
 	cnf-ite.smt2 \
 	cnf-and-neg.smt2 \
-	cnf_abc.smt2
+	cnf_abc.smt2 \
+	bool-pred-nested.smt2
 
 EXTRA_DIST = $(TESTS) \
 	mkpidgeon
@@ -1037,6 +1039,13 @@ cnf-and-neg.smt2.log: cnf-and-neg.smt2
 cnf_abc.smt2.log: cnf_abc.smt2
 	@p='cnf_abc.smt2'; \
 	b='cnf_abc.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bool-pred-nested.smt2.log: bool-pred-nested.smt2
+	@p='bool-pred-nested.smt2'; \
+	b='bool-pred-nested.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

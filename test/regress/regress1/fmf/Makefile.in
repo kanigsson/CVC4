@@ -364,6 +364,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -592,7 +593,8 @@ AM_LOG_FLAGS = $(RUN_REGRESSION_ARGS) @abs_top_builddir@/src/main/$(BINARY)$(EXE
 # If a test shouldn't be run in e.g. competition mode,
 # put it below in "TESTS +="
 TESTS = \
-	ForElimination-scala-9.smt2
+	ForElimination-scala-9.smt2 \
+	nunchaku2309663.nun.min.smt2
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -786,6 +788,13 @@ recheck: all
 ForElimination-scala-9.smt2.log: ForElimination-scala-9.smt2
 	@p='ForElimination-scala-9.smt2'; \
 	b='ForElimination-scala-9.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nunchaku2309663.nun.min.smt2.log: nunchaku2309663.nun.min.smt2
+	@p='nunchaku2309663.nun.min.smt2'; \
+	b='nunchaku2309663.nun.min.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

@@ -423,6 +423,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLN_CFLAGS = @CLN_CFLAGS@
 CLN_LIBS = @CLN_LIBS@
+COVERAGE_ON = @COVERAGE_ON@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CRYPTOMINISAT_HOME = @CRYPTOMINISAT_HOME@
@@ -731,11 +732,24 @@ TESTS = \
   rel_tc_5_1.cvc \
   rel_tp_join_1.cvc \
   rel_transpose_0.cvc \
-  set-strat.cvc
+  set-strat.cvc \
+  rel_tc_8.cvc \
+  atom_univ2.cvc \
+  rels-sharing-simp.cvc \
+  iden_0.cvc \
+  iden_1_1.cvc \
+  iden_1.cvc \
+  joinImg_0_1.cvc \
+  joinImg_0_2.cvc \
+  joinImg_0.cvc \
+  joinImg_1_1.cvc \
+  joinImg_1.cvc \
+  joinImg_2_1.cvc \
+  joinImg_2.cvc \
+  card_transpose.cvc
 
 
 # unsolved : garbage_collect.cvc
-# dump-unsat-core crash : rel_tc_8.cvc
 EXTRA_DIST = $(TESTS)
 all: all-recursive
 
@@ -1567,6 +1581,104 @@ rel_transpose_0.cvc.log: rel_transpose_0.cvc
 set-strat.cvc.log: set-strat.cvc
 	@p='set-strat.cvc'; \
 	b='set-strat.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+rel_tc_8.cvc.log: rel_tc_8.cvc
+	@p='rel_tc_8.cvc'; \
+	b='rel_tc_8.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+atom_univ2.cvc.log: atom_univ2.cvc
+	@p='atom_univ2.cvc'; \
+	b='atom_univ2.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+rels-sharing-simp.cvc.log: rels-sharing-simp.cvc
+	@p='rels-sharing-simp.cvc'; \
+	b='rels-sharing-simp.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+iden_0.cvc.log: iden_0.cvc
+	@p='iden_0.cvc'; \
+	b='iden_0.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+iden_1_1.cvc.log: iden_1_1.cvc
+	@p='iden_1_1.cvc'; \
+	b='iden_1_1.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+iden_1.cvc.log: iden_1.cvc
+	@p='iden_1.cvc'; \
+	b='iden_1.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_0_1.cvc.log: joinImg_0_1.cvc
+	@p='joinImg_0_1.cvc'; \
+	b='joinImg_0_1.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_0_2.cvc.log: joinImg_0_2.cvc
+	@p='joinImg_0_2.cvc'; \
+	b='joinImg_0_2.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_0.cvc.log: joinImg_0.cvc
+	@p='joinImg_0.cvc'; \
+	b='joinImg_0.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_1_1.cvc.log: joinImg_1_1.cvc
+	@p='joinImg_1_1.cvc'; \
+	b='joinImg_1_1.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_1.cvc.log: joinImg_1.cvc
+	@p='joinImg_1.cvc'; \
+	b='joinImg_1.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_2_1.cvc.log: joinImg_2_1.cvc
+	@p='joinImg_2_1.cvc'; \
+	b='joinImg_2_1.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+joinImg_2.cvc.log: joinImg_2.cvc
+	@p='joinImg_2.cvc'; \
+	b='joinImg_2.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+card_transpose.cvc.log: card_transpose.cvc
+	@p='card_transpose.cvc'; \
+	b='card_transpose.cvc'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
