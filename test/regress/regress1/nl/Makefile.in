@@ -88,7 +88,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = test/regress/regress0/tptp
+subdir = test/regress/regress1/nl
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/antlr.m4 \
@@ -603,61 +603,15 @@ zz_cvc4_use_personal_make_rules = @zz_cvc4_use_personal_make_rules@
 @mk_empty@BINARY = cvc4
 LOG_COMPILER = @srcdir@/../../run_regression
 AM_LOG_FLAGS = $(RUN_REGRESSION_ARGS) @abs_top_builddir@/src/main/$(BINARY)$(EXEEXT)
-MAKEFLAGS = -k
-
-# escape the `=' in file names
-equals = =
 
 # These are run for all build profiles.
 # If a test shouldn't be run in e.g. competition mode,
 # put it below in "TESTS +="
 TESTS = \
-	tptp_parser.p \
-	tptp_parser2.p \
-	tptp_parser3.p \
-	tptp_parser4.p \
-	tptp_parser5.p \
-	tptp_parser6.p \
-	tptp_parser7.p \
-	tptp_parser8.p \
-	tptp_parser9.p \
-	tptp_parser10.p \
-	tff0.p \
-	tff0-arith.p \
-	ARI086$(equals)1.p \
-	DAT001$(equals)1.p \
-	KRS018+1.p \
-	KRS063+1.p \
-	MGT019+2.p \
-	MGT041-2.p \
-	PUZ131_1.p \
-	SYN000+1.p \
-	SYN000+2.p \
-	SYN000-1.p \
-	SYN000-2.p \
-	SYN000$(equals)2.p \
-	SYN000_1.p \
-	SYN000_2.p \
-	SYN075-1.p
+	siegel-nl-bases.smt2 \
+	mirko-050417.smt2
 
-
-# axiom files required for the above tests
-TEST_DEPS_DIST = \
-	Axioms/BOO004-0.ax \
-	Axioms/SYN000_0.ax \
-	Axioms/SYN000-0.ax \
-	Axioms/SYN000+0.ax
-
-
-# these take too long at present
-EXTRA_DIST = $(TESTS) \
-	$(TEST_DEPS_DIST) \
-	BOO027-1.p \
-	BOO003-4.p \
-	MGT031-1.p \
-	NLP114-1.p \
-	SYN075+1.p
-
+EXTRA_DIST = $(TESTS)
 all: all-am
 
 .SUFFIXES:
@@ -671,9 +625,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu test/regress/regress0/tptp/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu test/regress/regress1/nl/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu test/regress/regress0/tptp/Makefile
+	  $(AUTOMAKE) --gnu test/regress/regress1/nl/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -845,191 +799,16 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-tptp_parser.p.log: tptp_parser.p
-	@p='tptp_parser.p'; \
-	b='tptp_parser.p'; \
+siegel-nl-bases.smt2.log: siegel-nl-bases.smt2
+	@p='siegel-nl-bases.smt2'; \
+	b='siegel-nl-bases.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser2.p.log: tptp_parser2.p
-	@p='tptp_parser2.p'; \
-	b='tptp_parser2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser3.p.log: tptp_parser3.p
-	@p='tptp_parser3.p'; \
-	b='tptp_parser3.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser4.p.log: tptp_parser4.p
-	@p='tptp_parser4.p'; \
-	b='tptp_parser4.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser5.p.log: tptp_parser5.p
-	@p='tptp_parser5.p'; \
-	b='tptp_parser5.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser6.p.log: tptp_parser6.p
-	@p='tptp_parser6.p'; \
-	b='tptp_parser6.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser7.p.log: tptp_parser7.p
-	@p='tptp_parser7.p'; \
-	b='tptp_parser7.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser8.p.log: tptp_parser8.p
-	@p='tptp_parser8.p'; \
-	b='tptp_parser8.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser9.p.log: tptp_parser9.p
-	@p='tptp_parser9.p'; \
-	b='tptp_parser9.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tptp_parser10.p.log: tptp_parser10.p
-	@p='tptp_parser10.p'; \
-	b='tptp_parser10.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tff0.p.log: tff0.p
-	@p='tff0.p'; \
-	b='tff0.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tff0-arith.p.log: tff0-arith.p
-	@p='tff0-arith.p'; \
-	b='tff0-arith.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-ARI086$(equals)1.p.log: ARI086$(equals)1.p
-	@p='ARI086$(equals)1.p'; \
-	b='ARI086$(equals)1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-DAT001$(equals)1.p.log: DAT001$(equals)1.p
-	@p='DAT001$(equals)1.p'; \
-	b='DAT001$(equals)1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-KRS018+1.p.log: KRS018+1.p
-	@p='KRS018+1.p'; \
-	b='KRS018+1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-KRS063+1.p.log: KRS063+1.p
-	@p='KRS063+1.p'; \
-	b='KRS063+1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-MGT019+2.p.log: MGT019+2.p
-	@p='MGT019+2.p'; \
-	b='MGT019+2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-MGT041-2.p.log: MGT041-2.p
-	@p='MGT041-2.p'; \
-	b='MGT041-2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-PUZ131_1.p.log: PUZ131_1.p
-	@p='PUZ131_1.p'; \
-	b='PUZ131_1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000+1.p.log: SYN000+1.p
-	@p='SYN000+1.p'; \
-	b='SYN000+1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000+2.p.log: SYN000+2.p
-	@p='SYN000+2.p'; \
-	b='SYN000+2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000-1.p.log: SYN000-1.p
-	@p='SYN000-1.p'; \
-	b='SYN000-1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000-2.p.log: SYN000-2.p
-	@p='SYN000-2.p'; \
-	b='SYN000-2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000$(equals)2.p.log: SYN000$(equals)2.p
-	@p='SYN000$(equals)2.p'; \
-	b='SYN000$(equals)2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000_1.p.log: SYN000_1.p
-	@p='SYN000_1.p'; \
-	b='SYN000_1.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN000_2.p.log: SYN000_2.p
-	@p='SYN000_2.p'; \
-	b='SYN000_2.p'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-SYN075-1.p.log: SYN075-1.p
-	@p='SYN075-1.p'; \
-	b='SYN075-1.p'; \
+mirko-050417.smt2.log: mirko-050417.smt2
+	@p='mirko-050417.smt2'; \
+	b='mirko-050417.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1205,23 +984,13 @@ uninstall-am:
 @mk_if@eq ($(BINARY),)
 end@mk_if@
 
-#if CVC4_BUILD_PROFILE_COMPETITION
-#else
-#TESTS += \
-#	error.cvc
-#endif
-#
-# and make sure to distribute it
-#EXTRA_DIST += \
-#	error.cvc
-
-# synonyms for "check"
-.PHONY: regress regress0 test
-regress regress0 test: check
+# synonyms for "check" in this directory
+.PHONY: regress regress1 test
+regress regress1 test: check
 
 # do nothing in this subdir
-.PHONY: regress1 regress2 regress3 regress4
-regress1 regress2 regress3 regress4:
+.PHONY: regress0 regress2 regress3 regress4
+regress0 regress2 regress3 regress4:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
