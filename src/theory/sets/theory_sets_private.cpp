@@ -2,9 +2,9 @@
 /*! \file theory_sets_private.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Kshitij Bansal, Tim King, Andrew Reynolds
+ **   Andrew Reynolds, Kshitij Bansal, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -16,8 +16,6 @@
 
 #include <algorithm>
 #include "theory/sets/theory_sets_private.h"
-
-#include <boost/foreach.hpp>
 
 #include "expr/emptyset.h"
 #include "options/sets_options.h"
@@ -56,7 +54,7 @@ TheorySetsPrivate::TheorySetsPrivate(TheorySets& external,
 {
 
   d_rels = new TheorySetsRels(c, u, &d_equalityEngine, &d_conflict, external);
-  
+
   d_true = NodeManager::currentNM()->mkConst( true );
   d_false = NodeManager::currentNM()->mkConst( false );
   d_zero = NodeManager::currentNM()->mkConst( Rational(0) );
@@ -79,9 +77,8 @@ TheorySetsPrivate::TheorySetsPrivate(TheorySets& external,
 
 TheorySetsPrivate::~TheorySetsPrivate(){
   delete d_rels;
-  for(std::map< Node, EqcInfo* >::iterator i = d_eqc_info.begin(), iend = d_eqc_info.end(); i != iend; ++i){
-    EqcInfo* current = (*i).second;
-    delete current;
+  for (std::pair<const Node, EqcInfo*>& current_pair : d_eqc_info) {
+    delete current_pair.second;
   }
 }/* TheorySetsPrivate::~TheorySetsPrivate() */
 

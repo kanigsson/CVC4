@@ -2,9 +2,9 @@
 /*! \file theory_sets_type_rules.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Kshitij Bansal, Tim King, Morgan Deters
+ **   Kshitij Bansal, Andrew Reynolds, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -115,8 +115,29 @@ struct MemberTypeRule {
         throw TypeCheckingExceptionPrivate(n, "checking for membership in a non-set");
       }
       TypeNode elementType = n[0].getType(check);
+      // TODO : still need to be flexible here due to situations like:
+      //
+      // T : (Set Int)
+      // S : (Set Real)
+      // (= (as T (Set Real)) S)
+      // (member 0.5 S)
+      // ...where (member 0.5 T) is inferred
+      //
+      // or
+      //
+      // S : (Set Real)
+      // (not (member 0.5 s))
+      // (member 0.0 s)
+      // ...find model M where M( s ) = { 0 }, check model will generate (not (member 0.5 (singleton 0)))
+      //      
       if(!elementType.isComparableTo(setType.getSetElementType())) {
-        throw TypeCheckingExceptionPrivate(n, "member operating on sets of different types");
+      //if(!elementType.isSubtypeOf(setType.getSetElementType())) {     //FIXME:typing
+        std::stringstream ss;
+        ss << "member operating on sets of different types:\n"
+           << "child type:  " << elementType << "\n"
+           << "not subtype: " << setType.getSetElementType() << "\n"
+           << "in term : " << n;
+        throw TypeCheckingExceptionPrivate(n, ss.str());
       }
     }
     return nodeManager->booleanType();

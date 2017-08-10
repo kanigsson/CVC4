@@ -2,9 +2,9 @@
 /*! \file dio_solver.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Tim King, Morgan Deters, Dejan Jovanovic
+ **   Tim King, Morgan Deters, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -304,7 +304,7 @@ bool DioSolver::queueEmpty() const{
 }
 
 Node DioSolver::columnGcdIsOne() const{
-  std::hash_map<Node, Integer, NodeHashFunction> gcdMap;
+  std::unordered_map<Node, Integer, NodeHashFunction> gcdMap;
 
   std::deque<TrailIndex>::const_iterator iter, end;
   for(iter = d_currentF.begin(), end = d_currentF.end(); iter != end; ++iter){

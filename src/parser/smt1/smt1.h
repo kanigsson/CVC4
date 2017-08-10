@@ -2,9 +2,9 @@
 /*! \file smt1.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Christopher L. Conway, Morgan Deters, Tim King
+ **   Christopher L. Conway, Morgan Deters, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -17,10 +17,9 @@
 #ifndef __CVC4__PARSER__SMT1_H
 #define __CVC4__PARSER__SMT1_H
 
-#include <ext/hash_map>
-namespace std { using namespace __gnu_cxx; }
+#include <string>
+#include <unordered_map>
 
-#include "util/hash.h"
 #include "parser/parser.h"
 
 namespace CVC4 {
@@ -117,7 +116,7 @@ public:
 private:
 
   void addArithmeticOperators();
-  static std::hash_map<const std::string, Logic, CVC4::StringHashFunction> newLogicMap();
+  static std::unordered_map<std::string, Logic> newLogicMap();
 };/* class Smt1 */
 
 }/* CVC4::parser namespace */

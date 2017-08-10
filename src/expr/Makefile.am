@@ -26,7 +26,6 @@ libexpr_la_SOURCES = \
 	attribute.cpp \
 	attribute_internals.h \
 	attribute_unique_id.h \
-	convenience_node_builders.h \
 	chain.h \
 	emptyset.cpp \
 	emptyset.h \
@@ -61,8 +60,6 @@ libexpr_la_SOURCES = \
 	variable_type_map.h \
 	datatype.h \
 	datatype.cpp \
-	predicate.h \
-	predicate.cpp \
 	record.cpp \
 	record.h \
 	uninterpreted_constant.cpp \
@@ -103,7 +100,6 @@ EXTRA_DIST = \
 	kind.i \
 	expr.i \
 	record.i \
-	predicate.i \
 	variable_type_map.i \
 	uninterpreted_constant.i
 

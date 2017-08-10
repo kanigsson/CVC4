@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Andrew Reynolds, Christopher L. Conway
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -22,6 +22,7 @@
 #include <sstream>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "parser/parser.h"
@@ -58,14 +59,13 @@ public:
 private:
   bool d_logicSet;
   LogicInfo d_logic;
-  std::hash_map<std::string, Kind, StringHashFunction> operatorKindMap;
+  std::unordered_map<std::string, Kind> operatorKindMap;
   std::pair<Expr, std::string> d_lastNamedTerm;
   // this is a user-context stack
   std::stack< std::map<Expr, std::string> > d_unsatCoreNames;
+  // for sygus
   std::vector<Expr> d_sygusVars, d_sygusConstraints, d_sygusFunSymbols;
-  std::vector< std::pair<std::string, Expr> > d_sygusFuns;
   std::map< Expr, bool > d_sygusVarPrimed;
-  size_t d_nextSygusFun;
 
 protected:
   Smt2(ExprManager* exprManager, Input* input, bool strictMode = false, bool parseOnly = false);
@@ -179,9 +179,6 @@ public:
 
   Expr mkSygusVar(const std::string& name, const Type& type, bool isPrimed = false);
 
-  void mkSygusDefaultGrammar( const Type& range, Expr& bvl, const std::string& fun, std::vector<CVC4::Datatype>& datatypes,
-                              std::vector<Type>& sorts, std::vector< std::vector<Expr> >& ops, std::vector<Expr> sygus_vars, int& startIndex );
-
   void mkSygusConstantsForType( const Type& type, std::vector<CVC4::Expr>& ops );
 
   void processSygusGTerm( CVC4::SygusGTerm& sgt, int index,
@@ -218,23 +215,10 @@ public:
                            std::vector< CVC4::Type>& sorts,
                            std::vector< std::vector<CVC4::Expr> >& ops );
 
-  void addSygusFun(const std::string& fun, Expr eval) {
-    d_sygusFuns.push_back(std::make_pair(fun, eval));
-  }
-
-  void defineSygusFuns();
-
   void mkSygusDatatype( CVC4::Datatype& dt, std::vector<CVC4::Expr>& ops,
                         std::vector<std::string>& cnames, std::vector< std::vector< CVC4::Type > >& cargs,
                         std::vector<std::string>& unresolved_gterm_sym,
                         std::map< CVC4::Type, CVC4::Type >& sygus_to_builtin );
-
-  // i is index in datatypes/ops
-  // j is index is datatype
-  Expr getSygusAssertion( std::vector<DatatypeType>& datatypeTypes, std::vector< std::vector<Expr> >& ops,
-                          std::map<DatatypeType, Expr>& evals, std::vector<Expr>& terms,
-                          Expr eval, const Datatype& dt, size_t i, size_t j );
-
 
 
   void addSygusConstraint(Expr constraint) {
@@ -254,6 +238,7 @@ public:
   }
   const void getSygusPrimedVars( std::vector<Expr>& vars, bool isPrimed );
 
+  const void addSygusFunSymbol( Type t, Expr synth_fun );
   const std::vector<Expr>& getSygusFunSymbols() {
     return d_sygusFunSymbols;
   }
@@ -326,9 +311,6 @@ private:
   std::vector< CVC4::Expr > d_sygus_defined_funs;
 
   void collectSygusLetArgs( CVC4::Expr e, std::vector< CVC4::Type >& sygusArgs, std::vector< CVC4::Expr >& builtinArgs );
-
-  void addSygusDatatypeConstructor( CVC4::Datatype& dt, CVC4::Expr op, std::string& cname, std::vector< CVC4::Type >& cargs,
-                                    CVC4::Expr& let_body, std::vector< CVC4::Expr >& let_args, unsigned let_num_input_args );
 
   Type processSygusNestedGTerm( int sub_dt_index, std::string& sub_dname, std::vector< CVC4::Datatype >& datatypes,
                                 std::vector< CVC4::Type>& sorts,

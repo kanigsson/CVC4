@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Dejan Jovanovic, Christopher L. Conway
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -77,6 +77,9 @@ class EqualityTypeRule {
       TypeNode lhsType = n[0].getType(check);
       TypeNode rhsType = n[1].getType(check);
 
+      // TODO : we may want to limit cases where we have equalities between terms of different types 
+      //   equalities between (Set Int) and (Set Real) already cause strange issues in theory solver for sets
+      //   one possibility is to only allow this for Int/Real
       if ( TypeNode::leastCommonTypeNode(lhsType, rhsType).isNull() ) {
         std::stringstream ss;
         ss << "Subexpressions must have a common base type:" << std::endl;
@@ -298,26 +301,6 @@ public:
     return NodeManager::currentNM()->mkNode(kind::SEXPR, children);
   }
 };/* class SExprProperties */
-
-class SubtypeProperties {
-public:
-
-  inline static Cardinality computeCardinality(TypeNode type) {
-    Assert(type.getKind() == kind::SUBTYPE_TYPE);
-    Unimplemented("Computing the cardinality for predicate subtype not yet supported.");
-  }
-
-  inline static bool isWellFounded(TypeNode type) {
-    Assert(type.getKind() == kind::SUBTYPE_TYPE);
-    Unimplemented("Computing the well-foundedness for predicate subtype not yet supported.");
-  }
-
-  inline static Node mkGroundTerm(TypeNode type) {
-    Assert(type.getKind() == kind::SUBTYPE_TYPE);
-    Unimplemented("Constructing a ground term for predicate subtype not yet supported.");
-  }
-
-};/* class SubtypeProperties */
 
 }/* CVC4::theory::builtin namespace */
 }/* CVC4::theory namespace */

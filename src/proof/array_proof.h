@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Guy Katz, Liana Hadarean, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -18,6 +18,8 @@
 
 #ifndef __CVC4__ARRAY__PROOF_H
 #define __CVC4__ARRAY__PROOF_H
+
+#include <unordered_set>
 
 #include "expr/expr.h"
 #include "proof/proof_manager.h"
@@ -94,7 +96,7 @@ class TheoryArrays;
 } /* namespace CVC4::theory::arrays */
 } /* namespace CVC4::theory */
 
-typedef __gnu_cxx::hash_set<Type, TypeHashFunction > TypeSet;
+typedef std::unordered_set<Type, TypeHashFunction > TypeSet;
 
 class ArrayProof : public TheoryProof {
   // TODO: whatever goes in this theory

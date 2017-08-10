@@ -2,9 +2,9 @@
 /*! \file regexp.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Tianyi Liang, Tim King, Morgan Deters
+ **   Tianyi Liang, Andrew Reynolds, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -20,11 +20,13 @@
 #ifndef __CVC4__REGEXP_H
 #define __CVC4__REGEXP_H
 
-#include <vector>
-#include <string>
+#include <algorithm>
+#include <cassert>
+#include <functional>
 #include <set>
 #include <sstream>
-#include <cassert>
+#include <string>
+#include <vector>
 
 #include "base/exception.h"
 #include "util/hash.h"
@@ -333,7 +335,7 @@ namespace strings {
 
 struct CVC4_PUBLIC StringHashFunction {
   size_t operator()(const ::CVC4::String& s) const {
-    return __gnu_cxx::hash<const char*>()(s.toString().c_str());
+    return std::hash<std::string>()(s.toString());
   }
 };/* struct StringHashFunction */
 

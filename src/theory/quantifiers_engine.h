@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -17,9 +17,9 @@
 #ifndef __CVC4__THEORY__QUANTIFIERS_ENGINE_H
 #define __CVC4__THEORY__QUANTIFIERS_ENGINE_H
 
-#include <ext/hash_set>
 #include <iostream>
 #include <map>
+#include <unordered_map>
 
 #include "context/cdchunk_list.h"
 #include "context/cdhashset.h"
@@ -315,7 +315,7 @@ public:
   /** get instantiation */
   Node getInstantiation( Node q, std::vector< Node >& terms, bool doVts = false );
   /** do substitution */
-  Node getSubstitute( Node n, std::vector< Node >& terms );
+  Node getSubstitute( Node n, std::vector< Node >& terms, std::map< Node, Node >& visited );
   /** add lemma lem */
   bool addLemma( Node lem, bool doCache = true, bool doRewrite = true );
   /** remove pending lemma */
@@ -449,7 +449,7 @@ private:
   /** processInferences : will merge equivalence classes in master equality engine, if possible */
   bool processInferences( Theory::Effort e );
   /** node contains */
-  Node getInstance( Node n, const std::vector< Node >& eqc, std::hash_map<TNode, Node, TNodeHashFunction>& cache );
+  Node getInstance( Node n, const std::vector< Node >& eqc, std::unordered_map<TNode, Node, TNodeHashFunction>& cache );
   /** get score */
   int getRepScore( Node n, Node f, int index, TypeNode v_tn );
   /** flatten representatives */

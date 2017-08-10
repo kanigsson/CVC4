@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Clark Barrett, Morgan Deters, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -16,6 +16,9 @@
 
 #ifndef __CVC4__THEORY__THEORY_MODEL_H
 #define __CVC4__THEORY__THEORY_MODEL_H
+
+#include <unordered_map>
+#include <unordered_set>
 
 #include "smt/model.h"
 #include "theory/uf/equality_engine.h"
@@ -52,7 +55,7 @@ public:
   /** true/false nodes */
   Node d_true;
   Node d_false;
-  mutable std::hash_map<Node, Node, NodeHashFunction> d_modelCache;
+  mutable std::unordered_map<Node, Node, NodeHashFunction> d_modelCache;
 public: 
   /** comment stream to include in printing */
   std::stringstream d_comment_str;
@@ -140,8 +143,8 @@ public:
  */
 class TypeSet {
 public:
-  typedef std::hash_map<TypeNode, std::set<Node>*, TypeNodeHashFunction> TypeSetMap;
-  typedef std::hash_map<TypeNode, TypeEnumerator*, TypeNodeHashFunction> TypeToTypeEnumMap;
+  typedef std::unordered_map<TypeNode, std::set<Node>*, TypeNodeHashFunction> TypeSetMap;
+  typedef std::unordered_map<TypeNode, TypeEnumerator*, TypeNodeHashFunction> TypeToTypeEnumMap;
   typedef TypeSetMap::iterator iterator;
   typedef TypeSetMap::const_iterator const_iterator;
 private:
@@ -265,9 +268,9 @@ class TheoryEngineModelBuilder : public ModelBuilder
 protected:
   /** pointer to theory engine */
   TheoryEngine* d_te;
-  typedef std::hash_map<Node, Node, NodeHashFunction> NodeMap;
+  typedef std::unordered_map<Node, Node, NodeHashFunction> NodeMap;
   NodeMap d_normalizedCache;
-  typedef std::hash_set<Node, NodeHashFunction> NodeSet;
+  typedef std::unordered_set<Node, NodeHashFunction> NodeSet;
   std::map< Node, Node > d_constantReps;
 
   /** process build model */

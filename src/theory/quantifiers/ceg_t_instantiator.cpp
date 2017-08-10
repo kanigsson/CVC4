@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -688,7 +688,7 @@ Node DtInstantiator::solve_dt( Node v, Node a, Node b, Node sa, Node sb ) {
       TypeNode tn = a.getType();
       const Datatype& dt = ((DatatypeType)(tn).toType()).getDatatype();
       for( unsigned i=0; i<a.getNumChildren(); i++ ){
-        Node nn = NodeManager::currentNM()->mkNode( APPLY_SELECTOR_TOTAL, Node::fromExpr( dt[cindex][i].getSelector() ), sb );
+        Node nn = NodeManager::currentNM()->mkNode( APPLY_SELECTOR_TOTAL, Node::fromExpr( dt[cindex].getSelectorInternal( tn.toType(), i ) ), sb );
         Node s = solve_dt( v, a[i], Node::null(), sa[i], nn );
         if( !s.isNull() ){
           return s;
@@ -720,7 +720,7 @@ bool DtInstantiator::processEqualTerms( CegInstantiator * ci, SolvedForm& sf, No
       unsigned cindex = Datatype::indexOf( n.getOperator().toExpr() );
       //now must solve for selectors applied to pv
       for( unsigned j=0; j<dt[cindex].getNumArgs(); j++ ){
-        Node c = NodeManager::currentNM()->mkNode( APPLY_SELECTOR_TOTAL, Node::fromExpr( dt[cindex][j].getSelector() ), pv );
+        Node c = NodeManager::currentNM()->mkNode( APPLY_SELECTOR_TOTAL, Node::fromExpr( dt[cindex].getSelectorInternal( d_type.toType(), j ) ), pv );
         ci->pushStackVariable( c );
         children.push_back( c );
       }

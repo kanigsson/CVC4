@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -16,6 +16,7 @@
 
 #include "expr/datatype.h"
 #include "options/quantifiers_options.h"
+#include "options/datatypes_options.h"
 #include "theory/quantifiers/candidate_generator.h"
 #include "theory/quantifiers/term_database.h"
 #include "theory/quantifiers/trigger.h"
@@ -116,7 +117,8 @@ void InstMatchGenerator::initialize( Node q, QuantifiersEngine* qe, std::vector<
           break;
         }
       }
-    }else if( d_match_pattern.getKind()==APPLY_SELECTOR_TOTAL && d_match_pattern[0].getKind()==INST_CONSTANT && options::purifyDtTriggers() ){
+    }else if( d_match_pattern.getKind()==APPLY_SELECTOR_TOTAL && d_match_pattern[0].getKind()==INST_CONSTANT && 
+              options::purifyDtTriggers() && !options::dtSharedSelectors() ){
       d_match_pattern = d_match_pattern[0];
     }
     d_match_pattern_type = d_match_pattern.getType();
@@ -955,8 +957,10 @@ void InstMatchGeneratorSimple::addInstantiations( InstMatch& m, QuantifiersEngin
     Debug("simple-trigger") << "Actual term is " << t << std::endl;
     //convert to actual used terms
     for( std::map< int, int >::iterator it = d_var_num.begin(); it != d_var_num.end(); ++it ){
-      Debug("simple-trigger") << "...set " << it->second << " " << t[it->first] << std::endl;
-      m.setValue( it->second, t[it->first] );
+      if( it->second>=0 ){
+        Debug("simple-trigger") << "...set " << it->second << " " << t[it->first] << std::endl;
+        m.setValue( it->second, t[it->first] );
+      }
     }
     if( qe->addInstantiation( d_f, m ) ){
       addedLemmas++;

@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Christopher L. Conway, ACSYS
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -149,8 +149,9 @@ This is CVC4 version " CVC4_RELEASE_STRING ) + \
     )) + "\n\
 compiled with " + ::CVC4::Configuration::getCompiler() + "\n\
 on " + ::CVC4::Configuration::getCompiledDateTime() + "\n\n\
-Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014\n\
-  New York University and The University of Iowa\n\n" + \
+Copyright (c) 2009-2017\n\
+by the authors and their institutional affiliations listed at \n\
+http://cvc4.cs.stanford.edu/authors\n\n" + \
     ( IS_GPL_BUILD ? "\
 This build of CVC4 uses GPLed libraries, and is thus covered by the GNU\n\
 General Public License (GPL) version 3.  Versions of CVC4 are available\n\

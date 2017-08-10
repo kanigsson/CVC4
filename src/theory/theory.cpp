@@ -2,9 +2,9 @@
 /*! \file theory.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Tim King, Dejan Jovanovic, Clark Barrett
+ **   Tim King, Andrew Reynolds, Dejan Jovanovic
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -220,8 +220,8 @@ void Theory::debugPrintFacts() const{
   printFacts(DebugChannel.getStream());
 }
 
-std::hash_set<TNode, TNodeHashFunction> Theory::currentlySharedTerms() const{
-  std::hash_set<TNode, TNodeHashFunction> currentlyShared;
+std::unordered_set<TNode, TNodeHashFunction> Theory::currentlySharedTerms() const{
+  std::unordered_set<TNode, TNodeHashFunction> currentlyShared;
   for (shared_terms_iterator i = shared_terms_begin(),
            i_end = shared_terms_end(); i != i_end; ++i) {
     currentlyShared.insert (*i);

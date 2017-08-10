@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -659,6 +659,10 @@ void FullSaturation::check( Theory::Effort e, unsigned quant_e ) {
 }
 
 bool FullSaturation::process( Node f, bool fullEffort ){
+  // ignore if constant true (rare case of non-standard quantifier whose body is rewritten to true)
+  if( f[1].isConst() && f[1].getConst<bool>() ){
+    return false;
+  }
   //first, try from relevant domain
   RelevantDomain * rd = d_quantEngine->getRelevantDomain();
   unsigned rstart = options::fullSaturateQuantRd() ? 0 : 1;
@@ -671,18 +675,43 @@ bool FullSaturation::process( Node f, bool fullEffort ){
         Trace("inst-alg") << "-> Ground term instantiate " << f << "..." << std::endl;
       }
       Assert( rd!=NULL );
+      Trace("inst-alg-debug") << "Compute relevant domain..." << std::endl;
       rd->compute();
+      Trace("inst-alg-debug") << "...finished" << std::endl;
       unsigned final_max_i = 0;
       std::vector< unsigned > maxs;
       std::vector< bool > max_zero;
       bool has_zero = false;
+      std::map< TypeNode, std::vector< Node > > term_db_list;
+      std::vector< TypeNode > ftypes;
+      // iterate over substitutions for variables
       for(unsigned i=0; i<f[0].getNumChildren(); i++ ){
+        TypeNode tn = f[0][i].getType();
+        ftypes.push_back( tn );
         unsigned ts;
         if( r==0 ){
           ts = rd->getRDomain( f, i )->d_terms.size();
         }else{
-          ts = d_quantEngine->getTermDatabase()->getNumTypeGroundTerms( f[0][i].getType() );
+          ts = d_quantEngine->getTermDatabase()->getNumTypeGroundTerms( tn );
+          std::map< TypeNode, std::vector< Node > >::iterator ittd = term_db_list.find( tn );
+          if( ittd==term_db_list.end() ){
+            std::map< Node, Node > reps_found;
+            for( unsigned j=0; j<ts; j++ ){
+              Node gt = d_quantEngine->getTermDatabase()->getTypeGroundTerm( ftypes[i], j );
+              if( !options::cbqi() || !quantifiers::TermDb::hasInstConstAttr( gt ) ){
+                Node r = d_quantEngine->getEqualityQuery()->getRepresentative( gt );
+                if( reps_found.find( r )==reps_found.end() ){
+                  reps_found[r] = gt;
+                  term_db_list[tn].push_back( gt );
+                }
+              } 
+            }
+            ts = term_db_list[tn].size();
+          }else{
+            ts = ittd->second.size();
+          }
         }
+        // consider a default value if at full effort
         max_zero.push_back( fullEffort && ts==0 );
         ts = ( fullEffort && ts==0 ) ? 1 : ts;
         Trace("inst-alg-rd") << "Variable " << i << " has " << ts << " in relevant domain." << std::endl;
@@ -697,11 +726,6 @@ bool FullSaturation::process( Node f, bool fullEffort ){
         }
       }
       if( !has_zero ){
-        std::vector< TypeNode > ftypes;
-        for( unsigned i=0; i<f[0].getNumChildren(); i++ ){
-          ftypes.push_back( f[0][i].getType() );
-        }
-      
         Trace("inst-alg-rd") << "Will do " << final_max_i << " stages of instantiation." << std::endl;
         unsigned max_i = 0;
         bool success;
@@ -716,13 +740,6 @@ bool FullSaturation::process( Node f, bool fullEffort ){
               }else{
                 Assert( index==(int)(childIndex.size())-1 );
                 unsigned nv = childIndex[index]+1;
-                if( options::cbqi() && r==1 && !max_zero[index] ){
-                  //skip inst constant nodes
-                  while( nv<maxs[index] && nv<=max_i &&
-                          quantifiers::TermDb::hasInstConstAttr( d_quantEngine->getTermDatabase()->getTypeGroundTerm( ftypes[index], nv ) ) ){
-                    nv++;
-                  }
-                }
                 if( nv<maxs[index] && nv<=max_i ){
                   childIndex[index] = nv;
                   index++;
@@ -750,8 +767,9 @@ bool FullSaturation::process( Node f, bool fullEffort ){
                   terms.push_back( rd->getRDomain( f, i )->d_terms[childIndex[i]] );
                   Trace("inst-alg-rd") << "  " << rd->getRDomain( f, i )->d_terms[childIndex[i]] << std::endl;
                 }else{
-                  terms.push_back( d_quantEngine->getTermDatabase()->getTypeGroundTerm( ftypes[i], childIndex[i] ) );
-                  Trace("inst-alg-rd") << "  " << d_quantEngine->getTermDatabase()->getTypeGroundTerm( ftypes[i], childIndex[i] ) << std::endl;
+                  Assert( childIndex[i]<term_db_list[ftypes[i]].size() );
+                  terms.push_back( term_db_list[ftypes[i]][childIndex[i]] );
+                  Trace("inst-alg-rd") << "  " << term_db_list[ftypes[i]][childIndex[i]] << std::endl;
                 }
               }
               if( d_quantEngine->addInstantiation( f, terms ) ){
@@ -768,7 +786,7 @@ bool FullSaturation::process( Node f, bool fullEffort ){
       }
     }
   }
-  //term enumerator?
+  //TODO : term enumerator?
   return false;
 }
 

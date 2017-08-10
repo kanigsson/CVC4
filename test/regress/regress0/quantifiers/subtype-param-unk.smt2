@@ -1,12 +1,11 @@
-; COMMAND-LINE: 
+; COMMAND-LINE: --lang=smt2.5
 ; EXPECT: unknown
 ; this will fail if type rule for APPLY_UF requires arguments to be subtypes
 (set-logic ALL_SUPPORTED)
 
 (declare-datatypes (T) ((List (cons (hd T) (tl (List T))) (nil))))
 
-(declare-fun R ((List Int)) Bool)
-
+(declare-fun R ((List Real)) Bool)
 (assert (forall ((x (List Int))) (R x)))
 (declare-fun j1 () (List Real))
 (assert (not (R j1)))

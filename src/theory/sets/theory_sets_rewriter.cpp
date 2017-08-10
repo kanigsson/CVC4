@@ -2,9 +2,9 @@
 /*! \file theory_sets_rewriter.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Kshitij Bansal, Tim King
+ **   Andrew Reynolds, Paul Meng, Kshitij Bansal
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -25,7 +25,7 @@ namespace theory {
 namespace sets {
 
 typedef std::set<TNode> Elements;
-typedef std::hash_map<TNode, Elements, TNodeHashFunction> SettermElementsMap;
+typedef std::unordered_map<TNode, Elements, TNodeHashFunction> SettermElementsMap;
 
 struct FlattenedNodeTag {};
 typedef expr::Attribute<FlattenedNodeTag, bool> flattened;
@@ -50,7 +50,7 @@ RewriteResponse flattenNode(TNode n, TNode trivialNode, TNode skipNode)
     return RewriteResponse(REWRITE_DONE, n);
   }
 
-  typedef std::hash_set<TNode, TNodeHashFunction> node_set;
+  typedef std::unordered_set<TNode, TNodeHashFunction> node_set;
 
   node_set visited;
   visited.insert(skipNode);

@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Liana Hadarean, Dejan Jovanovic, Morgan Deters
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -56,7 +56,7 @@ enum RewriteRuleId {
   SubEliminate,
   SltEliminate,
   SleEliminate,
-  UleEliminate, 
+  UleEliminate,
   CompEliminate,
   RepeatEliminate,
   RotateLeftEliminate,
@@ -75,7 +75,7 @@ enum RewriteRuleId {
 
   /// ground term evaluation
   EvalEquals,
-  EvalConcat, 
+  EvalConcat,
   EvalAnd,
   EvalOr,
   EvalXor,
@@ -90,7 +90,7 @@ enum RewriteRuleId {
   EvalUlt,
   EvalUltBv,
   EvalUle,
-  EvalExtract, 
+  EvalExtract,
   EvalSignExtend,
   EvalRotateLeft,
   EvalRotateRight,
@@ -133,18 +133,18 @@ enum RewriteRuleId {
   ExtractMultLeadingBit,
   NegIdemp,
   UdivPow2,
+  UdivZero,
   UdivOne,
-  UdivSelf,
   UremPow2,
   UremOne,
   UremSelf,
   ShiftZero,
 
   UltOne,
-  SltZero, 
+  SltZero,
   ZeroUlt,
   MergeSignExtend,
-  
+
   /// normalization rules
   ExtractBitwise,
   ExtractNot,
@@ -156,9 +156,9 @@ enum RewriteRuleId {
   NegSub,
   NegPlus,
   NotConcat,
-  NotAnd, // not sure why this would help (not done)
-  NotOr,  // not sure why this would help (not done)
-  NotXor, // not sure why this would help (not done)
+  NotAnd,  // not sure why this would help (not done)
+  NotOr,   // not sure why this would help (not done)
+  NotXor,  // not sure why this would help (not done)
   FlattenAssocCommut,
   FlattenAssocCommutNoDuplicates,
   PlusCombineLikeTerms,
@@ -177,7 +177,6 @@ enum RewriteRuleId {
   ConcatToMult,
   IsPowerOfTwo
 };
-
 
 inline std::ostream& operator << (std::ostream& out, RewriteRuleId ruleId) {
   switch (ruleId) {
@@ -272,8 +271,10 @@ inline std::ostream& operator << (std::ostream& out, RewriteRuleId ruleId) {
   case ExtractMultLeadingBit :            out << "ExtractMultLeadingBit";             return out;
   case NegIdemp :            out << "NegIdemp";             return out;
   case UdivPow2 :            out << "UdivPow2";             return out;
+  case UdivZero:
+    out << "UdivZero";
+    return out;
   case UdivOne :            out << "UdivOne";             return out;
-  case UdivSelf :            out << "UdivSelf";             return out;
   case UremPow2 :            out << "UremPow2";             return out;
   case UremOne :            out << "UremOne";             return out;
   case UremSelf :            out << "UremSelf";             return out;
@@ -501,8 +502,8 @@ struct AllRewriteRules {
   RewriteRule<ExtractMultLeadingBit> rule88;
   RewriteRule<NegIdemp> rule91;
   RewriteRule<UdivPow2> rule92;
-  RewriteRule<UdivOne> rule93;
-  RewriteRule<UdivSelf> rule94;
+  RewriteRule<UdivZero> rule93;
+  RewriteRule<UdivOne> rule94;
   RewriteRule<UremPow2> rule95;
   RewriteRule<UremOne> rule96;
   RewriteRule<UremSelf> rule97;

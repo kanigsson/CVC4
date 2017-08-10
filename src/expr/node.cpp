@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Tim King, Dejan Jovanovic
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -21,6 +21,8 @@
 #include "base/exception.h"
 #include "base/output.h"
 #include "expr/attribute.h"
+
+#include "theory/quantifiers/term_database.h"
 
 
 using namespace std;
@@ -110,6 +112,15 @@ bool NodeTemplate<ref_count>::hasBoundVar() {
     } else {
       for(iterator i = begin(); i != end() && !hasBv; ++i) {
         hasBv = (*i).hasBoundVar();
+      }
+      if( !hasBv ){
+        //FIXME : this is a hack to handle synthesis conjectures
+        // the issue is that we represent second-order quantification in synthesis conjectures via a Node:
+        //  exists x forall y P[f,y], where x is a dummy variable that maps to f through attribute SygusSynthFunVarListAttributeId
+        //  when asked whether a node has a bound variable, we want to treat f as if it were a bound (second-order) variable. -AJR
+        if( getKind()==kind::APPLY_UF && getOperator().hasAttribute(theory::SygusSynthFunVarListAttribute()) ){
+          hasBv = true;
+        }
       }
     }
     setAttribute(HasBoundVarAttr(), hasBv);

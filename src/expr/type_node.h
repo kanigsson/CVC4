@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Dejan Jovanovic, Martin Brain
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -22,10 +22,12 @@
 #ifndef __CVC4__TYPE_NODE_H
 #define __CVC4__TYPE_NODE_H
 
-#include <vector>
-#include <string>
-#include <iostream>
 #include <stdint.h>
+
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "base/cvc4_assert.h"
 #include "expr/kind.h"
@@ -93,7 +95,7 @@ private:
    * member function with a similar signature.
    */
   TypeNode substitute(const TypeNode& type, const TypeNode& replacement,
-                      std::hash_map<TypeNode, TypeNode, HashFunction>& cache) const;
+                      std::unordered_map<TypeNode, TypeNode, HashFunction>& cache) const;
 
   /**
    * Cache-aware, recursive version of substitute() used by the public
@@ -102,7 +104,7 @@ private:
   template <class Iterator1, class Iterator2>
   TypeNode substitute(Iterator1 typesBegin, Iterator1 typesEnd,
                       Iterator2 replacementsBegin, Iterator2 replacementsEnd,
-                      std::hash_map<TypeNode, TypeNode, HashFunction>& cache) const;
+                      std::unordered_map<TypeNode, TypeNode, HashFunction>& cache) const;
 
 public:
 
@@ -620,26 +622,8 @@ public:
   /** Is this a sort constructor kind */
   bool isSortConstructor() const;
 
-  /** Is this a subtype predicate */
-  bool isPredicateSubtype() const;
-
-  /** Get the predicate defining this subtype */
-  Node getSubtypePredicate() const;
-
-  /**
-   * Get the parent type of this subtype; note that it could be
-   * another subtype.
-   */
-  TypeNode getSubtypeParentType() const;
-
   /** Get the most general base type of the type */
   TypeNode getBaseType() const;
-
-  /** Is this a subrange */
-  bool isSubrange() const;
-
-  /** Get the bounds defining this subrange */
-  const SubrangeBounds& getSubrangeBounds() const;
 
   /**
    * Returns the leastUpperBound in the extended type lattice of the two types.
@@ -657,13 +641,7 @@ public:
   static Node getEnsureTypeCondition( Node n, TypeNode tn );
 private:
   static TypeNode commonTypeNode(TypeNode t0, TypeNode t1, bool isLeast);
-
-  /**
-   * Returns the leastUpperBound in the extended type lattice of two
-   * predicate subtypes.
-   */
-  static TypeNode leastCommonPredicateSubtype(TypeNode t0, TypeNode t1);
-
+  
   /**
    * Indents the given stream a given amount of spaces.
    *
@@ -694,8 +672,6 @@ typedef TypeNode::HashFunction TypeNodeHashFunction;
 
 }/* CVC4 namespace */
 
-#include <ext/hash_map>
-
 #include "expr/node_manager.h"
 
 namespace CVC4 {
@@ -711,7 +687,7 @@ inline TypeNode TypeNode::fromType(const Type& t) {
 inline TypeNode
 TypeNode::substitute(const TypeNode& type,
                      const TypeNode& replacement) const {
-  std::hash_map<TypeNode, TypeNode, HashFunction> cache;
+  std::unordered_map<TypeNode, TypeNode, HashFunction> cache;
   return substitute(type, replacement, cache);
 }
 
@@ -721,7 +697,7 @@ TypeNode::substitute(Iterator1 typesBegin,
                      Iterator1 typesEnd,
                      Iterator2 replacementsBegin,
                      Iterator2 replacementsEnd) const {
-  std::hash_map<TypeNode, TypeNode, HashFunction> cache;
+  std::unordered_map<TypeNode, TypeNode, HashFunction> cache;
   return substitute(typesBegin, typesEnd,
                     replacementsBegin, replacementsEnd, cache);
 }
@@ -731,9 +707,9 @@ TypeNode TypeNode::substitute(Iterator1 typesBegin,
                               Iterator1 typesEnd,
                               Iterator2 replacementsBegin,
                               Iterator2 replacementsEnd,
-                              std::hash_map<TypeNode, TypeNode, HashFunction>& cache) const {
+                              std::unordered_map<TypeNode, TypeNode, HashFunction>& cache) const {
   // in cache?
-  std::hash_map<TypeNode, TypeNode, HashFunction>::const_iterator i = cache.find(*this);
+  std::unordered_map<TypeNode, TypeNode, HashFunction>::const_iterator i = cache.find(*this);
   if(i != cache.end()) {
     return (*i).second;
   }
@@ -852,22 +828,18 @@ inline void TypeNode::printAst(std::ostream& out, int indent) const {
 
 inline bool TypeNode::isBoolean() const {
   return
-    ( getKind() == kind::TYPE_CONSTANT && getConst<TypeConstant>() == BOOLEAN_TYPE ) ||
-    ( isPredicateSubtype() && getSubtypeParentType().isBoolean() );
+    ( getKind() == kind::TYPE_CONSTANT && getConst<TypeConstant>() == BOOLEAN_TYPE );
 }
 
 inline bool TypeNode::isInteger() const {
   return
-    ( getKind() == kind::TYPE_CONSTANT && getConst<TypeConstant>() == INTEGER_TYPE ) ||
-    isSubrange() ||
-    ( isPredicateSubtype() && getSubtypeParentType().isInteger() );
+    ( getKind() == kind::TYPE_CONSTANT && getConst<TypeConstant>() == INTEGER_TYPE );
 }
 
 inline bool TypeNode::isReal() const {
   return
     ( getKind() == kind::TYPE_CONSTANT && getConst<TypeConstant>() == REAL_TYPE ) ||
-    isInteger() ||
-    ( isPredicateSubtype() && getSubtypeParentType().isReal() );
+    isInteger();
 }
 
 inline bool TypeNode::isString() const {
@@ -944,43 +916,27 @@ inline TypeNode TypeNode::getRangeType() const {
 
 /** Is this a symbolic expression type? */
 inline bool TypeNode::isSExpr() const {
-  return getKind() == kind::SEXPR_TYPE ||
-    ( isPredicateSubtype() && getSubtypeParentType().isSExpr() );
-}
-
-/** Is this a predicate subtype */
-inline bool TypeNode::isPredicateSubtype() const {
-  return getKind() == kind::SUBTYPE_TYPE;
-}
-
-/** Is this a subrange type */
-inline bool TypeNode::isSubrange() const {
-  return getKind() == kind::SUBRANGE_TYPE ||
-    ( isPredicateSubtype() && getSubtypeParentType().isSubrange() );
+  return getKind() == kind::SEXPR_TYPE;
 }
 
 /** Is this a floating-point type */
 inline bool TypeNode::isFloatingPoint() const {
-  return getKind() == kind::FLOATINGPOINT_TYPE ||
-    ( isPredicateSubtype() && getSubtypeParentType().isFloatingPoint() );
+  return getKind() == kind::FLOATINGPOINT_TYPE;
 }
 
 /** Is this a bit-vector type */
 inline bool TypeNode::isBitVector() const {
-  return getKind() == kind::BITVECTOR_TYPE ||
-    ( isPredicateSubtype() && getSubtypeParentType().isBitVector() );
+  return getKind() == kind::BITVECTOR_TYPE;
 }
 
 /** Is this a datatype type */
 inline bool TypeNode::isDatatype() const {
-  return getKind() == kind::DATATYPE_TYPE || getKind() == kind::PARAMETRIC_DATATYPE ||
-    ( isPredicateSubtype() && getSubtypeParentType().isDatatype() );
+  return getKind() == kind::DATATYPE_TYPE || getKind() == kind::PARAMETRIC_DATATYPE;
 }
 
 /** Is this a parametric datatype type */
 inline bool TypeNode::isParametricDatatype() const {
-  return getKind() == kind::PARAMETRIC_DATATYPE ||
-    ( isPredicateSubtype() && getSubtypeParentType().isParametricDatatype() );
+  return getKind() == kind::PARAMETRIC_DATATYPE;
 }
 
 /** Is this a codatatype type */
@@ -1013,15 +969,13 @@ inline bool TypeNode::isFloatingPoint(unsigned exp, unsigned sig) const {
   return
     ( getKind() == kind::FLOATINGPOINT_TYPE &&
       getConst<FloatingPointSize>().exponent() == exp &&
-      getConst<FloatingPointSize>().significand() == sig ) ||
-    ( isPredicateSubtype() && getSubtypeParentType().isFloatingPoint(exp,sig) );
+      getConst<FloatingPointSize>().significand() == sig );
 }
 
 /** Is this a bit-vector type of size <code>size</code> */
 inline bool TypeNode::isBitVector(unsigned size) const {
   return
-    ( getKind() == kind::BITVECTOR_TYPE && getConst<BitVectorSize>() == size ) ||
-    ( isPredicateSubtype() && getSubtypeParentType().isBitVector(size) );
+    ( getKind() == kind::BITVECTOR_TYPE && getConst<BitVectorSize>() == size );
 }
 
 /** Get the datatype specification from a datatype type */
@@ -1052,16 +1006,6 @@ inline unsigned TypeNode::getFloatingPointSignificandSize() const {
 inline unsigned TypeNode::getBitVectorSize() const {
   Assert(isBitVector());
   return getConst<BitVectorSize>();
-}
-
-inline const SubrangeBounds& TypeNode::getSubrangeBounds() const {
-  Assert(isSubrange());
-  if(getKind() == kind::SUBRANGE_TYPE){
-    return getConst<SubrangeBounds>();
-  }else{
-    Assert(isPredicateSubtype());
-    return getSubtypeParentType().getSubrangeBounds();
-  }
 }
 
 #ifdef CVC4_DEBUG

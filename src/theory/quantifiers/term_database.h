@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -17,12 +17,14 @@
 #ifndef __CVC4__THEORY__QUANTIFIERS__TERM_DATABASE_H
 #define __CVC4__THEORY__QUANTIFIERS__TERM_DATABASE_H
 
+#include <map>
+#include <unordered_set>
+
 #include "expr/attribute.h"
 #include "theory/theory.h"
 #include "theory/type_enumerator.h"
 #include "theory/quantifiers/quant_util.h"
 
-#include <map>
 
 namespace CVC4 {
 namespace theory {
@@ -93,6 +95,14 @@ typedef expr::Attribute< LtePartialInstAttributeId, bool > LtePartialInstAttribu
 struct SygusProxyAttributeId {};
 typedef expr::Attribute<SygusProxyAttributeId, Node> SygusProxyAttribute;
 
+// attribute for associating a synthesis function with a first order variable
+struct SygusSynthFunAttributeId {};
+typedef expr::Attribute<SygusSynthFunAttributeId, Node> SygusSynthFunAttribute;
+
+// attribute for associating a variable list with a synth fun
+struct SygusSynthFunVarListAttributeId {};
+typedef expr::Attribute<SygusSynthFunVarListAttributeId, Node> SygusSynthFunVarListAttribute;
+
 //attribute for fun-def abstraction type
 struct AbsTypeFunDefAttributeId {};
 typedef expr::Attribute<AbsTypeFunDefAttributeId, bool> AbsTypeFunDefAttribute;
@@ -108,6 +118,11 @@ typedef expr::Attribute< QuantElimPartialAttributeId, bool > QuantElimPartialAtt
 /** Attribute for id number */
 struct QuantIdNumAttributeId {};
 typedef expr::Attribute< QuantIdNumAttributeId, uint64_t > QuantIdNumAttribute;
+
+/** sygus var num */
+struct SygusVarNumAttributeId {};
+typedef expr::Attribute<SygusVarNumAttributeId, uint64_t> SygusVarNumAttribute;
+
 
 
 class QuantifiersEngine;
@@ -181,9 +196,9 @@ private:
   /** reference to the quantifiers engine */
   QuantifiersEngine* d_quantEngine;
   /** terms processed */
-  std::hash_set< Node, NodeHashFunction > d_processed;
+  std::unordered_set< Node, NodeHashFunction > d_processed;
   /** terms processed */
-  std::hash_set< Node, NodeHashFunction > d_iclosure_processed;
+  std::unordered_set< Node, NodeHashFunction > d_iclosure_processed;
   /** select op map */
   std::map< Node, std::map< TypeNode, Node > > d_par_op_map;
   /** whether master equality engine is UF-inconsistent */
@@ -495,6 +510,8 @@ public:
   static bool isAssoc( Kind k );
   /** is comm */
   static bool isComm( Kind k );
+  /** ( x k ... ) k x = ( x k ... ) */
+  static bool isNonAdditive( Kind k );
   /** is bool connective */
   static bool isBoolConnective( Kind k );
   /** is bool connective term */
@@ -558,126 +575,6 @@ public:
   /** compute quantifier attributes */
   static void computeQuantAttributes( Node q, QAttributes& qa );
 };/* class TermDb */
-
-class TermDbSygus {
-private:
-  /** reference to the quantifiers engine */
-  QuantifiersEngine* d_quantEngine;
-  std::map< TypeNode, std::vector< Node > > d_fv;
-  std::map< Node, TypeNode > d_fv_stype;
-  std::map< Node, int > d_fv_num;
-  Node d_true;
-  Node d_false;
-public:
-  TNode getVar( TypeNode tn, int i );
-  TNode getVarInc( TypeNode tn, std::map< TypeNode, int >& var_count );
-  bool isVar( Node n ) { return d_fv_stype.find( n )!=d_fv_stype.end(); }
-  int getVarNum( Node n ) { return d_fv_num[n]; }
-private:
-  std::map< TypeNode, std::map< int, Node > > d_generic_base;
-  std::map< TypeNode, std::vector< Node > > d_generic_templ;
-  bool getMatch( Node p, Node n, std::map< int, Node >& s );
-  bool getMatch2( Node p, Node n, std::map< int, Node >& s, std::vector< int >& new_s );
-public:
-  bool getMatch( Node n, TypeNode st, int& index_found, std::vector< Node >& args, int index_exc = -1, int index_start = 0 );
-private:
-  //information for sygus types
-  std::map< TypeNode, TypeNode > d_register;  //stores sygus -> builtin type
-  std::map< TypeNode, std::map< int, Kind > > d_arg_kind;
-  std::map< TypeNode, std::map< Kind, int > > d_kinds;
-  std::map< TypeNode, std::map< int, Node > > d_arg_const;
-  std::map< TypeNode, std::map< Node, int > > d_consts;
-  std::map< TypeNode, std::map< Node, int > > d_ops;
-  std::map< TypeNode, std::map< int, Node > > d_arg_ops;
-  std::map< TypeNode, std::vector< int > > d_id_funcs;
-  std::map< TypeNode, std::vector< Node > > d_const_list; //sorted list of constants for type
-  std::map< TypeNode, unsigned > d_const_list_pos;
-  //information for builtin types
-  std::map< TypeNode, std::map< int, Node > > d_type_value;
-  std::map< TypeNode, Node > d_type_max_value;
-  std::map< TypeNode, std::map< Node, std::map< int, Node > > > d_type_value_offset;
-  std::map< TypeNode, std::map< Node, std::map< int, int > > > d_type_value_offset_status;
-  //normalized map
-  std::map< TypeNode, std::map< Node, Node > > d_normalized;
-  std::map< TypeNode, std::map< Node, Node > > d_sygus_to_builtin;
-  std::map< TypeNode, std::map< Node, Node > > d_builtin_const_to_sygus;
-public:
-  TermDbSygus( context::Context* c, QuantifiersEngine* qe );
-  ~TermDbSygus(){}
-  bool reset( Theory::Effort e );
-  std::string identify() const { return "TermDbSygus"; }
-  
-  bool isRegistered( TypeNode tn );
-  TypeNode sygusToBuiltinType( TypeNode tn );
-  int getKindArg( TypeNode tn, Kind k );
-  int getConstArg( TypeNode tn, Node n );
-  int getOpArg( TypeNode tn, Node n );
-  bool hasKind( TypeNode tn, Kind k );
-  bool hasConst( TypeNode tn, Node n );
-  bool hasOp( TypeNode tn, Node n );
-  Node getArgConst( TypeNode tn, int i );
-  Node getArgOp( TypeNode tn, int i );
-  Kind getArgKind( TypeNode tn, int i );
-  bool isKindArg( TypeNode tn, int i );
-  bool isConstArg( TypeNode tn, int i );
-  unsigned getNumIdFuncs( TypeNode tn );
-  unsigned getIdFuncIndex( TypeNode tn, unsigned i );
-  void registerSygusType( TypeNode tn );
-  /** get arg type */
-  TypeNode getArgType( const DatatypeConstructor& c, int i );
-  /** isAntisymmetric */
-  bool isAntisymmetric( Kind k, Kind& dk );
-  /** is idempotent arg */
-  bool isIdempotentArg( Node n, Kind ik, int arg );
-  /** is singular arg */
-  bool isSingularArg( Node n, Kind ik, int arg );
-  /** get offset arg */
-  bool hasOffsetArg( Kind ik, int arg, int& offset, Kind& ok );
-  /** get value */
-  Node getTypeValue( TypeNode tn, int val );
-  /** get value */
-  Node getTypeValueOffset( TypeNode tn, Node val, int offset, int& status );
-  /** get value */
-  Node getTypeMaxValue( TypeNode tn );
-  TypeNode getSygusTypeForVar( Node v );
-  Node getGenericBase( TypeNode tn, const Datatype& dt, int c );
-  Node mkGeneric( const Datatype& dt, int c, std::map< TypeNode, int >& var_count, std::map< int, Node >& pre );
-  Node sygusToBuiltin( Node n, TypeNode tn );
-  Node builtinToSygusConst( Node c, TypeNode tn, int rcons_depth = 0 );
-  Node getSygusNormalized( Node n, std::map< TypeNode, int >& var_count, std::map< Node, Node >& subs );
-  Node getNormalized( TypeNode t, Node prog, bool do_pre_norm = false, bool do_post_norm = true );
-  int getSygusTermSize( Node n );
-  /** given a term, construct an equivalent smaller one that respects syntax */
-  Node minimizeBuiltinTerm( Node n );
-  /** given a term, expand it into more basic components */
-  Node expandBuiltinTerm( Node n );
-  /** get comparison kind */
-  Kind getComparisonKind( TypeNode tn );
-  Kind getPlusKind( TypeNode tn, bool is_neg = false );
-  bool doCompare( Node a, Node b, Kind k );
-  /** get operator kind */
-  static Kind getOperatorKind( Node op );
-  /** print sygus term */
-  static void printSygusTerm( std::ostream& out, Node n, std::vector< Node >& lvs );
-  
-  /** get anchor */
-  static Node getAnchor( Node n );
-//for eager instantiation
-private:
-  std::map< Node, std::map< Node, bool > > d_subterms;
-  std::map< Node, std::vector< Node > > d_evals;
-  std::map< Node, std::vector< std::vector< Node > > > d_eval_args;
-  std::map< Node, std::map< Node, unsigned > > d_node_mv_args_proc;
-public:
-  void registerEvalTerm( Node n );
-  void registerModelValue( Node n, Node v, std::vector< Node >& exps, std::vector< Node >& terms, std::vector< Node >& vals );
-  Node unfold( Node en, std::map< Node, Node >& vtm, std::vector< Node >& exp, bool track_exp = true );
-  Node unfold( Node en ){
-    std::map< Node, Node > vtm;
-    std::vector< Node > exp;
-    return unfold( en, vtm, exp, false );
-  }
-};
 
 }/* CVC4::theory::quantifiers namespace */
 }/* CVC4::theory namespace */

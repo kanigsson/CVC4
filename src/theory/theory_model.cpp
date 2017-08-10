@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Clark Barrett, Andrew Reynolds, Morgan Deters
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -132,7 +132,7 @@ Cardinality TheoryModel::getCardinality( Type t ) const{
 
 Node TheoryModel::getModelValue(TNode n, bool hasBoundVars, bool useDontCares) const
 {
-  std::hash_map<Node, Node, NodeHashFunction>::iterator it = d_modelCache.find(n);
+  std::unordered_map<Node, Node, NodeHashFunction>::iterator it = d_modelCache.find(n);
   if (it != d_modelCache.end()) {
     return (*it).second;
   }

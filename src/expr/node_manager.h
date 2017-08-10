@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Christopher L. Conway, Dejan Jovanovic
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -30,7 +30,7 @@
 
 #include <vector>
 #include <string>
-#include <ext/hash_set>
+#include <unordered_set>
 
 #include "base/tls.h"
 #include "expr/kind.h"
@@ -95,12 +95,12 @@ class NodeManager {
     bool operator()(expr::NodeValue* nv) { return nv->d_rc > 0; }
   };
 
-  typedef __gnu_cxx::hash_set<expr::NodeValue*,
-                              expr::NodeValuePoolHashFunction,
-                              expr::NodeValuePoolEq> NodeValuePool;
-  typedef __gnu_cxx::hash_set<expr::NodeValue*,
-                              expr::NodeValueIDHashFunction,
-                              expr::NodeValueIDEquality> NodeValueIDSet;
+  typedef std::unordered_set<expr::NodeValue*,
+                             expr::NodeValuePoolHashFunction,
+                             expr::NodeValuePoolEq> NodeValuePool;
+  typedef std::unordered_set<expr::NodeValue*,
+                             expr::NodeValueIDHashFunction,
+                             expr::NodeValueIDEquality> NodeValueIDSet;
 
   static CVC4_THREADLOCAL(NodeManager*) s_current;
 
@@ -873,31 +873,6 @@ public:
 
   /** Make a new sort with the given name and arity. */
   TypeNode mkSortConstructor(const std::string& name, size_t arity);
-
-  /**
-   * Make a predicate subtype type defined by the given LAMBDA
-   * expression.  A TypeCheckingExceptionPrivate can be thrown if
-   * lambda is not a LAMBDA, or is ill-typed, or if CVC4 fails at
-   * proving that the resulting predicate subtype is inhabited.
-   */
-  TypeNode mkPredicateSubtype(Expr lambda)
-    throw(TypeCheckingExceptionPrivate);
-
-  /**
-   * Make a predicate subtype type defined by the given LAMBDA
-   * expression and whose non-emptiness is witnessed by the given
-   * witness.  A TypeCheckingExceptionPrivate can be thrown if lambda
-   * is not a LAMBDA, or is ill-typed, or if the witness is not a
-   * witness or ill-typed.
-   */
-  TypeNode mkPredicateSubtype(Expr lambda, Expr witness)
-    throw(TypeCheckingExceptionPrivate);
-
-  /**
-   * Make an integer subrange type as defined by the argument.
-   */
-  TypeNode mkSubrangeType(const SubrangeBounds& bounds)
-    throw(TypeCheckingExceptionPrivate);
 
   /**
    * Get the type for the given node and optionally do type checking.

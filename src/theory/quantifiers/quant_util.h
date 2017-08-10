@@ -2,9 +2,9 @@
 /*! \file quant_util.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Morgan Deters, Andrew Reynolds, Tim King
+ **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -17,12 +17,11 @@
 #ifndef __CVC4__THEORY__QUANT_UTIL_H
 #define __CVC4__THEORY__QUANT_UTIL_H
 
-#include "theory/theory.h"
-#include "theory/uf/equality_engine.h"
-
-#include <ext/hash_set>
 #include <iostream>
 #include <map>
+
+#include "theory/theory.h"
+#include "theory/uf/equality_engine.h"
 
 namespace CVC4 {
 namespace theory {
@@ -205,6 +204,24 @@ public:
   Node mkEPRAxiom( TypeNode tn );
   /** has EPR axiom */
   bool hasEPRAxiom( TypeNode tn ) const { return d_epr_axiom.find( tn )!=d_epr_axiom.end(); }
+};
+
+class TermRecBuild {
+private:
+  std::vector< Node > d_term;
+  std::vector< std::vector< Node > > d_children;
+  std::vector< Kind > d_kind;
+  std::vector< bool > d_has_op;
+  std::vector< unsigned > d_pos;
+  void addTerm( Node n );
+public:
+  TermRecBuild(){}
+  void init( Node n );
+  void push( unsigned p );
+  void pop();
+  void replaceChild( unsigned i, Node n );
+  Node getChild( unsigned i );
+  Node build( unsigned p=0 );
 };
 
 }

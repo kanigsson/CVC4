@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Tim King, Liana Hadarean
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -20,6 +20,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <new>
 
 // This must come before PORTFOLIO_BUILD.
@@ -27,7 +28,6 @@
 
 #include "base/configuration.h"
 #include "base/output.h"
-#include "base/ptr_closer.h"
 #include "expr/expr_iomanip.h"
 #include "expr/expr_manager.h"
 #include "main/command_executor.h"
@@ -162,7 +162,7 @@ int runCvc4(int argc, char* argv[], Options& opts) {
     } else {
       unsigned len = filenameStr.size();
       if(len >= 5 && !strcmp(".smt2", filename + len - 5)) {
-        opts.setInputLanguage(language::input::LANG_SMTLIB_V2_5);
+        opts.setInputLanguage(language::input::LANG_SMTLIB_V2_6);
       } else if(len >= 4 && !strcmp(".smt", filename + len - 4)) {
         opts.setInputLanguage(language::input::LANG_SMTLIB_V1);
       } else if(len >= 5 && !strcmp(".smt1", filename + len - 5)) {
@@ -249,7 +249,7 @@ int runCvc4(int argc, char* argv[], Options& opts) {
   }
 # endif
 
-  PtrCloser<Parser> replayParser;
+  std::unique_ptr<Parser> replayParser;
   if( opts.getReplayInputFilename() != "" ) {
     std::string replayFilename = opts.getReplayInputFilename();
     ParserBuilder replayParserBuilder(exprMgr, replayFilename, opts);
@@ -357,7 +357,7 @@ int runCvc4(int argc, char* argv[], Options& opts) {
 
       vector< vector<Command*> > allCommands;
       allCommands.push_back(vector<Command*>());
-      PtrCloser<Parser> parser(parserBuilder.build());
+      std::unique_ptr<Parser> parser(parserBuilder.build());
       if(replayParser) {
         // have the replay parser use the file's declarations
         replayParser->useDeclarationsFrom(parser.get());
@@ -512,7 +512,7 @@ int runCvc4(int argc, char* argv[], Options& opts) {
 #endif /* CVC4_COMPETITION_MODE && !CVC4_SMTCOMP_APPLICATION_TRACK */
       }
 
-      PtrCloser<Parser> parser(parserBuilder.build());
+      std::unique_ptr<Parser> parser(parserBuilder.build());
       if(replayParser) {
         // have the replay parser use the file's declarations
         replayParser->useDeclarationsFrom(parser.get());

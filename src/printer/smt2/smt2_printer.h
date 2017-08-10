@@ -2,9 +2,9 @@
 /*! \file smt2_printer.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Morgan Deters, Tim King, Andrew Reynolds
+ **   Morgan Deters, Paul Meng, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -38,7 +38,7 @@ enum Variant {
 class Smt2Printer : public CVC4::Printer {
   Variant d_variant;
 
-  void toStream(std::ostream& out, TNode n, int toDepth, bool types) const throw();
+  void toStream(std::ostream& out, TNode n, int toDepth, bool types, TypeNode nt) const throw();
   void toStream(std::ostream& out, const Model& m, const Command* c) const throw();
 public:
   Smt2Printer(Variant variant = no_variant) : d_variant(variant) { }

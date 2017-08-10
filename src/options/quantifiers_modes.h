@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Tim King, Morgan Deters
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -131,19 +131,6 @@ enum CVC4_PUBLIC PrenexQuantMode {
   PRENEX_QUANT_DISJ_NORMAL,
   /** prenex normal form */
   PRENEX_QUANT_NORMAL,
-};
-
-enum CegqiFairMode {
-  /** enforce fairness by UF corresponding to datatypes size */
-  CEGQI_FAIR_UF_DT_SIZE,
-  /** enforce fairness by datatypes size */
-  CEGQI_FAIR_DT_SIZE,
-  /** enforce fairness by datatypes height bound */
-  CEGQI_FAIR_DT_HEIGHT_PRED,
-  /** enforce fairness by datatypes size bound */
-  CEGQI_FAIR_DT_SIZE_PRED,
-  /** do not use fair strategy for CEGQI */
-  CEGQI_FAIR_NONE,
 };
 
 enum TermDbMode {

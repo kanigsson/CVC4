@@ -2,9 +2,9 @@
 /*! \file theory_proof.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Guy Katz, Morgan Deters
+ **   Guy Katz, Liana Hadarean, Morgan Deters
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -118,7 +118,12 @@ TheoryProof* TheoryProofEngine::getTheoryProof(theory::TheoryId id) {
     id = theory::THEORY_UF;
   }
 
-  Assert (d_theoryProofTable.find(id) != d_theoryProofTable.end());
+  if (d_theoryProofTable.find(id) == d_theoryProofTable.end()) {
+    std::stringstream ss;
+    ss << "Error! Proofs not yet supported for the following theory: " << id << std::endl;
+    InternalError(ss.str().c_str());
+  }
+
   return d_theoryProofTable[id];
 }
 

@@ -2,9 +2,9 @@
 /*! \file theory_arith_private.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Tim King, Martin Brain, Morgan Deters
+ **   Tim King, Martin Brain, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -848,8 +848,16 @@ private:
    * semantics.  Needed to deal with partial function "mod".
    */
   Node d_modZero;
-
-
+  
+  /** 
+   *  Maps for Skolems for to-integer, real/integer div-by-k.
+   *  Introduced during ppRewriteTerms.
+   */
+  typedef context::CDHashMap< Node, Node, NodeHashFunction > NodeMap;
+  NodeMap d_to_int_skolem;
+  NodeMap d_div_skolem;
+  NodeMap d_int_div_skolem;
+  
 };/* class TheoryArithPrivate */
 
 }/* CVC4::theory::arith namespace */

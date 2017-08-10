@@ -55,7 +55,6 @@ libcvc4_la_SOURCES = \
 	context/context.h \
 	context/context_mm.cpp \
 	context/context_mm.h \
-	context/stacking_vector.h \
 	decision/decision_attributes.h \
 	decision/decision_engine.cpp \
 	decision/decision_engine.h \
@@ -354,6 +353,8 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/ce_guided_single_inv.h \
 	theory/quantifiers/ce_guided_single_inv_ei.cpp \
 	theory/quantifiers/ce_guided_single_inv_ei.h \
+	theory/quantifiers/ce_guided_pbe.cpp \
+	theory/quantifiers/ce_guided_pbe.h \
 	theory/quantifiers/ce_guided_single_inv_sol.cpp \
 	theory/quantifiers/ce_guided_single_inv_sol.h \
 	theory/quantifiers/ceg_instantiator.cpp \
@@ -412,6 +413,8 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/symmetry_breaking.h \
 	theory/quantifiers/term_database.cpp \
 	theory/quantifiers/term_database.h \
+	theory/quantifiers/term_database_sygus.cpp \
+	theory/quantifiers/term_database_sygus.h \
 	theory/quantifiers/theory_quantifiers.cpp \
 	theory/quantifiers/theory_quantifiers.h \
 	theory/quantifiers/theory_quantifiers_type_rules.h \

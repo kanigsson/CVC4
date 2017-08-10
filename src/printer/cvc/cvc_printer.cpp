@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Dejan Jovanovic, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -145,12 +145,6 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       }
       break;
     }
-    case kind::SUBRANGE_TYPE:
-      out << '[' << n.getConst<SubrangeBounds>() << ']';
-      break;
-    case kind::SUBTYPE_TYPE:
-      out << "SUBTYPE(" << n.getConst<Predicate>() << ")";
-      break;
     case kind::TYPE_CONSTANT:
       switch(TypeConstant tc = n.getConst<TypeConstant>()) {
       case REAL_TYPE:
@@ -392,18 +386,24 @@ void CvcPrinter::toStream(std::ostream& out, TNode n, int depth, bool types, boo
       break;
     case kind::APPLY_SELECTOR:
     case kind::APPLY_SELECTOR_TOTAL: {
-        TypeNode t = n.getType();
+        TypeNode t = n[0].getType();
+        Node opn = n.getOperator();
         if( t.isTuple() ){
           toStream(out, n[0], depth, types, true);
-          out << '.' << Datatype::indexOf( n.getOperator().toExpr() );
+          const Datatype& dt = ((DatatypeType)t.toType()).getDatatype();
+          int sindex = dt[0].getSelectorIndexInternal( opn.toExpr() );
+          Assert( sindex>=0 );
+          out << '.' << sindex;
         }else if( t.isRecord() ){
           toStream(out, n[0], depth, types, true);
           const Record& rec = t.getRecord();
-          unsigned index = Datatype::indexOf( n.getOperator().toExpr() );
-          std::pair<std::string, Type> fld = rec[index];
+          const Datatype& dt = ((DatatypeType)t.toType()).getDatatype();
+          int sindex = dt[0].getSelectorIndexInternal( opn.toExpr() );
+          Assert( sindex>=0 );
+          std::pair<std::string, Type> fld = rec[sindex];
           out << '.' << fld.first;
         }else{
-          toStream(op, n.getOperator(), depth, types, false);
+          toStream(op, opn, depth, types, false);
         }
       }
       break;

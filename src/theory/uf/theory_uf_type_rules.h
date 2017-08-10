@@ -2,9 +2,9 @@
 /*! \file theory_uf_type_rules.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Andrew Reynolds, Morgan Deters, Dejan Jovanovic
+ **   Tim King, Morgan Deters, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -45,13 +45,14 @@ class UfTypeRule {
            ++argument_it, ++argument_type_it) {
         TypeNode currentArgument = (*argument_it).getType();
         TypeNode currentArgumentType = *argument_type_it;
-        if (!currentArgument.isComparableTo(currentArgumentType)) {
+        if (!currentArgument.isSubtypeOf(currentArgumentType)) { 
           std::stringstream ss;
           ss << "argument type is not a subtype of the function's argument "
              << "type:\n"
              << "argument:  " << *argument_it << "\n"
              << "has type:  " << (*argument_it).getType() << "\n"
-             << "not subtype: " << *argument_type_it;
+             << "not subtype: " << *argument_type_it << "\n"
+             << "in term : " << n;
           throw TypeCheckingExceptionPrivate(n, ss.str());
         }
       }

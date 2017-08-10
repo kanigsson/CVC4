@@ -2,9 +2,9 @@
 /*! \file ce_guided_single_inv_sol.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Andrew Reynolds, Tim King
+ **   Andrew Reynolds, Paul Meng, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -20,7 +20,7 @@
 #include "theory/quantifiers/ce_guided_single_inv.h"
 #include "theory/quantifiers/first_order_model.h"
 #include "theory/quantifiers/quant_util.h"
-#include "theory/quantifiers/term_database.h"
+#include "theory/quantifiers/term_database_sygus.h"
 #include "theory/quantifiers/trigger.h"
 #include "theory/theory_engine.h"
 
@@ -383,7 +383,7 @@ Node CegConjectureSingleInvSol::simplifySolutionNode( Node sol, TypeNode stn, st
     d_qe->getTermDatabaseSygus()->registerSygusType( stn );
     std::map< int, TypeNode > stnc;
     if( !stn.isNull() ){
-      int karg = d_qe->getTermDatabaseSygus()->getKindArg( stn, sol.getKind() );
+      int karg = d_qe->getTermDatabaseSygus()->getKindConsNum( stn, sol.getKind() );
       if( karg!=-1 ){
         const Datatype& dt = ((DatatypeType)(stn).toType()).getDatatype();
         if( dt[karg].getNumArgs()==sol.getNumChildren() ){
@@ -714,8 +714,10 @@ Node CegConjectureSingleInvSol::reconstructSolution( Node sol, TypeNode stn, int
       }
     }while( !active.empty() );
 
-    //if solution is null, we ran out of elements, return the original solution
-    return sol;
+    // we ran out of elements, return null
+    reconstructed = -1;
+    Warning() << CommandFailure("Cannot get synth function: reconstruction to syntax failed.");
+    return Node::null(); // return sol;
   }
 }
 
@@ -741,14 +743,14 @@ int CegConjectureSingleInvSol::collectReconstructNodes( Node t, TypeNode stn, in
     Node min_t = d_qe->getTermDatabaseSygus()->minimizeBuiltinTerm( t );
     Trace("csi-rcons-debug") << "Minimized term is : " << min_t << std::endl;
     //check if op is in syntax sort
-    carg = d_qe->getTermDatabaseSygus()->getOpArg( stn, min_t );
+    carg = d_qe->getTermDatabaseSygus()->getOpConsNum( stn, min_t );
     if( carg!=-1 ){
       Trace("csi-rcons-debug") << "  Type has operator." << std::endl;
       d_reconstruct[id] = NodeManager::currentNM()->mkNode( APPLY_CONSTRUCTOR, Node::fromExpr( dt[carg].getConstructor() ) );
       status = 0;
     }else{
       //check if kind is in syntax sort
-      karg = d_qe->getTermDatabaseSygus()->getKindArg( stn, min_t.getKind() );
+      karg = d_qe->getTermDatabaseSygus()->getKindConsNum( stn, min_t.getKind() );
       if( karg!=-1 ){
         //collect the children of min_t
         std::vector< Node > tchildren;
@@ -880,7 +882,7 @@ int CegConjectureSingleInvSol::collectReconstructNodes( Node t, TypeNode stn, in
                 }
                 //get decompositions
                 for( unsigned i=0; i<dt.getNumConstructors(); i++ ){
-                  Kind k = d_qe->getTermDatabaseSygus()->getArgKind( stn, i );
+                  Kind k = d_qe->getTermDatabaseSygus()->getConsNumKind( stn, i );
                   getEquivalentTerms( k, min_t, equiv );
                 }
                 //assign ids to terms

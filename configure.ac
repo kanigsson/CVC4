@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 m4_define(_CVC4_MAJOR,          1)       dnl version (major)
-m4_define(_CVC4_MINOR,          5)       dnl version (minor)
+m4_define(_CVC4_MINOR,          6)       dnl version (minor)
 m4_define(_CVC4_RELEASE,        0)       dnl version (alpha)
 m4_define(_CVC4_EXTRAVERSION,   [-prerelease])      dnl version (extra)
 m4_define(_CVC4_RELEASE_STRING, _CVC4_MAJOR[.]_CVC4_MINOR[]m4_if(_CVC4_RELEASE,[0],,[.]_CVC4_RELEASE)_CVC4_EXTRAVERSION) dnl version string
@@ -64,11 +64,11 @@ CVC4_PARSER_LIBRARY_VERSION=_CVC4_PARSER_LIBRARY_VERSION
 CVC4_COMPAT_LIBRARY_VERSION=_CVC4_COMPAT_LIBRARY_VERSION
 CVC4_BINDINGS_LIBRARY_VERSION=_CVC4_BINDINGS_LIBRARY_VERSION
 
-# Using the AC_CANONICAL_* macros destroy the command line you get
-# from $@, which we want later for determining the build profile.  So
-# we save it.  (We can't do our build profile stuff here, or it's not
-# included in the output... autoconf overrides us on the orderings of
-# some things.)
+# Using AX_CXX_COMPILE_STDCXX_11 and the AC_CANONICAL_* macros destroy the
+# command line you get from $@, which we want later for determining the build
+# profile.  So we save it.
+# (We can't do our build profile stuff here, or it's not included in the
+# output... autoconf overrides us on the orderings of some things.)
 config_cmdline=("$@")
 cvc4_config_cmdline="${config_cmdline[[@]]}"
 
@@ -97,6 +97,10 @@ AC_DISABLE_STATIC
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
+
+# C++11 support in the compiler is now mandatory. Check for support and add
+# switches if necessary.
+AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 
 as_me=configure
 
@@ -468,7 +472,7 @@ case "$with_build" in
     FLAG_VISIBILITY_HIDDEN='-fvisibility=hidden'
     if test -z "${OPTLEVEL+set}"            ; then OPTLEVEL=3                       ; fi
     if test -z "${enable_optimized+set}"    ; then enable_optimized=yes             ; fi
-    if test -z "${enable_debug_symbols+set}"; then enable_debug_symbols=yes         ; fi
+    if test -z "${enable_debug_symbols+set}"; then enable_debug_symbols=no          ; fi
     if test -z "${enable_statistics+set}"   ; then enable_statistics=yes            ; fi
     if test -z "${enable_replay+set}"       ; then enable_replay=no                 ; fi
     if test -z "${enable_assertions+set}"   ; then enable_assertions=no             ; fi
@@ -596,8 +600,12 @@ if test "$enable_optimized" = yes; then
   CVC4CXXFLAGS="${CVC4CXXFLAGS:+$CVC4CXXFLAGS }-O$OPTLEVEL"
   CVC4CFLAGS="${CVC4CFLAGS:+$CVC4CFLAGS }-O$OPTLEVEL"
 else
-  CVC4CXXFLAGS="${CVC4CXXFLAGS:+$CVC4CXXFLAGS }-O0"
-  CVC4CFLAGS="${CVC4CFLAGS:+$CVC4CFLAGS }-O0"
+  # Use -Og if available (optimizations that do not interfere with debugging),
+  # -O0 otherwise
+  debug_optimization_level="-O0"
+  CVC4_CXX_OPTION([-Og], [debug_optimization_level])
+  CVC4CXXFLAGS="${CVC4CXXFLAGS:+$CVC4CXXFLAGS }${debug_optimization_level}"
+  CVC4CFLAGS="${CVC4CFLAGS:+$CVC4CFLAGS }${debug_optimization_level}"
 fi
 
 AC_MSG_CHECKING([whether to include debugging symbols in libcvc4])
@@ -822,14 +830,14 @@ AC_SUBST([CRYPTOMINISAT_LIBS])
 
 
 # Check to see if this version/architecture of GNU C++ explicitly
-# instantiates __gnu_cxx::hash<uint64_t> or not.  Some do, some don't.
+# instantiates std::hash<uint64_t> or not.  Some do, some don't.
 # See src/util/hash.h.
-AC_MSG_CHECKING([whether __gnu_cxx::hash<uint64_t> is already specialized])
+AC_MSG_CHECKING([whether std::hash<uint64_t> is already specialized])
 AC_LANG_PUSH([C++])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-#include <stdint.h>
-#include <ext/hash_map>
-namespace __gnu_cxx { template<> struct hash<uint64_t> {}; }])],
+#include <cstdint>
+#include <functional>
+namespace std { template<> struct hash<uint64_t> {}; }])],
                   [AC_MSG_RESULT([no]); CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-DCVC4_NEED_HASH_UINT64_T"],
                   [AC_MSG_RESULT([yes])])
 AC_LANG_POP([C++])
@@ -919,24 +927,11 @@ DX_PS_FEATURE(OFF)
 DX_DOT_FEATURE(OFF)
 DX_INIT_DOXYGEN($PACKAGE_NAME, config/doxygen.cfg, $srcdir/doc/doxygen)
 
-AC_ARG_ENABLE([unit-testing], AS_HELP_STRING([--disable-unit-testing], [don't build support for unit testing, even if available]), , [enable_unit_testing=check])
+AC_ARG_ENABLE([unit-testing], AS_HELP_STRING([--disable-unit-testing], [do not build support for unit testing, even if available]), , [enable_unit_testing=check])
 AC_ARG_VAR(CXXTEST, [path to CxxTest installation])
-
-AC_SUBST([CXXTEST])
-
 AC_ARG_WITH([cxxtest-dir],
   [AS_HELP_STRING([--with-cxxtest-dir=DIR], [path to CxxTest installation])],
   [CXXTEST="$withval"])
-
-# In the case of "./configure --with-cxxtest-dir=../cxxtest" (or other
-# relative path) and having switched the configure directory (see above),
-# search with respect to the top source dir, not the build dir
-if test "$CVC4_CONFIGURE_IN_BUILDS" = yes -a -n "$CXXTEST"; then
-  case "$CXXTEST" in
-    /*) ;;
-    *)  CXXTEST="$srcdir/$CXXTEST" ;;
-  esac
-fi
 
 TESTS_ENVIRONMENT=
 RUN_REGRESSION_ARGS=
@@ -946,38 +941,71 @@ fi
 AC_SUBST([TESTS_ENVIRONMENT])
 AC_SUBST([RUN_REGRESSION_ARGS])
 
+AC_ARG_VAR(TEST_CPPFLAGS, [CPPFLAGS to use when testing (default=$CPPFLAGS)])
+AC_ARG_VAR(TEST_CXXFLAGS, [CXXFLAGS to use when testing (default=$CXXFLAGS)])
+AC_ARG_VAR(TEST_LDFLAGS,  [LDFLAGS to use when testing (default=$LDFLAGS)])
+
 CXXTESTGEN=
-AC_PATH_PROG(CXXTESTGEN, cxxtestgen.pl, [], [$CXXTEST:$PATH])
-if test -z "$CXXTESTGEN"; then
-  AC_PATH_PROG(CXXTESTGEN, cxxtestgen.py, [], [$CXXTEST:$PATH])
-fi
-if test -z "$CXXTESTGEN"; then
-  AC_PATH_PROG(CXXTESTGEN, cxxtestgen, [], [$CXXTEST:$PATH])
-fi
-# The latest version of cxxtest distributed from the git repository places
-# cxxtest under <cxxtest-root>/bin/cxxtest
-if test -z "$CXXTESTGEN"; then
-  AC_PATH_PROG(CXXTESTGEN, cxxtestgen, [], [$CXXTEST/bin:$PATH])
-fi
 if test "$enable_unit_testing" = "no"; then
   AC_MSG_NOTICE([unit tests disabled by user request.])
-  CXXTESTGEN=
   CXXTEST=
-elif test -z "$CXXTESTGEN"; then
-  AC_MSG_NOTICE([unit tests disabled, could not find cxxtestgen.pl or cxxtestgen.py or cxxtestgen])
-elif test -z "$CXXTEST"; then
-  CXXTEST=`dirname "$CXXTESTGEN"`
-  AC_MSG_CHECKING([for location of CxxTest headers])
-  if test -e "$CXXTEST/cxxtest/TestRunner.h"; then
-    AC_MSG_RESULT([$CXXTEST])
-  else
-    if test -e "/usr/include/cxxtest/TestRunner.h"; then
-      AC_MSG_RESULT([/usr/include])
+else
+  # The latest version of cxxtest distributed from the git repository places
+  # cxxtest under <cxxtest-root>/bin/cxxtest
+  AC_PATH_PROGS(CXXTESTGEN,
+                cxxtestgen.pl cxxtestgen.py cxxtestgen,
+                [
+                  AC_MSG_NOTICE([unit tests disabled, \
+                                 could not find cxxtestgen.pl or \
+                                 cxxtestgen.py or cxxtestgen])
+                  CXXTEST=
+                ],
+                [$CXXTEST:$CXXTEST/bin:$PATH])
+
+  if test -n "$CXXTESTGEN" -a "`basename $CXXTESTGEN`" = "cxxtestgen.pl"; then
+    if test -z "$PERL"; then
+      AC_CHECK_PROGS(PERL, perl, perl, [])
     else
-      AC_MSG_RESULT([not found])
-      AC_MSG_WARN([unit tests disabled, CxxTest headers not found.])
+      AC_CHECK_PROG(PERL, "$PERL", "$PERL", [])
+    fi
+
+    if test -z "$PERL"; then
+      AC_MSG_WARN([unit tests disabled, perl not found.])
       CXXTESTGEN=
       CXXTEST=
+    fi
+  fi
+
+  # check if CxxTest headers exist and set include paths accordingly
+  if test -n "$CXXTESTGEN"; then
+    AC_MSG_CHECKING([for location of CxxTest headers])
+    if test -n "$CXXTEST"; then
+      if test -e "$CXXTEST/cxxtest/TestRunner.h"; then
+        AC_MSG_RESULT([$CXXTEST])
+        TEST_CPPFLAGS="${TEST_CPPFLAGS} -I$CXXTEST"
+        TEST_CXXFLAGS="${TEST_CXXFLAGS} -I$CXXTEST"
+      else
+        AC_MSG_RESULT([not found])
+        AC_MSG_WARN([unit tests disabled, CxxTest headers not found at $CXXTEST.])
+        CXXTESTGEN=
+        CXXTEST=
+      fi
+    # TODO: use more generic way to find cxxtest/TestRunner.h in system headers
+    elif test -e "/usr/include/cxxtest/TestRunner.h"; then
+      CXXTEST=/usr/include
+      AC_MSG_RESULT([$CXXTEST])
+    else
+      CXXTEST=`dirname "$CXXTESTGEN"`
+      if test -e "$CXXTEST/cxxtest/TestRunner.h"; then
+        AC_MSG_RESULT([$CXXTEST])
+        TEST_CPPFLAGS="${TEST_CPPFLAGS} -I$CXXTEST"
+        TEST_CXXFLAGS="${TEST_CXXFLAGS} -I$CXXTEST"
+      else
+        AC_MSG_RESULT([not found])
+        AC_MSG_WARN([unit tests disabled, CxxTest headers not found.])
+        CXXTESTGEN=
+        CXXTEST=
+      fi
     fi
   fi
 fi
@@ -988,25 +1016,7 @@ fi
 
 AM_CONDITIONAL([HAVE_CXXTESTGEN], [test -n "$CXXTESTGEN"])
 
-AC_ARG_VAR(TEST_CPPFLAGS, [CPPFLAGS to use when testing (default=$CPPFLAGS)])
-AC_ARG_VAR(TEST_CXXFLAGS, [CXXFLAGS to use when testing (default=$CXXFLAGS)])
-AC_ARG_VAR(TEST_LDFLAGS,  [LDFLAGS to use when testing (default=$LDFLAGS)])
-
 AC_ARG_VAR(PERL, [PERL interpreter (used when testing)])
-
-if test -n "$CXXTEST"; then
-  if test -z "$PERL"; then
-    AC_CHECK_PROGS(PERL, perl, perl, [])
-  else
-    AC_CHECK_PROG(PERL, "$PERL", "$PERL", [])
-  fi
-
-  if test -z "$PERL"; then
-    AC_MSG_WARN([unit tests disabled, perl not found.])
-    CXXTESTGEN=
-    CXXTEST=
-  fi
-fi
 
 AC_ARG_VAR(PYTHON, [PYTHON interpreter (used for building legacy Java library interface)])
 
@@ -1034,6 +1044,10 @@ AC_CHECK_FUNC([ffs], [AC_DEFINE([HAVE_FFS], [1],
                                 [Defined to 1 if ffs() is supported by the platform.])])
 
 AC_LIBOBJ([strtok_r ffs])
+
+# Check for sigaltstack (missing in emscripten and mingw)
+AC_CHECK_FUNC([sigaltstack], [AC_DEFINE([HAVE_SIGALTSTACK], [1],
+                                        [Defined to 1 if sigaltstack() is supported by the platform.])])
 
 # Check for antlr C++ runtime (defined in config/antlr.m4)
 AC_LIB_ANTLR
@@ -1064,9 +1078,6 @@ AC_CHECK_DECLS([optreset], [], [], [#include <getopt.h>])
 
 # check with which standard strerror_r() complies
 AC_FUNC_STRERROR_R
-
-# is is_sorted() in std or __gnu_cxx?
-CHECK_FOR_IS_SORTED
 
 # require boost library
 BOOST_REQUIRE()

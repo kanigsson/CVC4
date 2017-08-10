@@ -2,9 +2,9 @@
 /*! \file trigger.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Tim King, Morgan Deters, Andrew Reynolds
+ **   Andrew Reynolds, Tim King, Morgan Deters
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -137,9 +137,9 @@ private:
   static Node getIsUsableEq( Node q, Node eq );
   static bool isUsableEqTerms( Node q, Node n1, Node n2 );
   /** collect all APPLY_UF pattern terms for f in n */
-  static void collectPatTerms2( Node q, Node n, std::map< Node, Node >& visited, std::map< Node, TriggerTermInfo >& tinfo, 
+  static void collectPatTerms2( Node q, Node n, std::map< Node, std::vector< Node > >& visited, std::map< Node, TriggerTermInfo >& tinfo, 
                                 quantifiers::TriggerSelMode tstrt, std::vector< Node >& exclude, std::vector< Node >& added,
-                                bool pol, bool hasPol, bool epol, bool hasEPol );
+                                bool pol, bool hasPol, bool epol, bool hasEPol, bool knowIsUsable = false );
 
   std::vector< Node > d_nodes;
 

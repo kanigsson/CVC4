@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Andrew Reynolds, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -60,7 +60,7 @@ public:
   static Node computeProcessTerms( Node body, std::vector< Node >& new_vars, std::vector< Node >& new_conds, Node q, QAttributes& qa );
   static Node computeCondSplit( Node body, QAttributes& qa );
   static Node computePrenex( Node body, std::vector< Node >& args, std::vector< Node >& nargs, bool pol, bool prenexAgg );
-  static Node computePrenexAgg( Node n, bool topLevel );
+  static Node computePrenexAgg( Node n, bool topLevel, std::map< unsigned, std::map< Node, Node > >& visited );
   static Node computeSplit( std::vector< Node >& args, Node body, QAttributes& qa );
   static Node computeVarElimination( Node body, std::vector< Node >& args, QAttributes& qa );
 private:
@@ -94,6 +94,7 @@ public:
   static Node preprocess( Node n, bool isInst = false );
   static Node mkForAll( std::vector< Node >& args, Node body, QAttributes& qa );
   static Node mkForall( std::vector< Node >& args, Node body, bool marked = false );
+  static Node mkForall( std::vector< Node >& args, Node body, std::vector< Node >& iplc, bool marked = false );
 };/* class QuantifiersRewriter */
 
 }/* CVC4::theory::quantifiers namespace */

@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -734,8 +734,7 @@ Node FirstOrderModelFmc::getFunctionValue(Node op, const char* argPrefix ) {
           if( !isStar(cond[j][1]) ){
             children.push_back( NodeManager::currentNM()->mkNode( LT, vars[j], cond[j][1] ) );
           }
-        }else if ( !isStar(cond[j]) &&  //handle the case where there are 0 or 1 ground eqc of this type
-                   d_rep_set.d_type_reps.find( tn )!=d_rep_set.d_type_reps.end() && d_rep_set.d_type_reps[ tn ].size()>1 ){
+        }else if( !isStar(cond[j]) ){
           Node c = getRepresentative( cond[j] );
           c = getRepresentative( c );
           children.push_back( NodeManager::currentNM()->mkNode( EQUAL, vars[j], c ) );

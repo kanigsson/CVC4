@@ -37,7 +37,6 @@ UNIT_TESTS += \
 	context/cdmap_black \
 	context/cdmap_white \
 	context/cdvector_black \
-	context/stacking_vector_black \
 	util/array_store_all_black \
 	util/assert_white \
 	util/binary_heap_black \
@@ -53,7 +52,6 @@ UNIT_TESTS += \
 	util/rational_white \
 	util/stats_black \
 	util/boolean_simplification_black \
-	util/subrange_bound_white \
 	main/interactive_shell_black
 endif
 
@@ -69,7 +67,6 @@ if HAVE_CXXTESTGEN
 
 AM_CPPFLAGS = \
 	-I. \
-	"-I@CXXTEST@" \
 	"-I@top_builddir@/src" \
 	"-I@top_srcdir@/src/include" \
 	"-I@top_srcdir@/lib" \

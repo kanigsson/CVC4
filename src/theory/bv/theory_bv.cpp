@@ -2,9 +2,9 @@
 /*! \file theory_bv.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Tim King, Dejan Jovanovic
+ **   Liana Hadarean, Andrew Reynolds, Clark Barrett
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -510,7 +510,8 @@ bool TheoryBV::doExtfInferences( std::vector< Node >& terms ) {
   std::map< Node, Node > op_map;
   for( unsigned j=0; j<terms.size(); j++ ){
     TNode n = terms[j];
-    Assert( n.getKind()==kind::BITVECTOR_TO_NAT || kind::INT_TO_BITVECTOR );
+    Assert (n.getKind() == kind::BITVECTOR_TO_NAT
+            || n.getKind() == kind::INT_TO_BITVECTOR );
     if( n.getKind()==kind::BITVECTOR_TO_NAT ){
       //range lemmas
       if( d_extf_range_infer.find( n )==d_extf_range_infer.end() ){

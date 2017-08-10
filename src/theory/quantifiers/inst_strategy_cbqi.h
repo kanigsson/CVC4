@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds, Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -58,6 +58,7 @@ protected:
   /** helper functions */
   int hasNonCbqiVariable( Node q );
   bool hasNonCbqiOperator( Node n, std::map< Node, bool >& visited );
+  int isCbqiSort( TypeNode tn, std::map< TypeNode, int >& visited );
   /** get next decision request with dependency checking */
   Node getNextDecisionRequestProc( Node q, std::map< Node, bool >& proc );  
   /** process functions */

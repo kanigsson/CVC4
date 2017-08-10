@@ -1,9 +1,11 @@
+; COMMAND-LINE: --lang=smt2.5
+; EXPECT: unsat
 (set-logic ALL_SUPPORTED)
 (set-info :status unsat)
 
 (declare-datatypes (T) ((List (cons (hd T) (tl (List T))) (nil))))
 
-(declare-fun R ((List Int)) Bool)
+(declare-fun R ((List Real)) Bool)
 (assert (forall ((x (List Real))) (R x)))
 
 (declare-fun Q ((Array Int Real)) Bool)

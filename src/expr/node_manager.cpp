@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Tim King, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -18,7 +18,6 @@
 #include "expr/node_manager.h"
 
 #include <algorithm>
-#include <ext/hash_set>
 #include <stack>
 #include <utility>
 
@@ -36,7 +35,6 @@
 
 using namespace std;
 using namespace CVC4::expr;
-using __gnu_cxx::hash_set;
 
 namespace CVC4 {
 
@@ -504,51 +502,6 @@ TypeNode NodeManager::mkConstructorType(const DatatypeConstructor& constructor,
                       "cannot create higher-order function types");
   sorts.push_back(range);
   return mkTypeNode(kind::CONSTRUCTOR_TYPE, sorts);
-}
-
-TypeNode NodeManager::mkPredicateSubtype(Expr lambda)
-  throw(TypeCheckingExceptionPrivate) {
-
-  Node lambdan = Node::fromExpr(lambda);
-
-  if(lambda.isNull()) {
-    throw TypeCheckingExceptionPrivate(lambdan, "cannot make a predicate subtype based on null expression");
-  }
-
-  TypeNode tn = lambdan.getType();
-  if(! tn.isPredicateLike() ||
-     tn.getArgTypes().size() != 1) {
-    stringstream ss;
-    ss << "expected a predicate of one argument to define predicate subtype, but got type `" << tn << "'";
-    throw TypeCheckingExceptionPrivate(lambdan, ss.str());
-  }
-
-  return TypeNode(mkTypeConst(Predicate(lambda)));
-}
-
-TypeNode NodeManager::mkPredicateSubtype(Expr lambda, Expr witness)
-  throw(TypeCheckingExceptionPrivate) {
-
-  Node lambdan = Node::fromExpr(lambda);
-
-  if(lambda.isNull()) {
-    throw TypeCheckingExceptionPrivate(lambdan, "cannot make a predicate subtype based on null expression");
-  }
-
-  TypeNode tn = lambdan.getType();
-  if(! tn.isPredicateLike() ||
-     tn.getArgTypes().size() != 1) {
-    stringstream ss;
-    ss << "expected a predicate of one argument to define predicate subtype, but got type `" << tn << "'";
-    throw TypeCheckingExceptionPrivate(lambdan, ss.str());
-  }
-
-  return TypeNode(mkTypeConst(Predicate(lambda, witness)));
-}
-
-TypeNode NodeManager::mkSubrangeType(const SubrangeBounds& bounds)
-  throw(TypeCheckingExceptionPrivate) {
-  return TypeNode(mkTypeConst(bounds));
 }
 
 TypeNode NodeManager::TupleTypeCache::getTupleType( NodeManager * nm, std::vector< TypeNode >& types, unsigned index ) {

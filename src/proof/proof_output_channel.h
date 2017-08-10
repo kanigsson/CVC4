@@ -1,6 +1,13 @@
 /*********************                                                        */
 /*! \file proof_output_channel.h
  ** \verbatim
+ ** Top contributors (to current version):
+ **   Guy Katz, Tim King
+ ** This file is part of the CVC4 project.
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** in the top-level source directory) and their institutional affiliations.
+ ** All rights reserved.  See the file COPYING in the top-level source
+ ** directory for licensing information.\endverbatim
  **
  **/
 
@@ -8,6 +15,8 @@
 
 #ifndef __CVC4__PROOF_OUTPUT_CHANNEL_H
 #define __CVC4__PROOF_OUTPUT_CHANNEL_H
+
+#include <unordered_set>
 
 #include "theory/output_channel.h"
 
@@ -35,7 +44,7 @@ public:
 
 class MyPreRegisterVisitor {
   theory::Theory* d_theory;
-  __gnu_cxx::hash_set<TNode, TNodeHashFunction> d_visited;
+  std::unordered_set<TNode, TNodeHashFunction> d_visited;
 public:
   typedef void return_type;
   MyPreRegisterVisitor(theory::Theory* theory);

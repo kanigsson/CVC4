@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Clark Barrett, Morgan Deters, Guy Katz
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -551,7 +551,7 @@ void TheoryArrays::weakEquivMakeRepIndex(TNode node) {
 }
 
 void TheoryArrays::weakEquivAddSecondary(TNode index, TNode arrayFrom, TNode arrayTo, TNode reason) {
-  std::hash_set<TNode, TNodeHashFunction> marked;
+  std::unordered_set<TNode, TNodeHashFunction> marked;
   vector<TNode> index_trail;
   vector<TNode>::iterator it, iend;
   Node equivalence_trail = reason;
@@ -1198,7 +1198,7 @@ void TheoryArrays::collectModelInfo( TheoryModel* m )
       /*
     }
     else {
-      std::hash_map<Node, Node, NodeHashFunction>::iterator it = d_skolemCache.find(n);
+      std::unordered_map<Node, Node, NodeHashFunction>::iterator it = d_skolemCache.find(n);
       if (it == d_skolemCache.end()) {
         rep = nm->mkSkolem("array_collect_model_var", n.getType(), "base model variable for array collectModelInfo");
         d_skolemCache[n] = rep;
@@ -1240,7 +1240,7 @@ void TheoryArrays::presolve()
 Node TheoryArrays::getSkolem(TNode ref, const string& name, const TypeNode& type, const string& comment, bool makeEqual)
 {
   Node skolem;
-  std::hash_map<Node, Node, NodeHashFunction>::iterator it = d_skolemCache.find(ref);
+  std::unordered_map<Node, Node, NodeHashFunction>::iterator it = d_skolemCache.find(ref);
   if (it == d_skolemCache.end()) {
     NodeManager* nm = NodeManager::currentNM();
     skolem = nm->mkSkolem(name, type, comment);
@@ -1704,7 +1704,7 @@ void TheoryArrays::mergeArrays(TNode a, TNode b)
     // so we take its representative to be safe.
     a = d_equalityEngine.getRepresentative(a);
     Assert(d_equalityEngine.getRepresentative(b) == a);
-    Trace("arrays-merge") << spaces(getSatContext()->getLevel()) << "Arrays::merge: " << a << "," << b << ")\n";
+    Trace("arrays-merge") << spaces(getSatContext()->getLevel()) << "Arrays::merge: (" << a << ", " << b << ")\n";
 
     if (options::arraysLazyRIntro1() && !options::arraysWeakEquivalence()) {
       checkRIntro1(a, b);

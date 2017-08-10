@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Tim King, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -36,7 +36,7 @@ LogicInfo::LogicInfo() :
   d_sharingTheories(0),
   d_integers(true),
   d_reals(true),
-  d_linear(true),// for now, "everything enabled" doesn't include non-linear arith
+  d_linear(false),
   d_differenceLogic(false),
   d_cardinalityConstraints(false),
   d_locked(false) {
@@ -340,21 +340,25 @@ void LogicInfo::setLogicString(std::string logicString) throw(IllegalArgumentExc
     // the "all theories included" logic, no quantifiers
     enableEverything();
     disableQuantifiers();
+    arithNonLinear();
     p += 16;
   } else if(!strcmp(p, "QF_ALL")) {
     // the "all theories included" logic, no quantifiers
     enableEverything();
     disableQuantifiers();
+    arithNonLinear();
     p += 6;
   } else if(!strcmp(p, "ALL_SUPPORTED")) {
     // the "all theories included" logic, with quantifiers
     enableEverything();
     enableQuantifiers();
+    arithNonLinear();
     p += 13;
   } else if(!strcmp(p, "ALL")) {
     // the "all theories included" logic, with quantifiers
     enableEverything();
     enableQuantifiers();
+    arithNonLinear();
     p += 3;
   } else {
     if(!strncmp(p, "QF_", 3)) {

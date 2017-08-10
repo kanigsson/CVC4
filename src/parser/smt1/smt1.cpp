@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Christopher L. Conway, Clark Barrett
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -12,21 +12,17 @@
  ** Definitions of SMT-LIB (v1) constants.
  **/
 
-#include <ext/hash_map>
-namespace std {
-  using namespace __gnu_cxx;
-}
+#include "parser/smt1/smt1.h"
 
 #include "expr/type.h"
 #include "smt/command.h"
 #include "parser/parser.h"
-#include "parser/smt1/smt1.h"
 
 namespace CVC4 {
 namespace parser {
 
-std::hash_map<const std::string, Smt1::Logic, CVC4::StringHashFunction> Smt1::newLogicMap() {
-  std::hash_map<const std::string, Smt1::Logic, CVC4::StringHashFunction> logicMap;
+std::unordered_map<std::string, Smt1::Logic> Smt1::newLogicMap() {
+  std::unordered_map<std::string, Smt1::Logic> logicMap;
   logicMap["AUFLIA"] = AUFLIA;
   logicMap["AUFLIRA"] = AUFLIRA;
   logicMap["AUFNIRA"] = AUFNIRA;
@@ -68,7 +64,7 @@ std::hash_map<const std::string, Smt1::Logic, CVC4::StringHashFunction> Smt1::ne
 }
 
 Smt1::Logic Smt1::toLogic(const std::string& name) {
-  static std::hash_map<const std::string, Smt1::Logic, CVC4::StringHashFunction> logicMap = newLogicMap();
+  static std::unordered_map<std::string, Smt1::Logic> logicMap = newLogicMap();
   return logicMap[name];
 }
 

@@ -2,9 +2,9 @@
 /*! \file datatype.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Morgan Deters, Andrew Reynolds, Tim King
+ **   Morgan Deters, Andrew Reynolds, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -20,6 +20,7 @@
 #ifndef __CVC4__DATATYPE_H
 #define __CVC4__DATATYPE_H
 
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -197,6 +198,10 @@ private:
   Expr d_sygus_let_body;
   std::vector< Expr > d_sygus_let_args;
   unsigned d_sygus_num_let_input_args;
+  
+  /** shared selectors */
+  mutable std::map< Type, std::vector< Expr > > d_shared_selectors;
+  mutable std::map< Type, std::map< Expr, unsigned > > d_shared_selector_index;
 
   void resolve(ExprManager* em, DatatypeType self,
                const std::map<std::string, DatatypeType>& resolutions,
@@ -226,6 +231,8 @@ private:
   bool computeWellFounded( std::vector< Type >& processing ) const throw(IllegalArgumentException);
   /** compute ground term */
   Expr computeGroundTerm( Type t, std::vector< Type >& processing, std::map< Type, Expr >& gt ) const throw(IllegalArgumentException);
+  /** compute shared selectors */
+  void computeSharedSelectors( Type domainType ) const;
 public:
   /**
    * Create a new Datatype constructor with the given name for the
@@ -378,6 +385,17 @@ public:
    */
   Expr getSelector(std::string name) const;
 
+
+  /**
+   * Get the internal selector for a constructor argument.
+   */
+  Expr getSelectorInternal( Type domainType, size_t index ) const;
+  
+  /** 
+   * Get the index for the selector
+   */
+  int getSelectorIndexInternal( Expr sel ) const;
+  
   /**
    * Get whether this datatype involves an external type.  If so,
    * then we will pose additional requirements for sharing.
@@ -506,6 +524,8 @@ private:
   mutable int d_well_founded;
   // ground term for this datatype
   mutable std::map< Type, Expr > d_ground_term;
+  // shared selectors
+  mutable std::map< Type, std::map< Type, std::map< unsigned, Expr > > > d_shared_sel;
 
   /**
    * Datatypes refer to themselves, recursively, and we have a
@@ -549,7 +569,9 @@ private:
   /** compute whether this datatype is well-founded */
   bool computeWellFounded( std::vector< Type >& processing ) const throw(IllegalArgumentException);
   /** compute ground term */
-  Expr computeGroundTerm( Type t, std::vector< Type >& processing ) const throw(IllegalArgumentException);
+  Expr computeGroundTerm( Type t, std::vector< Type >& processing ) const throw(IllegalArgumentException);  
+  /** Get the shared selector */
+  Expr getSharedSelector( Type dtt, Type t, unsigned index ) const;
 public:
 
   /** Create a new Datatype of the given name. */
@@ -575,7 +597,11 @@ public:
    *    allow_const : whether all constants are (implicitly) included in the grammar
    */
   void setSygus( Type st, Expr bvl, bool allow_const, bool allow_all );
-
+  /** add sygus constructor */
+  void addSygusConstructor( CVC4::Expr op, std::string& cname, std::vector< CVC4::Type >& cargs );
+  void addSygusConstructor( CVC4::Expr op, std::string& cname, std::vector< CVC4::Type >& cargs,
+                            CVC4::Expr& let_body, std::vector< CVC4::Expr >& let_args, unsigned let_num_input_args );
+                                    
   /** set tuple */
   void setTuple();
 
@@ -726,7 +752,7 @@ public:
    * similarly-named constructors, the first is returned.
    */
   const DatatypeConstructor& operator[](std::string name) const;
-
+ 
   /**
    * Get the constructor operator for the named constructor.
    * This is a linear search through the constructors, so in
@@ -763,16 +789,16 @@ public:
  */
 struct CVC4_PUBLIC DatatypeHashFunction {
   inline size_t operator()(const Datatype& dt) const {
-    return StringHashFunction()(dt.getName());
+    return std::hash<std::string>()(dt.getName());
   }
   inline size_t operator()(const Datatype* dt) const {
-    return StringHashFunction()(dt->getName());
+    return std::hash<std::string>()(dt->getName());
   }
   inline size_t operator()(const DatatypeConstructor& dtc) const {
-    return StringHashFunction()(dtc.getName());
+    return std::hash<std::string>()(dtc.getName());
   }
   inline size_t operator()(const DatatypeConstructor* dtc) const {
-    return StringHashFunction()(dtc->getName());
+    return std::hash<std::string>()(dtc->getName());
   }
 };/* struct DatatypeHashFunction */
 

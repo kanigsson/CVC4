@@ -2,9 +2,9 @@
 /*! \file theory_bv_rewriter.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Morgan Deters, Clark Barrett
+ **   Liana Hadarean, Clark Barrett, Morgan Deters
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -439,11 +439,9 @@ RewriteResponse TheoryBVRewriter::RewriteUdivTotal(TNode node, bool prerewrite){
     return RewriteResponse(REWRITE_AGAIN_FULL, resultNode); 
   }
 
-  resultNode = LinearRewriteStrategy
-    < RewriteRule<EvalUdiv>,
-      RewriteRule<UdivOne>,
-      RewriteRule<UdivSelf>
-      >::apply(node);
+  resultNode =
+      LinearRewriteStrategy<RewriteRule<EvalUdiv>, RewriteRule<UdivZero>,
+                            RewriteRule<UdivOne> >::apply(node);
 
   return RewriteResponse(REWRITE_DONE, resultNode); 
 }

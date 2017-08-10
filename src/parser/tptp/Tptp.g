@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Francois Bobot, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -32,10 +32,11 @@ options {
 
 @header {
 /**
- ** This file is part of CVC4.
- ** Copyright (c) 2009-2014  New York University and The University of Iowa
- ** See the file COPYING in the top-level source directory for licensing
- ** information.
+ ** This file is part of the CVC4 project.
+ ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** in the top-level source directory) and their institutional affiliations.
+ ** All rights reserved.  See the file COPYING in the top-level source
+ ** directory for licensing information.
  **/
 }/* @header */
 
@@ -91,6 +92,8 @@ using namespace CVC4::parser;
 // This should come immediately after #include <antlr3.h> in the generated
 // files. See the documentation in "parser/antlr_undefines.h" for more details.
 #include "parser/antlr_undefines.h"
+
+#include <memory>
 
 #include "smt/command.h"
 #include "parser/parser.h"
@@ -353,7 +356,7 @@ definedFun[CVC4::Expr& expr]
                                       MK_EXPR(CVC4::kind::TO_INTEGER, expr),
                                       MK_EXPR(CVC4::kind::UMINUS, MK_EXPR(CVC4::kind::TO_INTEGER, MK_EXPR(CVC4::kind::UMINUS, expr))));
       if(remainder) {
-        expr = MK_EXPR(CVC4::kind::MINUS, n, MK_EXPR(CVC4::kind::MULT, expr, d));
+        expr = MK_EXPR(CVC4::kind::TO_INTEGER, MK_EXPR(CVC4::kind::MINUS, n, MK_EXPR(CVC4::kind::MULT, expr, d)));
       }
       expr = MK_EXPR(CVC4::kind::LAMBDA, formals, expr);
     }
@@ -368,7 +371,7 @@ definedFun[CVC4::Expr& expr]
                                       MK_EXPR(CVC4::kind::TO_INTEGER, expr),
                                       MK_EXPR(CVC4::kind::UMINUS, MK_EXPR(CVC4::kind::TO_INTEGER, MK_EXPR(CVC4::kind::UMINUS, expr))));
       if(remainder) {
-        expr = MK_EXPR(CVC4::kind::MINUS, n, MK_EXPR(CVC4::kind::MULT, expr, d));
+        expr = MK_EXPR(CVC4::kind::TO_INTEGER, MK_EXPR(CVC4::kind::MINUS, n, MK_EXPR(CVC4::kind::MULT, expr, d)));
       }
       expr = MK_EXPR(CVC4::kind::LAMBDA, formals, expr);
     }
@@ -381,7 +384,7 @@ definedFun[CVC4::Expr& expr]
       expr = MK_EXPR(CVC4::kind::DIVISION_TOTAL, n, d);
       expr = MK_EXPR(CVC4::kind::TO_INTEGER, expr);
       if(remainder) {
-        expr = MK_EXPR(CVC4::kind::MINUS, n, MK_EXPR(CVC4::kind::MULT, expr, d));
+        expr = MK_EXPR(CVC4::kind::TO_INTEGER, MK_EXPR(CVC4::kind::MINUS, n, MK_EXPR(CVC4::kind::MULT, expr, d)));
       }
       expr = MK_EXPR(CVC4::kind::LAMBDA, formals, expr);
     }

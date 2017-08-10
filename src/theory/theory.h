@@ -2,9 +2,9 @@
 /*! \file theory.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Dejan Jovanovic, Morgan Deters, Tim King
+ **   Morgan Deters, Dejan Jovanovic, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -19,11 +19,11 @@
 #ifndef __CVC4__THEORY__THEORY_H
 #define __CVC4__THEORY__THEORY_H
 
-#include <ext/hash_set>
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_set>
 
 #include "context/cdlist.h"
 #include "context/cdhashset.h"
@@ -243,9 +243,6 @@ public:
   static inline TheoryId theoryOf(TypeNode typeNode) {
     Trace("theory::internal") << "theoryOf(" << typeNode << ")" << std::endl;
     TheoryId id;
-    while (typeNode.isPredicateSubtype()) {
-      typeNode = typeNode.getSubtypeParentType();
-    }
     if (typeNode.getKind() == kind::TYPE_CONSTANT) {
       id = typeConstantToTheoryId(typeNode.getConst<TypeConstant>());
     } else {
@@ -763,7 +760,7 @@ public:
    * This is a utility function for constructing a copy of the currently shared terms
    * in a queriable form.  As this is
    */
-  std::hash_set<TNode, TNodeHashFunction> currentlySharedTerms() const;
+  std::unordered_set<TNode, TNodeHashFunction> currentlySharedTerms() const;
 
   /**
    * This allows the theory to be queried for whether a literal, lit, is

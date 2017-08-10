@@ -2,9 +2,9 @@
 /*! \file options_handler.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Tim King, Andrew Reynolds
+ **   Tim King, Andrew Reynolds, Liana Hadarean
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -29,6 +29,7 @@
 #include "options/base_handlers.h"
 #include "options/bv_bitblast_mode.h"
 #include "options/decision_mode.h"
+#include "options/datatypes_modes.h"
 #include "options/language.h"
 #include "options/option_exception.h"
 #include "options/options.h"
@@ -95,7 +96,6 @@ public:
   theory::quantifiers::TriggerSelMode stringToTriggerSelMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::TriggerActiveSelMode stringToTriggerActiveSelMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::PrenexQuantMode stringToPrenexQuantMode(std::string option, std::string optarg) throw(OptionException);
-  theory::quantifiers::CegqiFairMode stringToCegqiFairMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::TermDbMode stringToTermDbMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::IteLiftQuantMode stringToIteLiftQuantMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::CegqiSingleInvMode stringToCegqiSingleInvMode(std::string option, std::string optarg) throw(OptionException);
@@ -104,6 +104,7 @@ public:
   theory::quantifiers::QuantDSplitMode stringToQuantDSplitMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::QuantRepMode stringToQuantRepMode(std::string option, std::string optarg) throw(OptionException);
   theory::quantifiers::FmfBoundMinMode stringToFmfBoundMinMode(std::string option, std::string optarg) throw(OptionException);
+  theory::SygusFairMode stringToSygusFairMode(std::string option, std::string optarg) throw(OptionException);
 
   // theory/bv/options_handlers.h
   void abcEnabledBuild(std::string option, bool value) throw(OptionException);

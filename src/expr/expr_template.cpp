@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Kshitij Bansal, Dejan Jovanovic
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -115,7 +115,7 @@ static Node exportConstant(TNode n, NodeManager* to, ExprManagerMapCollection& v
 
 class ExportPrivate {
 private:
-  typedef std::hash_map <NodeTemplate<false>, NodeTemplate<true>, TNodeHashFunction> ExportCache;
+  typedef std::unordered_map <NodeTemplate<false>, NodeTemplate<true>, TNodeHashFunction> ExportCache;
   ExprManager* from;
   ExprManager* to;
   ExprManagerMapCollection& vmap;
@@ -393,7 +393,7 @@ static inline NodePairIteratorAdaptor<Iterator> mkNodePairIteratorAdaptor(Iterat
   return NodePairIteratorAdaptor<Iterator>(i);
 }
 
-Expr Expr::substitute(const std::hash_map<Expr, Expr, ExprHashFunction> map) const {
+Expr Expr::substitute(const std::unordered_map<Expr, Expr, ExprHashFunction> map) const {
   ExprManagerScope ems(*this);
   return Expr(d_exprManager, new Node(d_node->substitute(mkNodePairIteratorAdaptor(map.begin()), mkNodePairIteratorAdaptor(map.end()))));
 }

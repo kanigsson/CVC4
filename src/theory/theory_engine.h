@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Dejan Jovanovic, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -21,6 +21,7 @@
 
 #include <deque>
 #include <set>
+#include <unordered_map>
 #include <vector>
 #include <utility>
 
@@ -189,8 +190,8 @@ class TheoryEngine {
   theory::TheoryEngineModelBuilder* d_curr_model_builder;
   bool d_aloc_curr_model_builder;
 
-  typedef std::hash_map<Node, Node, NodeHashFunction> NodeMap;
-  typedef std::hash_map<TNode, Node, TNodeHashFunction> TNodeMap;
+  typedef std::unordered_map<Node, Node, NodeHashFunction> NodeMap;
+  typedef std::unordered_map<TNode, Node, TNodeHashFunction> TNodeMap;
 
   /**
   * Cache for theory-preprocessing of assertions

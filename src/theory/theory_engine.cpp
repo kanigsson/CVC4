@@ -2,9 +2,9 @@
 /*! \file theory_engine.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Dejan Jovanovic, Morgan Deters, Tim King
+ **   Dejan Jovanovic, Morgan Deters, Guy Katz
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -1645,7 +1645,7 @@ Node TheoryEngine::getExplanation(TNode node) {
 struct AtomsCollect {
 
   std::vector<TNode> d_atoms;
-  std::hash_set<TNode, TNodeHashFunction> d_visited;
+  std::unordered_set<TNode, TNodeHashFunction> d_visited;
 
 public:
 
@@ -1703,10 +1703,13 @@ void TheoryEngine::ensureLemmaAtoms(const std::vector<TNode>& atoms, theory::The
         assertToTheory(eq.notNode(), eqNormalized.notNode(), /** to */ atomsTo, /** Sat solver */ theory::THEORY_SAT_SOLVER);
       }
       continue;
+    }else if( eqNormalized.getKind() != kind::EQUAL){
+      Assert( eqNormalized.getKind()==kind::BOOLEAN_TERM_VARIABLE || 
+              ( eqNormalized.getKind()==kind::NOT && eqNormalized[0].getKind()==kind::BOOLEAN_TERM_VARIABLE ) );
+      // this happens for Boolean term equalities V = true that are rewritten to V, we should skip
+      //  TODO : revisit this
+      continue;
     }
-
-    Assert(eqNormalized.getKind() == kind::EQUAL);
-
 
     // If the normalization did the just flips, keep the flip
     if (eqNormalized[0] == eq[1] && eqNormalized[1] == eq[0]) {

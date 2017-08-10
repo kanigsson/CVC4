@@ -2,9 +2,9 @@
 /*! \file dio_solver.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Tim King, Morgan Deters
+ **   Tim King, Morgan Deters, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2016 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -20,6 +20,7 @@
 #ifndef __CVC4__THEORY__ARITH__DIO_SOLVER_H
 #define __CVC4__THEORY__ARITH__DIO_SOLVER_H
 
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -68,7 +69,7 @@ private:
    * We maintain a map from the variables associated with proofs to an input constraint.
    * These variables can then be used in polynomial manipulations.
    */
-  typedef std::hash_map<Node, InputConstraintIndex, NodeHashFunction> NodeToInputConstraintIndexMap;
+  typedef std::unordered_map<Node, InputConstraintIndex, NodeHashFunction> NodeToInputConstraintIndexMap;
   NodeToInputConstraintIndexMap d_varToInputConstraintMap;
 
   Node proofVariableToReason(const Variable& v) const{
