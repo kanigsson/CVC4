@@ -689,11 +689,22 @@ public:
     return SExpr(v);
   }
 
+  /**
+   * When using CVC4 as a GNATprove backend we ignore most of the statistics,
+   * because they consume too much memory when storing the prover's output in
+   * memcached.
+   *
+   * This is implemented with an extra argument to registerStat and
+   * unregisterStat. By default all statistics are ignored; those that must
+   * stay enabled are registered (and unregistered!) with explicit overriding
+   * of a default argument, "ignore = false".
+   */
+
   /** Register a new statistic */
-  void registerStat(Stat* s) throw(CVC4::IllegalArgumentException);
+  void registerStat(Stat* s, bool ignore = true) throw(CVC4::IllegalArgumentException);
 
   /** Unregister a new statistic */
-  void unregisterStat(Stat* s) throw(CVC4::IllegalArgumentException);
+  void unregisterStat(Stat* s, bool ignore = true) throw(CVC4::IllegalArgumentException);
 
 };/* class StatisticsRegistry */
 

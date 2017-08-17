@@ -273,7 +273,7 @@ struct SmtEngineStatistics {
     smtStatisticsRegistry()->registerStat(&d_pushPopTime);
     smtStatisticsRegistry()->registerStat(&d_processAssertionsTime);
     smtStatisticsRegistry()->registerStat(&d_simplifiedToFalse);
-    smtStatisticsRegistry()->registerStat(&d_resourceUnitsUsed);
+    smtStatisticsRegistry()->registerStat(&d_resourceUnitsUsed, false);
   }
 
   ~SmtEngineStatistics() {
@@ -298,7 +298,7 @@ struct SmtEngineStatistics {
     smtStatisticsRegistry()->unregisterStat(&d_pushPopTime);
     smtStatisticsRegistry()->unregisterStat(&d_processAssertionsTime);
     smtStatisticsRegistry()->unregisterStat(&d_simplifiedToFalse);
-    smtStatisticsRegistry()->unregisterStat(&d_resourceUnitsUsed);
+    smtStatisticsRegistry()->unregisterStat(&d_resourceUnitsUsed, false);
   }
 };/* struct SmtEngineStatistics */
 

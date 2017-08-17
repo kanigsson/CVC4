@@ -152,21 +152,25 @@ StatisticsRegistry::StatisticsRegistry(const std::string& name)
   }
 }
 
-void StatisticsRegistry::registerStat(Stat* s) throw(CVC4::IllegalArgumentException) {
+void StatisticsRegistry::registerStat(Stat* s, bool ignore) throw(CVC4::IllegalArgumentException) {
 #ifdef CVC4_STATISTICS_ON
+  if (!ignore) {
   PrettyCheckArgument(d_stats.find(s) == d_stats.end(), s,
                 "Statistic `%s' was not registered with this registry.",
                 s->getName().c_str());
   d_stats.insert(s);
+  }
 #endif /* CVC4_STATISTICS_ON */
 }/* StatisticsRegistry::registerStat_() */
 
-void StatisticsRegistry::unregisterStat(Stat* s) throw(CVC4::IllegalArgumentException) {
+void StatisticsRegistry::unregisterStat(Stat* s, bool ignore) throw(CVC4::IllegalArgumentException) {
 #ifdef CVC4_STATISTICS_ON
+  if (!ignore) {
   PrettyCheckArgument(d_stats.find(s) != d_stats.end(), s,
                 "Statistic `%s' was not registered with this registry.",
                 s->getName().c_str());
   d_stats.erase(s);
+  }
 #endif /* CVC4_STATISTICS_ON */
 }/* StatisticsRegistry::unregisterStat_() */
 
