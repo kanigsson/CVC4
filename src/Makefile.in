@@ -90,7 +90,6 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 @CVC4_PROOF_TRUE@am__append_1 = \
-@CVC4_PROOF_TRUE@	@top_builddir@/proofs/lfsc_checker/liblfsc_checker.la \
 @CVC4_PROOF_TRUE@	@top_builddir@/proofs/signatures/libsignatures.la
 
 @CVC4_USE_GLPK_TRUE@am__append_2 = $(GLPK_LIBS)
@@ -99,6 +98,8 @@ target_triplet = @target@
 @CVC4_USE_ABC_TRUE@am__append_5 = $(ABC_LDFLAGS)
 @CVC4_USE_CRYPTOMINISAT_TRUE@am__append_6 = $(CRYPTOMINISAT_LIBS)
 @CVC4_USE_CRYPTOMINISAT_TRUE@am__append_7 = $(CRYPTOMINISAT_LDFLAGS)
+@CVC4_USE_LFSC_TRUE@am__append_8 = $(LFSC_LIBS)
+@CVC4_USE_LFSC_TRUE@am__append_9 = $(LFSC_LDFLAGS)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
@@ -106,12 +107,12 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
-	$(top_srcdir)/config/ax_tls.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
-	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/libtool.m4 \
+	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/lfsc.m4 \
+	$(top_srcdir)/config/libtool.m4 \
 	$(top_srcdir)/config/ltoptions.m4 \
 	$(top_srcdir)/config/ltsugar.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
@@ -159,13 +160,15 @@ am__DEPENDENCIES_1 =
 @CVC4_USE_ABC_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1)
 @CVC4_USE_CRYPTOMINISAT_TRUE@am__DEPENDENCIES_4 =  \
 @CVC4_USE_CRYPTOMINISAT_TRUE@	$(am__DEPENDENCIES_1)
+@CVC4_USE_LFSC_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1)
 libcvc4_la_DEPENDENCIES = @builddir@/base/libbase.la \
 	@builddir@/options/liboptions.la @builddir@/util/libutil.la \
 	@builddir@/expr/libexpr.la @builddir@/smt_util/libsmtutil.la \
 	@builddir@/prop/minisat/libminisat.la \
 	@builddir@/prop/bvminisat/libbvminisat.la $(am__append_1) \
 	@builddir@/lib/libreplacements.la $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	context/context.lo context/context_mm.lo \
@@ -475,8 +478,6 @@ CVC4_LANGUAGE_BINDINGS = @CVC4_LANGUAGE_BINDINGS@
 CVC4_LIBRARY_VERSION = @CVC4_LIBRARY_VERSION@
 CVC4_NEED_INT64_T_OVERLOADS = @CVC4_NEED_INT64_T_OVERLOADS@
 CVC4_PARSER_LIBRARY_VERSION = @CVC4_PARSER_LIBRARY_VERSION@
-CVC4_TLS = @CVC4_TLS@
-CVC4_TLS_SUPPORTED = @CVC4_TLS_SUPPORTED@
 CVC4_USE_CLN_IMP = @CVC4_USE_CLN_IMP@
 CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
@@ -544,6 +545,9 @@ JAVAH = @JAVAH@
 JAVA_CPPFLAGS = @JAVA_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LFSC_HOME = @LFSC_HOME@
+LFSC_LDFLAGS = @LFSC_LDFLAGS@
+LFSC_LIBS = @LFSC_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -666,7 +670,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -695,13 +698,14 @@ AM_CPPFLAGS = \
 	-D__BUILDING_CVC4LIB \
 	-D __STDC_LIMIT_MACROS \
 	-D __STDC_FORMAT_MACROS \
-	-I@builddir@ -I@srcdir@/include -I@srcdir@ -I@top_srcdir@/proofs/lfsc_checker
+	-I@builddir@ -I@srcdir@/include -I@srcdir@
 
 AM_CXXFLAGS = -Wall -Wno-unknown-pragmas -Wno-parentheses $(FLAG_VISIBILITY_HIDDEN)
 SUBDIRS = lib base options util expr smt_util prop/minisat prop/bvminisat . parser compat bindings main
 lib_LTLIBRARIES = libcvc4.la
-libcvc4_la_LDFLAGS = -version-info $(LIBCVC4_VERSION) $(am__append_3) \
-	$(am__append_5) $(am__append_7)
+libcvc4_la_LDFLAGS = -no-undefined -version-info $(LIBCVC4_VERSION) \
+	$(am__append_3) $(am__append_5) $(am__append_7) \
+	$(am__append_9)
 
 # This "tricks" automake into linking us as a C++ library (rather than
 # as a C library, which messes up exception handling support)
@@ -1148,7 +1152,7 @@ libcvc4_la_LIBADD = @builddir@/base/libbase.la \
 	@builddir@/prop/minisat/libminisat.la \
 	@builddir@/prop/bvminisat/libbvminisat.la $(am__append_1) \
 	@builddir@/lib/libreplacements.la $(am__append_2) \
-	$(am__append_4) $(am__append_6)
+	$(am__append_4) $(am__append_6) $(am__append_8)
 BUILT_SOURCES = \
 	theory/rewriter_tables.h \
 	theory/theory_traits.h \
@@ -2520,7 +2524,6 @@ install-data-local:
 	(echo include/cvc4.h; \
 	 echo include/cvc4_public.h; \
 	 echo include/cvc4parser_public.h; \
-	 echo base/tls.h; \
 	 echo util/integer.h; \
 	 echo util/rational.h; \
 	 find * -name '*.h' | \
@@ -2553,7 +2556,6 @@ uninstall-local:
 	-(echo include/cvc4.h; \
 	  echo include/cvc4_public.h; \
 	  echo include/cvc4parser_public.h; \
-	  echo base/tls.h; \
 	  echo util/integer.h; \
 	  echo util/rational.h; \
 	  find * -name '*.h' | \

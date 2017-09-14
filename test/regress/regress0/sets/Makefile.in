@@ -95,12 +95,12 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
-	$(top_srcdir)/config/ax_tls.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
-	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/libtool.m4 \
+	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/lfsc.m4 \
+	$(top_srcdir)/config/libtool.m4 \
 	$(top_srcdir)/config/ltoptions.m4 \
 	$(top_srcdir)/config/ltsugar.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
@@ -392,8 +392,6 @@ CVC4_LANGUAGE_BINDINGS = @CVC4_LANGUAGE_BINDINGS@
 CVC4_LIBRARY_VERSION = @CVC4_LIBRARY_VERSION@
 CVC4_NEED_INT64_T_OVERLOADS = @CVC4_NEED_INT64_T_OVERLOADS@
 CVC4_PARSER_LIBRARY_VERSION = @CVC4_PARSER_LIBRARY_VERSION@
-CVC4_TLS = @CVC4_TLS@
-CVC4_TLS_SUPPORTED = @CVC4_TLS_SUPPORTED@
 CVC4_USE_CLN_IMP = @CVC4_USE_CLN_IMP@
 CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
@@ -461,6 +459,9 @@ JAVAH = @JAVAH@
 JAVA_CPPFLAGS = @JAVA_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LFSC_HOME = @LFSC_HOME@
+LFSC_LDFLAGS = @LFSC_LDFLAGS@
+LFSC_LIBS = @LFSC_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -589,7 +590,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -676,7 +676,9 @@ TESTS = \
 	sets-poly-nonint.smt2 \
 	int-real-univ.smt2 \
 	int-real-univ-unsat.smt2 \
-	sets-tuple-poly.cvc
+	sets-tuple-poly.cvc \
+	arjun-set-univ.cvc \
+	univ-set-uf-elim.smt2
 
 
 #if CVC4_BUILD_PROFILE_COMPETITION
@@ -1347,6 +1349,20 @@ int-real-univ-unsat.smt2.log: int-real-univ-unsat.smt2
 sets-tuple-poly.cvc.log: sets-tuple-poly.cvc
 	@p='sets-tuple-poly.cvc'; \
 	b='sets-tuple-poly.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+arjun-set-univ.cvc.log: arjun-set-univ.cvc
+	@p='arjun-set-univ.cvc'; \
+	b='arjun-set-univ.cvc'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+univ-set-uf-elim.smt2.log: univ-set-uf-elim.smt2
+	@p='univ-set-uf-elim.smt2'; \
+	b='univ-set-uf-elim.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

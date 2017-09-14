@@ -104,12 +104,12 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
-	$(top_srcdir)/config/ax_tls.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
-	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/libtool.m4 \
+	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/lfsc.m4 \
+	$(top_srcdir)/config/libtool.m4 \
 	$(top_srcdir)/config/ltoptions.m4 \
 	$(top_srcdir)/config/ltsugar.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
@@ -135,9 +135,9 @@ am__libutil_la_SOURCES_DIST = Makefile.am Makefile.in \
 	safe_print.cpp safe_print.h sexpr.cpp sexpr.h \
 	smt2_quote_string.cpp smt2_quote_string.h statistics.cpp \
 	statistics.h statistics_registry.cpp statistics_registry.h \
-	subrange_bound.cpp subrange_bound.h tuple.h \
-	unsafe_interrupt_exception.h utility.h rational_cln_imp.cpp \
-	integer_cln_imp.cpp rational_gmp_imp.cpp integer_gmp_imp.cpp
+	tuple.h unsafe_interrupt_exception.h utility.h \
+	rational_cln_imp.cpp integer_cln_imp.cpp rational_gmp_imp.cpp \
+	integer_gmp_imp.cpp
 @CVC4_CLN_IMP_TRUE@am__objects_1 = rational_cln_imp.lo \
 @CVC4_CLN_IMP_TRUE@	integer_cln_imp.lo
 @CVC4_GMP_IMP_TRUE@am__objects_2 = rational_gmp_imp.lo \
@@ -145,8 +145,8 @@ am__libutil_la_SOURCES_DIST = Makefile.am Makefile.in \
 am_libutil_la_OBJECTS = abstract_value.lo cardinality.lo divisible.lo \
 	floatingpoint.lo index.lo regexp.lo resource_manager.lo \
 	result.lo safe_print.lo sexpr.lo smt2_quote_string.lo \
-	statistics.lo statistics_registry.lo subrange_bound.lo \
-	$(am__objects_1) $(am__objects_2)
+	statistics.lo statistics_registry.lo $(am__objects_1) \
+	$(am__objects_2)
 libutil_la_OBJECTS = $(am_libutil_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -284,8 +284,6 @@ CVC4_LANGUAGE_BINDINGS = @CVC4_LANGUAGE_BINDINGS@
 CVC4_LIBRARY_VERSION = @CVC4_LIBRARY_VERSION@
 CVC4_NEED_INT64_T_OVERLOADS = @CVC4_NEED_INT64_T_OVERLOADS@
 CVC4_PARSER_LIBRARY_VERSION = @CVC4_PARSER_LIBRARY_VERSION@
-CVC4_TLS = @CVC4_TLS@
-CVC4_TLS_SUPPORTED = @CVC4_TLS_SUPPORTED@
 CVC4_USE_CLN_IMP = @CVC4_USE_CLN_IMP@
 CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
@@ -353,6 +351,9 @@ JAVAH = @JAVAH@
 JAVA_CPPFLAGS = @JAVA_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LFSC_HOME = @LFSC_HOME@
+LFSC_LDFLAGS = @LFSC_LDFLAGS@
+LFSC_LIBS = @LFSC_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -475,7 +476,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -509,8 +509,7 @@ libutil_la_SOURCES = Makefile.am Makefile.in abstract_value.cpp \
 	resource_manager.h result.cpp result.h safe_print.cpp \
 	safe_print.h sexpr.cpp sexpr.h smt2_quote_string.cpp \
 	smt2_quote_string.h statistics.cpp statistics.h \
-	statistics_registry.cpp statistics_registry.h \
-	subrange_bound.cpp subrange_bound.h tuple.h \
+	statistics_registry.cpp statistics_registry.h tuple.h \
 	unsafe_interrupt_exception.h utility.h $(am__append_1) \
 	$(am__append_2)
 BUILT_SOURCES = \
@@ -542,7 +541,6 @@ EXTRA_DIST = \
 	result.i \
 	sexpr.i \
 	statistics.i \
-	subrange_bound.i \
 	tuple.i \
 	unsafe_interrupt_exception.i
 
@@ -628,7 +626,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smt2_quote_string.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/statistics_registry.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subrange_bound.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\

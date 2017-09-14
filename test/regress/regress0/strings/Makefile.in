@@ -95,12 +95,12 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
-	$(top_srcdir)/config/ax_tls.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
-	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/libtool.m4 \
+	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/lfsc.m4 \
+	$(top_srcdir)/config/libtool.m4 \
 	$(top_srcdir)/config/ltoptions.m4 \
 	$(top_srcdir)/config/ltsugar.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
@@ -392,8 +392,6 @@ CVC4_LANGUAGE_BINDINGS = @CVC4_LANGUAGE_BINDINGS@
 CVC4_LIBRARY_VERSION = @CVC4_LIBRARY_VERSION@
 CVC4_NEED_INT64_T_OVERLOADS = @CVC4_NEED_INT64_T_OVERLOADS@
 CVC4_PARSER_LIBRARY_VERSION = @CVC4_PARSER_LIBRARY_VERSION@
-CVC4_TLS = @CVC4_TLS@
-CVC4_TLS_SUPPORTED = @CVC4_TLS_SUPPORTED@
 CVC4_USE_CLN_IMP = @CVC4_USE_CLN_IMP@
 CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
@@ -461,6 +459,9 @@ JAVAH = @JAVAH@
 JAVA_CPPFLAGS = @JAVA_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LFSC_HOME = @LFSC_HOME@
+LFSC_LDFLAGS = @LFSC_LDFLAGS@
+LFSC_LIBS = @LFSC_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -589,7 +590,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -662,7 +662,6 @@ TESTS = \
   bug686dd.smt2 \
   idof-handg.smt2 \
   fmf001.smt2 \
-  type002.smt2 \
   crash-1019.smt2 \
   norn-31.smt2 \
   strings-native-simple.cvc \
@@ -1243,13 +1242,6 @@ fmf001.smt2.log: fmf001.smt2
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-type002.smt2.log: type002.smt2
-	@p='type002.smt2'; \
-	b='type002.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 crash-1019.smt2.log: crash-1019.smt2
 	@p='crash-1019.smt2'; \
 	b='crash-1019.smt2'; \
@@ -1542,6 +1534,7 @@ end@mk_if@
 
 #norn-dis-0707-3.smt2
 #norn-ab.smt2
+#type002.smt2
 
 # synonyms for "check"
 .PHONY: regress regress0 test

@@ -565,7 +565,6 @@ PACKAGE_URL=''
 
 ac_unique_file="src/include/cvc4_public.h"
 ac_config_libobj_dir=src/lib
-enable_option_checking=no
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -643,8 +642,6 @@ JAR
 JAVAH
 JAVAC
 JAVA
-CVC4_TLS_SUPPORTED
-CVC4_TLS
 CVC4_BUILD_LIBCOMPAT_FALSE
 CVC4_BUILD_LIBCOMPAT_TRUE
 CVC4_BUILD_LIBCOMPAT
@@ -781,6 +778,11 @@ WNO_CONVERSION_NULL
 WERROR
 ANTLR
 CVC4_NEED_INT64_T_OVERLOADS
+LFSC_LIBS
+LFSC_LDFLAGS
+CVC4_USE_LFSC_FALSE
+CVC4_USE_LFSC_TRUE
+LFSC_HOME
 CRYPTOMINISAT_LIBS
 CRYPTOMINISAT_LDFLAGS
 CVC4_USE_CRYPTOMINISAT_FALSE
@@ -905,7 +907,6 @@ AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
 AM_DEFAULT_V
 AM_V
-subdirs
 target_alias
 host_alias
 build_alias
@@ -980,6 +981,8 @@ with_abc
 with_abc_dir
 with_cryptominisat
 with_cryptominisat_dir
+with_lfsc
+with_lfsc_dir
 enable_personal_make_rules
 enable_internals_documentation
 enable_doxygen_doc
@@ -1003,7 +1006,6 @@ enable_thread_support
 enable_static_boost
 with_readline
 with_compat
-enable_tls
 with_google_perftools
 '
       ac_precious_vars='build_alias
@@ -1026,6 +1028,7 @@ CLN_LIBS
 GLPK_HOME
 ABC_HOME
 CRYPTOMINISAT_HOME
+LFSC_HOME
 ANTLR
 DOXYGEN_PAPER_SIZE
 CXXTEST
@@ -1053,7 +1056,7 @@ JAVA
 JAVAC
 JAVAH
 JAR'
-ac_subdirs_all='proofs/lfsc_checker'
+
 
 CVC4_BSD_LICENSED_CODE_ONLY=1
 
@@ -1840,7 +1843,6 @@ Optional Features:
                           do not support multithreaded-capable library
   --enable-static-boost   Prefer the static boost libraries over the shared
                           ones @<:@no@:>@
-  --disable-tls           don't use compiler-native TLS
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1864,6 +1866,8 @@ Optional Packages:
   --with-cryptominisat    use the CRYPTOMINISAT sat solver
   --with-cryptominisat-dir=PATH 
                           path to top level of cryptominisat source tree
+  --with-lfsc             use the LFSC proof checker
+  --with-lfsc-dir=PATH    path to top level of lfsc source tree
   --with-cxxtest-dir=DIR  path to CxxTest installation
   --with-antlr-dir=PATH   path to ANTLR C headers and libraries
   --with-swig=BINARY      path to swig binary
@@ -1895,6 +1899,7 @@ Some influential environment variables:
   ABC_HOME    path to top level of abc source tree
   CRYPTOMINISAT_HOME 
               path to top level of cryptominisat source tree
+  LFSC_HOME   path to top level of LFSC source tree
   ANTLR       location of the antlr3 script
   DOXYGEN_PAPER_SIZE 
               a4wide (default), a4, letter, legal or executive
@@ -3050,10 +3055,6 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
-
-
-
-subdirs="$subdirs proofs/lfsc_checker"
 
 
 @%:@ Check whether --enable-silent-rules was given.
@@ -4548,7 +4549,22 @@ fi
 if test -z "${with_build+set}"; then
   with_build=production
 fi
-if test -z "${enable_optimized+set}" -a -z "${enable_debug_symbols+set}" -a -z "${enable_assertions+set}" -a -z "${enable_tracing+set}" -a -z "${enable_dumping+set}" -a -z "${enable_muzzle+set}" -a -z "${enable_coverage+set}" -a -z "${enable_profiling+set}" -a -z "${enable_statistics+set}" -a -z "${enable_replay+set}" -a -z "${with_gmp+set}" -a -z "${with_cln+set}" -a -z "${with_glpk+set}" -a -z "${with_abc+set}" -a -z "${with_cryptominisat+set}"; then
+if test -z "${enable_optimized+set}" -a \
+        -z "${enable_debug_symbols+set}" -a \
+        -z "${enable_assertions+set}" -a \
+        -z "${enable_tracing+set}" -a \
+        -z "${enable_dumping+set}" -a \
+        -z "${enable_muzzle+set}" -a \
+        -z "${enable_coverage+set}" -a \
+        -z "${enable_profiling+set}" -a \
+        -z "${enable_statistics+set}" -a \
+        -z "${enable_replay+set}" -a \
+        -z "${with_gmp+set}" -a \
+        -z "${with_cln+set}" -a \
+        -z "${with_glpk+set}" -a \
+        -z "${with_abc+set}" -a \
+        -z "${with_cryptominisat+set}" -a \
+        -z "${with_lfsc+set}"; then
   custom_build_profile=no
 else
   custom_build_profile=yes
@@ -4655,6 +4671,12 @@ fi
 if test -n "${with_cryptominisat+set}"; then
   if test "$with_cryptominisat" = yes; then
     btargs="$btargs cryptominisat"
+  fi
+fi
+if test -n "${with_lfsc+set}"; then
+  if test "$with_lfsc" = yes; then
+    enable_proof=yes
+    btargs="$btargs lfsc"
   fi
 fi
 
@@ -19180,7 +19202,7 @@ $as_echo "$enable_static_binary" >&6; }
 if test "$enable_static_binary" = yes; then
   if test "$target_vendor" = apple; then
     if test -z "$MAC_STATIC_BINARY_MANUAL_OVERRIDE"; then
-      as_fn_error $? "Statically-linked binaries are not supported on Mac OS.  See https://developer.apple.com/library/mac/#qa/qa2001/qa1118.html .  (If you ABSOLUTELY insist on this going forward and you know what you are doing, set MAC_STATIC_BINARY_MANUAL_OVERRIDE=1)" "$LINENO" 5
+      as_fn_error $? "Statically-linked binaries are not supported on macOS.  See  https://developer.apple.com/library/content/qa/qa1118/_index.html .  (If you ABSOLUTELY insist on this going forward and you know what you are doing, set MAC_STATIC_BINARY_MANUAL_OVERRIDE=1)" "$LINENO" 5
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MAC_STATIC_BINARY_MANUAL_OVERRIDE was set!" >&5
 $as_echo "$as_me: WARNING: MAC_STATIC_BINARY_MANUAL_OVERRIDE was set!" >&2;}
@@ -22372,6 +22394,144 @@ fi
 
 
 
+# Build with LFSC
+
+@%:@ Check whether --with-lfsc was given.
+if test "${with_lfsc+set}" = set; then :
+  withval=$with_lfsc; 
+else
+  with_lfsc=
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether user requested LFSC support" >&5
+$as_echo_n "checking whether user requested LFSC support... " >&6; }
+
+have_liblfsc=0
+LFSC_LIBS=
+LFSC_LDFLAGS=
+
+have_liblfsc=0
+if test "$with_lfsc" = no; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, LFSC disabled by user" >&5
+$as_echo "no, LFSC disabled by user" >&6; }
+elif test -n "$with_lfsc"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, LFSC requested by user" >&5
+$as_echo "yes, LFSC requested by user" >&6; }
+  
+  
+@%:@ Check whether --with-lfsc-dir was given.
+if test "${with_lfsc_dir+set}" = set; then :
+  withval=$with_lfsc_dir; LFSC_HOME="$withval"
+fi
+
+
+  if test -z "$LFSC_HOME" -a -e "$ac_abs_confdir/lfsc-checker"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LFSC checker library" >&5
+$as_echo_n "checking for LFSC checker library... " >&6; }
+    LFSC_HOME="$ac_abs_confdir/lfsc-checker/install"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: found LFSC checker in $LFSC_HOME" >&5
+$as_echo "found LFSC checker in $LFSC_HOME" >&6; }
+  fi
+  
+  if test -z "$LFSC_HOME"; then
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "must give --with-lfsc-dir=PATH or define environment variable LFSC_HOME!
+See \`config.log' for more details" "$LINENO" 5; }
+  fi
+
+  if ! test -d "$LFSC_HOME" || ! test -x "$LFSC_HOME/bin/lfscc" ; then
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "either $LFSC_HOME is not a LFSC install tree or it's not yet built
+See \`config.log' for more details" "$LINENO" 5; }
+  fi
+
+  CPPFLAGS="$CPPFLAGS -I$LFSC_HOME/include"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to link LFSC" >&5
+$as_echo_n "checking how to link LFSC... " >&6; }
+  
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+  cvc4_save_LIBS="$LIBS"
+  cvc4_save_LDFLAGS="$LDFLAGS"
+  cvc4_save_CPPFLAGS="$CPPFLAGS"
+
+  LDFLAGS="-L$LFSC_HOME/lib"
+  LIBS="-llfscc -lgmp"
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <lfscc.h>
+int
+main ()
+{
+lfscc_init()
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  LFSC_LIBS="-llfscc -lgmp"
+else
+  LFSC_LIBS=
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+  LDFLAGS="$cvc4_save_LDFLAGS"
+  CPPFLAGS="$cvc4_save_CPPFLAGS"
+  LIBS="$cvc4_save_LIBS"
+
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+  if test -z "$LFSC_LIBS"; then
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot link against liblfscc!
+See \`config.log' for more details" "$LINENO" 5; }
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LFSC_LIBS" >&5
+$as_echo "$LFSC_LIBS" >&6; }
+    have_liblfsc=1
+  fi
+
+  LFSC_LDFLAGS="-L$LFSC_HOME/lib"
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, user didn't request LFSC" >&5
+$as_echo "no, user didn't request LFSC" >&6; }
+  with_lfsc=no
+fi
+
+
+if test $have_liblfsc -eq 1; then
+  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-DCVC4_USE_LFSC"
+fi
+ if test $have_liblfsc -eq 1; then
+  CVC4_USE_LFSC_TRUE=
+  CVC4_USE_LFSC_FALSE='#'
+else
+  CVC4_USE_LFSC_TRUE='#'
+  CVC4_USE_LFSC_FALSE=
+fi
+
+
+
+
 
 # Check to see if this version/architecture of GNU C++ explicitly
 # instantiates std::hash<uint64_t> or not.  Some do, some don't.
@@ -22506,6 +22666,10 @@ $as_echo "not executable" >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: OK" >&5
 $as_echo "OK" >&6; }
     fi
+  fi
+  # Check if antlr-3.4 was installed via contrib/get-antlr3.4
+  if test -e "$ac_abs_confdir/antlr-3.4/bin/antlr3"; then
+    ANTLR="$ac_abs_confdir/antlr-3.4/bin/antlr3"
   fi
   if test "x$ANTLR" = "x"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No usable antlr3 script found. Make sure that the parser code has
@@ -24836,7 +25000,8 @@ fi
 
 TESTS_ENVIRONMENT=
 RUN_REGRESSION_ARGS=
-if test "$enable_proof" = yes; then
+# FIXME currently, unsat core regressions are disabled without LFSC
+if test "$with_lfsc" = yes; then
   RUN_REGRESSION_ARGS="${RUN_REGRESSION_ARGS:+$RUN_REGRESSION_ARGS }--proof"
 fi
 
@@ -25265,6 +25430,11 @@ else
   
 fi
 
+
+  # Check if antlr-3.4 was installed via contrib/get-antlr3.4
+  if test -e "$ac_abs_confdir/antlr-3.4"; then
+    ANTLR_PREFIXES="$ac_abs_confdir/antlr-3.4"
+  fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANTLR3 C runtime library" >&5
 $as_echo_n "checking for ANTLR3 C runtime library... " >&6; }
@@ -28748,98 +28918,6 @@ else
 fi
 
 
-# Check for availability of TLS support (e.g. __thread storage class)
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use compiler-supported TLS if available" >&5
-$as_echo_n "checking whether to use compiler-supported TLS if available... " >&6; }
-@%:@ Check whether --enable-tls was given.
-if test "${enable_tls+set}" = set; then :
-  enableval=$enable_tls; 
-fi
-
-if test $cvc4_has_threads = no; then
-  # We disable TLS entirely by simply telling the build system that
-  # the empty string is the __thread keyword.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: multithreading disabled" >&5
-$as_echo "multithreading disabled" >&6; }
-  CVC4_TLS_SUPPORTED=1
-  CVC4_TLS=
-  CVC4_TLS_explanation='disabled (no multithreading support)'
-else
-  if test -z "${enable_tls+set}" || test "$enable_tls" = "yes"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread local storage (TLS) class" >&5
-$as_echo_n "checking for thread local storage (TLS) class... " >&6; }
-  if ${ac_cv_tls+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  
-    ax_tls_keywords="__thread __declspec(thread) none"
-    for ax_tls_keyword in $ax_tls_keywords; do
-       case $ax_tls_keyword in @%:@(
-  none) :
-    ac_cv_tls=none ; break ;; @%:@(
-  *) :
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <stdlib.h>
-               static void
-               foo(void) {
-               static  $ax_tls_keyword  int bar;
-               exit(1);
-               }
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_tls=$ax_tls_keyword ; break
-else
-  ac_cv_tls=none
-           
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext ;;
-esac
-    done
-  
-fi
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_tls" >&5
-$as_echo "$ac_cv_tls" >&6; }
-
-  if test "$ac_cv_tls" != "none"; then :
-  
-cat >>confdefs.h <<_ACEOF
-@%:@define TLS $ac_cv_tls
-_ACEOF
-
-      CVC4_TLS=$ac_cv_tls
-else
-  CVC4_TLS=
-  
-fi
-
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    CVC4_TLS=
-  fi
-  if test -n "$CVC4_TLS"; then
-    CVC4_TLS_SUPPORTED=1
-    CVC4_TLS_explanation="$CVC4_TLS"
-  else
-    CVC4_TLS_explanation='pthread_getspecific()'
-    CVC4_TLS_SUPPORTED=0
-  fi
-fi
-
-
-
 # Whether to compile with google profiling tools
 cvc4_use_google_perftools=0
 
@@ -29581,10 +29659,6 @@ if test -n "$CVC4_LANGUAGE_BINDINGS"; then
 fi
 
 
-ac_config_files="$ac_config_files src/base/tls.h.tmp:src/base/tls.h.in"
-
-
-
 ac_config_files="$ac_config_files src/util/integer.h.tmp:src/util/integer.h.in"
 
 
@@ -29809,6 +29883,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CVC4_USE_CRYPTOMINISAT_TRUE}" && test -z "${CVC4_USE_CRYPTOMINISAT_FALSE}"; then
   as_fn_error $? "conditional \"CVC4_USE_CRYPTOMINISAT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CVC4_USE_LFSC_TRUE}" && test -z "${CVC4_USE_LFSC_FALSE}"; then
+  as_fn_error $? "conditional \"CVC4_USE_LFSC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DX_COND_doc_TRUE}" && test -z "${DX_COND_doc_FALSE}"; then
@@ -31044,7 +31122,6 @@ do
     "test/regress/regress4/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress4/Makefile" ;;
     "test/system/Makefile") CONFIG_FILES="$CONFIG_FILES test/system/Makefile" ;;
     "test/unit/Makefile") CONFIG_FILES="$CONFIG_FILES test/unit/Makefile" ;;
-    "src/base/tls.h.tmp") CONFIG_FILES="$CONFIG_FILES src/base/tls.h.tmp:src/base/tls.h.in" ;;
     "src/util/integer.h.tmp") CONFIG_FILES="$CONFIG_FILES src/util/integer.h.tmp:src/util/integer.h.in" ;;
     "src/util/rational.h.tmp") CONFIG_FILES="$CONFIG_FILES src/util/rational.h.tmp:src/util/rational.h.in" ;;
     "doc/cvc4.1_template.tmp") CONFIG_FILES="$CONFIG_FILES doc/cvc4.1_template.tmp:doc/cvc4.1_template.in" ;;
@@ -32451,13 +32528,6 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
-    "src/base/tls.h.tmp":F) 
-if diff -q "src/base/tls.h.tmp" "src/base/tls.h" >/dev/null 2>&1; then
-    :
-else
-    cp "src/base/tls.h.tmp" "src/base/tls.h"
-fi
- ;;
     "src/util/integer.h.tmp":F) 
 if diff -q "src/util/integer.h.tmp" "src/util/integer.h" >/dev/null 2>&1; then
     :
@@ -32554,151 +32624,6 @@ if test "$no_create" != yes; then
   # would make configure fail if this is the last instruction.
   $ac_cs_success || as_fn_exit 1
 fi
-
-#
-# CONFIG_SUBDIRS section.
-#
-if test "$no_recursion" != yes; then
-
-  # Remove --cache-file, --srcdir, and --disable-option-checking arguments
-  # so they do not pile up.
-  ac_sub_configure_args=
-  ac_prev=
-  eval "set x $ac_configure_args"
-  shift
-  for ac_arg
-  do
-    if test -n "$ac_prev"; then
-      ac_prev=
-      continue
-    fi
-    case $ac_arg in
-    -cache-file | --cache-file | --cache-fil | --cache-fi \
-    | --cache-f | --cache- | --cache | --cach | --cac | --ca | --c)
-      ac_prev=cache_file ;;
-    -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
-    | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* \
-    | --c=*)
-      ;;
-    --config-cache | -C)
-      ;;
-    -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
-      ac_prev=srcdir ;;
-    -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-      ;;
-    -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
-      ac_prev=prefix ;;
-    -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
-      ;;
-    --disable-option-checking)
-      ;;
-    *)
-      case $ac_arg in
-      *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
-      esac
-      as_fn_append ac_sub_configure_args " '$ac_arg'" ;;
-    esac
-  done
-
-  # Always prepend --prefix to ensure using the same prefix
-  # in subdir configurations.
-  ac_arg="--prefix=$prefix"
-  case $ac_arg in
-  *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
-  esac
-  ac_sub_configure_args="'$ac_arg' $ac_sub_configure_args"
-
-  # Pass --silent
-  if test "$silent" = yes; then
-    ac_sub_configure_args="--silent $ac_sub_configure_args"
-  fi
-
-  # Always prepend --disable-option-checking to silence warnings, since
-  # different subdirs can have different --enable and --with options.
-  ac_sub_configure_args="--disable-option-checking $ac_sub_configure_args"
-
-  ac_popdir=`pwd`
-  for ac_dir in : $subdirs; do test "x$ac_dir" = x: && continue
-
-    # Do not complain, so a configure script can configure whichever
-    # parts of a large source tree are present.
-    test -d "$srcdir/$ac_dir" || continue
-
-    ac_msg="=== configuring in $ac_dir (`pwd`/$ac_dir)"
-    $as_echo "$as_me:${as_lineno-$LINENO}: $ac_msg" >&5
-    $as_echo "$ac_msg" >&6
-    as_dir="$ac_dir"; as_fn_mkdir_p
-    ac_builddir=.
-
-case "$ac_dir" in
-.) ac_dir_suffix= ac_top_builddir_sub=. ac_top_build_prefix= ;;
-*)
-  ac_dir_suffix=/`$as_echo "$ac_dir" | sed 's|^\.[\\/]||'`
-  # A ".." for each directory in $ac_dir_suffix.
-  ac_top_builddir_sub=`$as_echo "$ac_dir_suffix" | sed 's|/[^\\/]*|/..|g;s|/||'`
-  case $ac_top_builddir_sub in
-  "") ac_top_builddir_sub=. ac_top_build_prefix= ;;
-  *)  ac_top_build_prefix=$ac_top_builddir_sub/ ;;
-  esac ;;
-esac
-ac_abs_top_builddir=$ac_pwd
-ac_abs_builddir=$ac_pwd$ac_dir_suffix
-# for backward compatibility:
-ac_top_builddir=$ac_top_build_prefix
-
-case $srcdir in
-  .)  # We are building in place.
-    ac_srcdir=.
-    ac_top_srcdir=$ac_top_builddir_sub
-    ac_abs_top_srcdir=$ac_pwd ;;
-  [\\/]* | ?:[\\/]* )  # Absolute name.
-    ac_srcdir=$srcdir$ac_dir_suffix;
-    ac_top_srcdir=$srcdir
-    ac_abs_top_srcdir=$srcdir ;;
-  *) # Relative name.
-    ac_srcdir=$ac_top_build_prefix$srcdir$ac_dir_suffix
-    ac_top_srcdir=$ac_top_build_prefix$srcdir
-    ac_abs_top_srcdir=$ac_pwd/$srcdir ;;
-esac
-ac_abs_srcdir=$ac_abs_top_srcdir$ac_dir_suffix
-
-
-    cd "$ac_dir"
-
-    # Check for guested configure; otherwise get Cygnus style configure.
-    if test -f "$ac_srcdir/configure.gnu"; then
-      ac_sub_configure=$ac_srcdir/configure.gnu
-    elif test -f "$ac_srcdir/configure"; then
-      ac_sub_configure=$ac_srcdir/configure
-    elif test -f "$ac_srcdir/configure.in"; then
-      # This should be Cygnus configure.
-      ac_sub_configure=$ac_aux_dir/configure
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no configuration information is in $ac_dir" >&5
-$as_echo "$as_me: WARNING: no configuration information is in $ac_dir" >&2;}
-      ac_sub_configure=
-    fi
-
-    # The recursion is here.
-    if test -n "$ac_sub_configure"; then
-      # Make the cache file name correct relative to the subdirectory.
-      case $cache_file in
-      [\\/]* | ?:[\\/]* ) ac_sub_cache_file=$cache_file ;;
-      *) # Relative name.
-	ac_sub_cache_file=$ac_top_build_prefix$cache_file ;;
-      esac
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&5
-$as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&6;}
-      # The eval makes quoting arguments work.
-      eval "\$SHELL \"\$ac_sub_configure\" $ac_sub_configure_args \
-	   --cache-file=\"\$ac_sub_cache_file\" --srcdir=\"\$ac_srcdir\"" ||
-	as_fn_error $? "$ac_sub_configure failed for $ac_dir" "$LINENO" 5
-    fi
-
-    cd "$ac_popdir"
-  done
-fi
 if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
@@ -32732,7 +32657,6 @@ Compat lib   : $CVC4_BUILD_LIBCOMPAT
 Bindings     : $bindings_to_be_built
 
 Multithreaded: $support_multithreaded
-TLS support  : $CVC4_TLS_explanation
 Portfolio    : $with_portfolio
 
 MP library   : $mplibrary

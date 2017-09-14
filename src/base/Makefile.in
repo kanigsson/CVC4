@@ -96,12 +96,12 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
-	$(top_srcdir)/config/ax_tls.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
-	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/libtool.m4 \
+	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/lfsc.m4 \
+	$(top_srcdir)/config/libtool.m4 \
 	$(top_srcdir)/config/ltoptions.m4 \
 	$(top_srcdir)/config/ltsugar.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
@@ -113,7 +113,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/cvc4autoconfig.h
-CONFIG_CLEAN_FILES = tls.h.tmp
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libbase_la_LIBADD =
@@ -202,8 +202,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/tls.h.in \
-	$(top_srcdir)/config/depcomp
+am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/config/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ABC_HOME = @ABC_HOME@
 ABC_LDFLAGS = @ABC_LDFLAGS@
@@ -256,8 +255,6 @@ CVC4_LANGUAGE_BINDINGS = @CVC4_LANGUAGE_BINDINGS@
 CVC4_LIBRARY_VERSION = @CVC4_LIBRARY_VERSION@
 CVC4_NEED_INT64_T_OVERLOADS = @CVC4_NEED_INT64_T_OVERLOADS@
 CVC4_PARSER_LIBRARY_VERSION = @CVC4_PARSER_LIBRARY_VERSION@
-CVC4_TLS = @CVC4_TLS@
-CVC4_TLS_SUPPORTED = @CVC4_TLS_SUPPORTED@
 CVC4_USE_CLN_IMP = @CVC4_USE_CLN_IMP@
 CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
@@ -325,6 +322,9 @@ JAVAH = @JAVAH@
 JAVA_CPPFLAGS = @JAVA_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LFSC_HOME = @LFSC_HOME@
+LFSC_LDFLAGS = @LFSC_LDFLAGS@
+LFSC_LIBS = @LFSC_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -447,7 +447,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -465,7 +464,7 @@ AM_CPPFLAGS = \
 AM_CXXFLAGS = -Wall -Wno-unknown-pragmas $(FLAG_VISIBILITY_HIDDEN)
 noinst_LTLIBRARIES = libbase.la
 
-# Do not list built sources (like tls.h) here!
+# Do not list built sources here!
 # Rather, list them under BUILT_SOURCES, and their .in versions under
 # EXTRA_DIST.  Otherwise, they're packaged up in the tarball, which is
 # no good---they belong in the configured builds/ directory.  If they
@@ -486,14 +485,20 @@ libbase_la_SOURCES = \
 	listener.h \
 	modal_exception.h \
 	output.cpp \
-	output.h
+	output.h \
+	tls.h
 
 
 # listing {Debug,Trace}_tags too ensures that make doesn't auto-remove it
 # after building (if it does, we don't get the "cached" effect with
 # the .tmp files below, and we have to re-compile and re-link each
 # time, even when there are no changes).
-BUILT_SOURCES = tls.h Debug_tags.h Debug_tags Trace_tags.h Trace_tags
+BUILT_SOURCES = \
+	Debug_tags.h \
+	Debug_tags \
+	Trace_tags.h \
+	Trace_tags
+
 MOSTLYCLEANFILES = \
 	Debug_tags \
 	Trace_tags \
@@ -507,12 +512,7 @@ EXTRA_DIST = \
 	exception.i \
 	mktagheaders \
 	mktags \
-	modal_exception.i \
-	tls.h.in
-
-DISTCLEANFILES = \
-	tls.h.tmp \
-	tls.h
+	modal_exception.i
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -548,8 +548,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-tls.h.tmp: $(top_builddir)/config.status $(srcdir)/tls.h.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
@@ -722,7 +720,6 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"

@@ -103,12 +103,12 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
-	$(top_srcdir)/config/ax_tls.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
-	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/libtool.m4 \
+	$(top_srcdir)/config/glpk.m4 $(top_srcdir)/config/lfsc.m4 \
+	$(top_srcdir)/config/libtool.m4 \
 	$(top_srcdir)/config/ltoptions.m4 \
 	$(top_srcdir)/config/ltsugar.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
@@ -129,7 +129,8 @@ am_libexpr_la_OBJECTS = array_store_all.lo attribute.lo emptyset.lo \
 	node_manager_listeners.lo node_value.lo pickle_data.lo \
 	pickler.lo symbol_table.lo type.lo type_node.lo datatype.lo \
 	record.lo uninterpreted_constant.lo
-nodist_libexpr_la_OBJECTS = expr.lo expr_manager.lo type_checker.lo
+nodist_libexpr_la_OBJECTS = kind.lo metakind.lo expr.lo \
+	expr_manager.lo type_checker.lo
 libexpr_la_OBJECTS = $(am_libexpr_la_OBJECTS) \
 	$(nodist_libexpr_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -268,8 +269,6 @@ CVC4_LANGUAGE_BINDINGS = @CVC4_LANGUAGE_BINDINGS@
 CVC4_LIBRARY_VERSION = @CVC4_LIBRARY_VERSION@
 CVC4_NEED_INT64_T_OVERLOADS = @CVC4_NEED_INT64_T_OVERLOADS@
 CVC4_PARSER_LIBRARY_VERSION = @CVC4_PARSER_LIBRARY_VERSION@
-CVC4_TLS = @CVC4_TLS@
-CVC4_TLS_SUPPORTED = @CVC4_TLS_SUPPORTED@
 CVC4_USE_CLN_IMP = @CVC4_USE_CLN_IMP@
 CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
@@ -337,6 +336,9 @@ JAVAH = @JAVAH@
 JAVA_CPPFLAGS = @JAVA_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LFSC_HOME = @LFSC_HOME@
+LFSC_LDFLAGS = @LFSC_LDFLAGS@
+LFSC_LIBS = @LFSC_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -459,7 +461,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -529,7 +530,9 @@ libexpr_la_SOURCES = \
 
 nodist_libexpr_la_SOURCES = \
 	kind.h \
+	kind.cpp \
 	metakind.h \
+	metakind.cpp \
 	type_properties.h \
 	expr.h \
 	expr.cpp \
@@ -545,7 +548,9 @@ EXTRA_DIST = \
 	datatype.i \
 	emptyset.i \
 	kind_template.h \
+	kind_template.cpp \
 	metakind_template.h \
+	metakind_template.cpp \
 	type_properties_template.h \
 	expr_manager_template.h \
 	expr_manager_template.cpp \
@@ -567,7 +572,9 @@ EXTRA_DIST = \
 
 BUILT_SOURCES = \
 	kind.h \
+	kind.cpp \
 	metakind.h \
+	metakind.cpp \
 	type_properties.h \
 	expr.h \
 	expr.cpp \
@@ -578,7 +585,9 @@ BUILT_SOURCES = \
 
 CLEANFILES = \
 	kind.h \
+	kind.cpp \
 	metakind.h \
+	metakind.cpp \
 	expr.h \
 	expr.cpp \
 	expr_manager.h \
@@ -649,6 +658,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expr_iomanip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expr_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kind.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/metakind.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node_manager_listeners.Plo@am__quote@
@@ -919,7 +930,23 @@ kind.h: kind_template.h mkkind @top_builddir@/src/expr/.subdirs $(if $(COVERAGE_
 		`cat @top_builddir@/src/expr/.subdirs` \
 	> $@) || (rm -f $@ && exit 1)
 
+kind.cpp: kind_template.cpp mkkind @top_builddir@/src/expr/.subdirs $(if $(COVERAGE_ON), @abs_top_srcdir@, @top_srcdir@)/src/theory/*/kinds
+	$(AM_V_at)chmod +x @srcdir@/mkkind
+	$(AM_V_at)$(am__mv) $@ $@~ 2>/dev/null || true
+	$(AM_V_GEN)(@srcdir@/mkkind \
+		$< \
+		`cat @top_builddir@/src/expr/.subdirs` \
+	> $@) || (rm -f $@ && exit 1)
+
 metakind.h: metakind_template.h mkmetakind @top_builddir@/src/expr/.subdirs $(if $(COVERAGE_ON), @abs_top_srcdir@, @top_srcdir@)/src/theory/*/kinds
+	$(AM_V_at)chmod +x @srcdir@/mkmetakind
+	$(AM_V_at)$(am__mv) $@ $@~ 2>/dev/null || true
+	$(AM_V_GEN)(@srcdir@/mkmetakind \
+		$< \
+		`cat @top_builddir@/src/expr/.subdirs` \
+	> $@) || (rm -f $@ && exit 1)
+
+metakind.cpp: metakind_template.cpp mkmetakind @top_builddir@/src/expr/.subdirs $(if $(COVERAGE_ON), @abs_top_srcdir@, @top_srcdir@)/src/theory/*/kinds
 	$(AM_V_at)chmod +x @srcdir@/mkmetakind
 	$(AM_V_at)$(am__mv) $@ $@~ 2>/dev/null || true
 	$(AM_V_GEN)(@srcdir@/mkmetakind \
