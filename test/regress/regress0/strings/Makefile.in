@@ -678,7 +678,13 @@ TESTS = \
   username_checker_min.smt2 \
   repl-empty-sem.smt2 \
   bug799-min.smt2 \
-  strings-charat.cvc
+  strings-charat.cvc \
+  issue1105.smt2 \
+  issue1189.smt2 \
+  rewrites-v2.smt2 \
+  substr-rewrites.smt2 \
+  norn-ab.smt2 \
+  type002.smt2
 
 FAILING_TESTS = 
 
@@ -1361,6 +1367,48 @@ strings-charat.cvc.log: strings-charat.cvc
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+issue1105.smt2.log: issue1105.smt2
+	@p='issue1105.smt2'; \
+	b='issue1105.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+issue1189.smt2.log: issue1189.smt2
+	@p='issue1189.smt2'; \
+	b='issue1189.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+rewrites-v2.smt2.log: rewrites-v2.smt2
+	@p='rewrites-v2.smt2'; \
+	b='rewrites-v2.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+substr-rewrites.smt2.log: substr-rewrites.smt2
+	@p='substr-rewrites.smt2'; \
+	b='substr-rewrites.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+norn-ab.smt2.log: norn-ab.smt2
+	@p='norn-ab.smt2'; \
+	b='norn-ab.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+type002.smt2.log: type002.smt2
+	@p='type002.smt2'; \
+	b='type002.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .test.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1533,8 +1581,6 @@ uninstall-am:
 end@mk_if@
 
 #norn-dis-0707-3.smt2
-#norn-ab.smt2
-#type002.smt2
 
 # synonyms for "check"
 .PHONY: regress regress0 test

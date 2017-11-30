@@ -88,7 +88,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = test/regress/regress0/fmf
+subdir = test/regress/regress0/ho
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/antlr.m4 \
@@ -609,67 +609,30 @@ MAKEFLAGS = -k
 # If a test shouldn't be run in e.g. competition mode,
 # put it below in "TESTS +="
 TESTS = \
-	array_card.smt2 \
-	ALG008-1.smt2 \
-	german169.smt2 \
-	QEpres-uf.855035.smt \
-	agree467.smt2 \
-	Arrow_Order-smtlib.778341.smt \
-	german73.smt2 \
-	PUZ001+1.smt2 \
-	refcount24.cvc.smt2 \
-	fmf-bound-int.smt2 \
-	fc-simple.smt2 \
-	fc-unsat-tot-2.smt2 \
-	fc-unsat-pent.smt2 \
-	fc-pigeonhole19.smt2 \
-	Hoare-z3.931718.smt \
-	bug0909.smt2 \
-	lst-no-self-rev-exp.smt2 \
-	fib-core.smt2 \
-	fore19-exp2-core.smt2 \
-	with-ind-104-core.smt2 \
-	syn002-si-real-int.smt2 \
-	krs-sat.smt2 \
-	forall_unit_data2.smt2 \
-	sc_bad_model_1221.smt2 \
- 	dt-proper-model.smt2 \
-	fd-false.smt2 \
-	tail_rec.smt2 \
-	jasmin-cdt-crash.smt2 \
-	loopy_coda.smt2 \
-	fmc_unsound_model.smt2 \
-	am-bad-model.cvc \
-	nun-0208-to.smt2 \
-	datatypes-ufinite.smt2 \
-	datatypes-ufinite-nested.smt2 \
-	agree466.smt2 \
-	LeftistHeap.scala-8-ncm.smt2 \
-	sc-crash-052316.smt2 \
-	bound-int-alt.smt2 \
-	bug723-irrelevant-funs.smt2 \
-	bounded_sets.smt2 \
-	fmf-strange-bounds.smt2 \
-	fmf-strange-bounds-2.smt2 \
-	fmf-bound-2dim.smt2 \
-	memory_model-R_cpp-dd.cvc \
-	bug764.smt2 \
-	ko-bound-set.cvc \
-	cons-sets-bounds.smt2 \
-	bug651.smt2 \
-	bug652.smt2 \
-	bug782.smt2 \
-	quant_real_univ.cvc \
-	constr-ground-to.smt2 \
-	bug-041417-set-options.cvc \
-	alg202+1.smt2 \
-	fmf-fun-no-elim-ext-arith.smt2 \
-	fmf-fun-no-elim-ext-arith2.smt2 \
-	cruanes-no-minimal-unk.smt2 \
-	no-minimal-sat.smt2 \
-	issue916-fmf-or.smt2 \
-	pow2-bool.smt2 \
-	sat-logic.smt2 
+  cong.smt2 \
+  ext-ho-nested-lambda-model.smt2 \
+  declare-fun-variants.smt2 \
+  ext-ho.smt2 \
+  trans.smt2 \
+  ext-finite-unsat.smt2 \
+  ext-sat.smt2 \
+  cong-full-apply.smt2 \
+  def-fun-flatten.smt2 \
+  lambda-equality-non-canon.smt2 \
+  ite-apply-eq.smt2 \
+  apply-collapse-unsat.smt2 \
+  apply-collapse-sat.smt2 \
+  ho-exponential-model.smt2 \
+  ext-sat-partial-eval.smt2 \
+  ho-std-fmf.smt2 \
+  fta0409.smt2 \
+  auth0068.smt2 \
+  modulo-func-equality.smt2 \
+  ho-matching-enum.smt2 \
+  ho-matching-enum-2.smt2 \
+  ho-matching-nested-app.smt2 \
+  simple-matching.smt2 \
+  simple-matching-partial.smt2
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -685,9 +648,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu test/regress/regress0/fmf/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu test/regress/regress0/ho/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu test/regress/regress0/fmf/Makefile
+	  $(AUTOMAKE) --gnu test/regress/regress0/ho/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -859,429 +822,170 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-array_card.smt2.log: array_card.smt2
-	@p='array_card.smt2'; \
-	b='array_card.smt2'; \
+cong.smt2.log: cong.smt2
+	@p='cong.smt2'; \
+	b='cong.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-ALG008-1.smt2.log: ALG008-1.smt2
-	@p='ALG008-1.smt2'; \
-	b='ALG008-1.smt2'; \
+ext-ho-nested-lambda-model.smt2.log: ext-ho-nested-lambda-model.smt2
+	@p='ext-ho-nested-lambda-model.smt2'; \
+	b='ext-ho-nested-lambda-model.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-german169.smt2.log: german169.smt2
-	@p='german169.smt2'; \
-	b='german169.smt2'; \
+declare-fun-variants.smt2.log: declare-fun-variants.smt2
+	@p='declare-fun-variants.smt2'; \
+	b='declare-fun-variants.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-QEpres-uf.855035.smt.log: QEpres-uf.855035.smt
-	@p='QEpres-uf.855035.smt'; \
-	b='QEpres-uf.855035.smt'; \
+ext-ho.smt2.log: ext-ho.smt2
+	@p='ext-ho.smt2'; \
+	b='ext-ho.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-agree467.smt2.log: agree467.smt2
-	@p='agree467.smt2'; \
-	b='agree467.smt2'; \
+trans.smt2.log: trans.smt2
+	@p='trans.smt2'; \
+	b='trans.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-Arrow_Order-smtlib.778341.smt.log: Arrow_Order-smtlib.778341.smt
-	@p='Arrow_Order-smtlib.778341.smt'; \
-	b='Arrow_Order-smtlib.778341.smt'; \
+ext-finite-unsat.smt2.log: ext-finite-unsat.smt2
+	@p='ext-finite-unsat.smt2'; \
+	b='ext-finite-unsat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-german73.smt2.log: german73.smt2
-	@p='german73.smt2'; \
-	b='german73.smt2'; \
+ext-sat.smt2.log: ext-sat.smt2
+	@p='ext-sat.smt2'; \
+	b='ext-sat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-PUZ001+1.smt2.log: PUZ001+1.smt2
-	@p='PUZ001+1.smt2'; \
-	b='PUZ001+1.smt2'; \
+cong-full-apply.smt2.log: cong-full-apply.smt2
+	@p='cong-full-apply.smt2'; \
+	b='cong-full-apply.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-refcount24.cvc.smt2.log: refcount24.cvc.smt2
-	@p='refcount24.cvc.smt2'; \
-	b='refcount24.cvc.smt2'; \
+def-fun-flatten.smt2.log: def-fun-flatten.smt2
+	@p='def-fun-flatten.smt2'; \
+	b='def-fun-flatten.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmf-bound-int.smt2.log: fmf-bound-int.smt2
-	@p='fmf-bound-int.smt2'; \
-	b='fmf-bound-int.smt2'; \
+lambda-equality-non-canon.smt2.log: lambda-equality-non-canon.smt2
+	@p='lambda-equality-non-canon.smt2'; \
+	b='lambda-equality-non-canon.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fc-simple.smt2.log: fc-simple.smt2
-	@p='fc-simple.smt2'; \
-	b='fc-simple.smt2'; \
+ite-apply-eq.smt2.log: ite-apply-eq.smt2
+	@p='ite-apply-eq.smt2'; \
+	b='ite-apply-eq.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fc-unsat-tot-2.smt2.log: fc-unsat-tot-2.smt2
-	@p='fc-unsat-tot-2.smt2'; \
-	b='fc-unsat-tot-2.smt2'; \
+apply-collapse-unsat.smt2.log: apply-collapse-unsat.smt2
+	@p='apply-collapse-unsat.smt2'; \
+	b='apply-collapse-unsat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fc-unsat-pent.smt2.log: fc-unsat-pent.smt2
-	@p='fc-unsat-pent.smt2'; \
-	b='fc-unsat-pent.smt2'; \
+apply-collapse-sat.smt2.log: apply-collapse-sat.smt2
+	@p='apply-collapse-sat.smt2'; \
+	b='apply-collapse-sat.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fc-pigeonhole19.smt2.log: fc-pigeonhole19.smt2
-	@p='fc-pigeonhole19.smt2'; \
-	b='fc-pigeonhole19.smt2'; \
+ho-exponential-model.smt2.log: ho-exponential-model.smt2
+	@p='ho-exponential-model.smt2'; \
+	b='ho-exponential-model.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-Hoare-z3.931718.smt.log: Hoare-z3.931718.smt
-	@p='Hoare-z3.931718.smt'; \
-	b='Hoare-z3.931718.smt'; \
+ext-sat-partial-eval.smt2.log: ext-sat-partial-eval.smt2
+	@p='ext-sat-partial-eval.smt2'; \
+	b='ext-sat-partial-eval.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug0909.smt2.log: bug0909.smt2
-	@p='bug0909.smt2'; \
-	b='bug0909.smt2'; \
+ho-std-fmf.smt2.log: ho-std-fmf.smt2
+	@p='ho-std-fmf.smt2'; \
+	b='ho-std-fmf.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-lst-no-self-rev-exp.smt2.log: lst-no-self-rev-exp.smt2
-	@p='lst-no-self-rev-exp.smt2'; \
-	b='lst-no-self-rev-exp.smt2'; \
+fta0409.smt2.log: fta0409.smt2
+	@p='fta0409.smt2'; \
+	b='fta0409.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fib-core.smt2.log: fib-core.smt2
-	@p='fib-core.smt2'; \
-	b='fib-core.smt2'; \
+auth0068.smt2.log: auth0068.smt2
+	@p='auth0068.smt2'; \
+	b='auth0068.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fore19-exp2-core.smt2.log: fore19-exp2-core.smt2
-	@p='fore19-exp2-core.smt2'; \
-	b='fore19-exp2-core.smt2'; \
+modulo-func-equality.smt2.log: modulo-func-equality.smt2
+	@p='modulo-func-equality.smt2'; \
+	b='modulo-func-equality.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-with-ind-104-core.smt2.log: with-ind-104-core.smt2
-	@p='with-ind-104-core.smt2'; \
-	b='with-ind-104-core.smt2'; \
+ho-matching-enum.smt2.log: ho-matching-enum.smt2
+	@p='ho-matching-enum.smt2'; \
+	b='ho-matching-enum.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-syn002-si-real-int.smt2.log: syn002-si-real-int.smt2
-	@p='syn002-si-real-int.smt2'; \
-	b='syn002-si-real-int.smt2'; \
+ho-matching-enum-2.smt2.log: ho-matching-enum-2.smt2
+	@p='ho-matching-enum-2.smt2'; \
+	b='ho-matching-enum-2.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-krs-sat.smt2.log: krs-sat.smt2
-	@p='krs-sat.smt2'; \
-	b='krs-sat.smt2'; \
+ho-matching-nested-app.smt2.log: ho-matching-nested-app.smt2
+	@p='ho-matching-nested-app.smt2'; \
+	b='ho-matching-nested-app.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-forall_unit_data2.smt2.log: forall_unit_data2.smt2
-	@p='forall_unit_data2.smt2'; \
-	b='forall_unit_data2.smt2'; \
+simple-matching.smt2.log: simple-matching.smt2
+	@p='simple-matching.smt2'; \
+	b='simple-matching.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-sc_bad_model_1221.smt2.log: sc_bad_model_1221.smt2
-	@p='sc_bad_model_1221.smt2'; \
-	b='sc_bad_model_1221.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-dt-proper-model.smt2.log: dt-proper-model.smt2
-	@p='dt-proper-model.smt2'; \
-	b='dt-proper-model.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fd-false.smt2.log: fd-false.smt2
-	@p='fd-false.smt2'; \
-	b='fd-false.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tail_rec.smt2.log: tail_rec.smt2
-	@p='tail_rec.smt2'; \
-	b='tail_rec.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-jasmin-cdt-crash.smt2.log: jasmin-cdt-crash.smt2
-	@p='jasmin-cdt-crash.smt2'; \
-	b='jasmin-cdt-crash.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-loopy_coda.smt2.log: loopy_coda.smt2
-	@p='loopy_coda.smt2'; \
-	b='loopy_coda.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmc_unsound_model.smt2.log: fmc_unsound_model.smt2
-	@p='fmc_unsound_model.smt2'; \
-	b='fmc_unsound_model.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-am-bad-model.cvc.log: am-bad-model.cvc
-	@p='am-bad-model.cvc'; \
-	b='am-bad-model.cvc'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-nun-0208-to.smt2.log: nun-0208-to.smt2
-	@p='nun-0208-to.smt2'; \
-	b='nun-0208-to.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-datatypes-ufinite.smt2.log: datatypes-ufinite.smt2
-	@p='datatypes-ufinite.smt2'; \
-	b='datatypes-ufinite.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-datatypes-ufinite-nested.smt2.log: datatypes-ufinite-nested.smt2
-	@p='datatypes-ufinite-nested.smt2'; \
-	b='datatypes-ufinite-nested.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-agree466.smt2.log: agree466.smt2
-	@p='agree466.smt2'; \
-	b='agree466.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-LeftistHeap.scala-8-ncm.smt2.log: LeftistHeap.scala-8-ncm.smt2
-	@p='LeftistHeap.scala-8-ncm.smt2'; \
-	b='LeftistHeap.scala-8-ncm.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-sc-crash-052316.smt2.log: sc-crash-052316.smt2
-	@p='sc-crash-052316.smt2'; \
-	b='sc-crash-052316.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bound-int-alt.smt2.log: bound-int-alt.smt2
-	@p='bound-int-alt.smt2'; \
-	b='bound-int-alt.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug723-irrelevant-funs.smt2.log: bug723-irrelevant-funs.smt2
-	@p='bug723-irrelevant-funs.smt2'; \
-	b='bug723-irrelevant-funs.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bounded_sets.smt2.log: bounded_sets.smt2
-	@p='bounded_sets.smt2'; \
-	b='bounded_sets.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmf-strange-bounds.smt2.log: fmf-strange-bounds.smt2
-	@p='fmf-strange-bounds.smt2'; \
-	b='fmf-strange-bounds.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmf-strange-bounds-2.smt2.log: fmf-strange-bounds-2.smt2
-	@p='fmf-strange-bounds-2.smt2'; \
-	b='fmf-strange-bounds-2.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmf-bound-2dim.smt2.log: fmf-bound-2dim.smt2
-	@p='fmf-bound-2dim.smt2'; \
-	b='fmf-bound-2dim.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-memory_model-R_cpp-dd.cvc.log: memory_model-R_cpp-dd.cvc
-	@p='memory_model-R_cpp-dd.cvc'; \
-	b='memory_model-R_cpp-dd.cvc'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug764.smt2.log: bug764.smt2
-	@p='bug764.smt2'; \
-	b='bug764.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-ko-bound-set.cvc.log: ko-bound-set.cvc
-	@p='ko-bound-set.cvc'; \
-	b='ko-bound-set.cvc'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-cons-sets-bounds.smt2.log: cons-sets-bounds.smt2
-	@p='cons-sets-bounds.smt2'; \
-	b='cons-sets-bounds.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug651.smt2.log: bug651.smt2
-	@p='bug651.smt2'; \
-	b='bug651.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug652.smt2.log: bug652.smt2
-	@p='bug652.smt2'; \
-	b='bug652.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug782.smt2.log: bug782.smt2
-	@p='bug782.smt2'; \
-	b='bug782.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-quant_real_univ.cvc.log: quant_real_univ.cvc
-	@p='quant_real_univ.cvc'; \
-	b='quant_real_univ.cvc'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-constr-ground-to.smt2.log: constr-ground-to.smt2
-	@p='constr-ground-to.smt2'; \
-	b='constr-ground-to.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-bug-041417-set-options.cvc.log: bug-041417-set-options.cvc
-	@p='bug-041417-set-options.cvc'; \
-	b='bug-041417-set-options.cvc'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-alg202+1.smt2.log: alg202+1.smt2
-	@p='alg202+1.smt2'; \
-	b='alg202+1.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmf-fun-no-elim-ext-arith.smt2.log: fmf-fun-no-elim-ext-arith.smt2
-	@p='fmf-fun-no-elim-ext-arith.smt2'; \
-	b='fmf-fun-no-elim-ext-arith.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-fmf-fun-no-elim-ext-arith2.smt2.log: fmf-fun-no-elim-ext-arith2.smt2
-	@p='fmf-fun-no-elim-ext-arith2.smt2'; \
-	b='fmf-fun-no-elim-ext-arith2.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-cruanes-no-minimal-unk.smt2.log: cruanes-no-minimal-unk.smt2
-	@p='cruanes-no-minimal-unk.smt2'; \
-	b='cruanes-no-minimal-unk.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-no-minimal-sat.smt2.log: no-minimal-sat.smt2
-	@p='no-minimal-sat.smt2'; \
-	b='no-minimal-sat.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-issue916-fmf-or.smt2.log: issue916-fmf-or.smt2
-	@p='issue916-fmf-or.smt2'; \
-	b='issue916-fmf-or.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-pow2-bool.smt2.log: pow2-bool.smt2
-	@p='pow2-bool.smt2'; \
-	b='pow2-bool.smt2'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-sat-logic.smt2.log: sat-logic.smt2
-	@p='sat-logic.smt2'; \
-	b='sat-logic.smt2'; \
+simple-matching-partial.smt2.log: simple-matching-partial.smt2
+	@p='simple-matching-partial.smt2'; \
+	b='simple-matching-partial.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1456,6 +1160,8 @@ uninstall-am:
 # don't override a BINARY imported from a personal.mk
 @mk_if@eq ($(BINARY),)
 end@mk_if@
+
+# hoa0102.smt2
 
 #if CVC4_BUILD_PROFILE_COMPETITION
 #else

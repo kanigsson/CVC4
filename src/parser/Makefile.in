@@ -89,6 +89,13 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+
+# -Wl,--export-all-symbols makes sure that all symbols are exported when
+# building a DLL. This option is on by default but gets disabled for the parser
+# library because the generated lexer/parser files define some functions as
+# __declspec(dllexport), which leads to lots of unresolved symbols when linking
+# against libcvc4parser.
+@CVC4_WINDOWS_BUILD_TRUE@am__append_1 = -Wl,--export-all-symbols
 subdir = src/parser
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
@@ -558,9 +565,8 @@ AM_CPPFLAGS = \
 AM_CXXFLAGS = -Wall -Wno-unknown-pragmas $(FLAG_VISIBILITY_HIDDEN)
 SUBDIRS = smt1 smt2 cvc tptp
 lib_LTLIBRARIES = libcvc4parser.la
-libcvc4parser_la_LDFLAGS = $(ANTLR_LDFLAGS) \
-	-version-info $(LIBCVC4PARSER_VERSION)
-
+libcvc4parser_la_LDFLAGS = $(ANTLR_LDFLAGS) -no-undefined \
+	-version-info $(LIBCVC4PARSER_VERSION) $(am__append_1)
 libcvc4parser_la_LIBADD = \
 	@builddir@/smt1/libparsersmt1.la \
 	@builddir@/smt2/libparsersmt2.la \

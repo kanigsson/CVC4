@@ -621,6 +621,8 @@ WHITE_AND_BLACK_TESTS_TRUE
 pcvc4_LDFLAGS
 cvc4_LDFLAGS
 FLAG_VISIBILITY_HIDDEN
+CVC4_WINDOWS_BUILD_FALSE
+CVC4_WINDOWS_BUILD_TRUE
 CVC4_BINDINGS_LIBRARY_VERSION
 CVC4_COMPAT_LIBRARY_VERSION
 CVC4_PARSER_LIBRARY_VERSION
@@ -22411,7 +22413,6 @@ have_liblfsc=0
 LFSC_LIBS=
 LFSC_LDFLAGS=
 
-have_liblfsc=0
 if test "$with_lfsc" = no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, LFSC disabled by user" >&5
 $as_echo "no, LFSC disabled by user" >&6; }
@@ -29463,11 +29464,22 @@ LDFLAGS="${LDFLAGS:+$LDFLAGS }$CVC4LDFLAGS"
 
 # visibility flag not supported for Windows builds
 # also increase default stack size for Windows binaries
+windows_build=no
 case $host_os in
   (*mingw*) FLAG_VISIBILITY_HIDDEN=
             cvc4_LDFLAGS=-Wl,--stack,134217728
             pcvc4_LDFLAGS=-Wl,--stack,134217728
+            windows_build=yes
 esac
+
+ if test "$windows_build" = "yes"; then
+  CVC4_WINDOWS_BUILD_TRUE=
+  CVC4_WINDOWS_BUILD_FALSE='#'
+else
+  CVC4_WINDOWS_BUILD_TRUE='#'
+  CVC4_WINDOWS_BUILD_FALSE=
+fi
+
 
 
 
@@ -29534,7 +29546,7 @@ fi
 MAN_DATE=`date '+%B %Y'`
 
 
-ac_config_files="$ac_config_files Makefile.builds Makefile proofs/signatures/Makefile contrib/Makefile examples/Makefile examples/api/Makefile examples/api/java/Makefile examples/hashsmt/Makefile examples/nra-translate/Makefile examples/sets-translate/Makefile src/Makefile src/base/Makefile src/bindings/Makefile src/bindings/compat/Makefile src/bindings/compat/c/Makefile src/bindings/compat/java/Makefile src/compat/Makefile src/expr/Makefile src/lib/Makefile src/main/Makefile src/options/Makefile src/parser/Makefile src/parser/cvc/Makefile src/parser/smt1/Makefile src/parser/smt2/Makefile src/parser/tptp/Makefile src/prop/bvminisat/Makefile src/prop/minisat/Makefile src/smt_util/Makefile src/util/Makefile test/Makefile test/regress/Makefile test/regress/regress0/Makefile test/regress/regress0/arith/Makefile test/regress/regress0/arith/integers/Makefile test/regress/regress0/arrays/Makefile test/regress/regress0/aufbv/Makefile test/regress/regress0/auflia/Makefile test/regress/regress0/bv/Makefile test/regress/regress0/bv/core/Makefile test/regress/regress0/datatypes/Makefile test/regress/regress0/decision/Makefile test/regress/regress0/expect/Makefile test/regress/regress0/fmf/Makefile test/regress/regress0/lemmas/Makefile test/regress/regress0/nl/Makefile test/regress/regress0/parser/Makefile test/regress/regress0/precedence/Makefile test/regress/regress0/preprocess/Makefile test/regress/regress0/push-pop/Makefile test/regress/regress0/push-pop/arith/Makefile test/regress/regress0/push-pop/boolean/Makefile test/regress/regress0/quantifiers/Makefile test/regress/regress0/rels/Makefile test/regress/regress0/rewriterules/Makefile test/regress/regress0/sep/Makefile test/regress/regress0/sets/Makefile test/regress/regress0/strings/Makefile test/regress/regress0/sygus/Makefile test/regress/regress0/tptp/Makefile test/regress/regress0/uf/Makefile test/regress/regress0/uflia/Makefile test/regress/regress0/uflra/Makefile test/regress/regress0/unconstrained/Makefile test/regress/regress1/Makefile test/regress/regress1/aufbv/Makefile test/regress/regress1/auflia/Makefile test/regress/regress1/bv/Makefile test/regress/regress1/datatypes/Makefile test/regress/regress1/decision/Makefile test/regress/regress1/fmf/Makefile test/regress/regress1/lemmas/Makefile test/regress/regress1/nl/Makefile test/regress/regress1/quantifiers/Makefile test/regress/regress1/rewriterules/Makefile test/regress/regress1/sep/Makefile test/regress/regress1/sets/Makefile test/regress/regress1/strings/Makefile test/regress/regress1/sygus/Makefile test/regress/regress2/Makefile test/regress/regress2/arith/Makefile test/regress/regress3/Makefile test/regress/regress4/Makefile test/system/Makefile test/unit/Makefile"
+ac_config_files="$ac_config_files Makefile.builds Makefile proofs/signatures/Makefile contrib/Makefile examples/Makefile examples/api/Makefile examples/api/java/Makefile examples/hashsmt/Makefile examples/nra-translate/Makefile examples/sets-translate/Makefile src/Makefile src/base/Makefile src/bindings/Makefile src/bindings/compat/Makefile src/bindings/compat/c/Makefile src/bindings/compat/java/Makefile src/compat/Makefile src/expr/Makefile src/lib/Makefile src/main/Makefile src/options/Makefile src/parser/Makefile src/parser/cvc/Makefile src/parser/smt1/Makefile src/parser/smt2/Makefile src/parser/tptp/Makefile src/prop/bvminisat/Makefile src/prop/minisat/Makefile src/smt_util/Makefile src/util/Makefile test/Makefile test/regress/Makefile test/regress/regress0/Makefile test/regress/regress0/arith/Makefile test/regress/regress0/arith/integers/Makefile test/regress/regress0/arrays/Makefile test/regress/regress0/aufbv/Makefile test/regress/regress0/auflia/Makefile test/regress/regress0/bv/Makefile test/regress/regress0/bv/core/Makefile test/regress/regress0/datatypes/Makefile test/regress/regress0/decision/Makefile test/regress/regress0/expect/Makefile test/regress/regress0/fmf/Makefile test/regress/regress0/ho/Makefile test/regress/regress0/lemmas/Makefile test/regress/regress0/nl/Makefile test/regress/regress0/parser/Makefile test/regress/regress0/precedence/Makefile test/regress/regress0/preprocess/Makefile test/regress/regress0/push-pop/Makefile test/regress/regress0/push-pop/arith/Makefile test/regress/regress0/push-pop/boolean/Makefile test/regress/regress0/quantifiers/Makefile test/regress/regress0/rels/Makefile test/regress/regress0/rewriterules/Makefile test/regress/regress0/sep/Makefile test/regress/regress0/sets/Makefile test/regress/regress0/strings/Makefile test/regress/regress0/sygus/Makefile test/regress/regress0/tptp/Makefile test/regress/regress0/uf/Makefile test/regress/regress0/uflia/Makefile test/regress/regress0/uflra/Makefile test/regress/regress0/unconstrained/Makefile test/regress/regress1/Makefile test/regress/regress1/aufbv/Makefile test/regress/regress1/auflia/Makefile test/regress/regress1/bv/Makefile test/regress/regress1/datatypes/Makefile test/regress/regress1/decision/Makefile test/regress/regress1/fmf/Makefile test/regress/regress1/lemmas/Makefile test/regress/regress1/nl/Makefile test/regress/regress1/quantifiers/Makefile test/regress/regress1/rewriterules/Makefile test/regress/regress1/sep/Makefile test/regress/regress1/sets/Makefile test/regress/regress1/strings/Makefile test/regress/regress1/sygus/Makefile test/regress/regress2/Makefile test/regress/regress2/arith/Makefile test/regress/regress3/Makefile test/regress/regress4/Makefile test/system/Makefile test/unit/Makefile"
 
 
 if test $cvc4_has_threads = yes; then
@@ -30043,6 +30055,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CVC4_TRACING_TRUE}" && test -z "${CVC4_TRACING_FALSE}"; then
   as_fn_error $? "conditional \"CVC4_TRACING\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CVC4_WINDOWS_BUILD_TRUE}" && test -z "${CVC4_WINDOWS_BUILD_FALSE}"; then
+  as_fn_error $? "conditional \"CVC4_WINDOWS_BUILD\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WHITE_AND_BLACK_TESTS_TRUE}" && test -z "${WHITE_AND_BLACK_TESTS_FALSE}"; then
@@ -31081,6 +31097,7 @@ do
     "test/regress/regress0/decision/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/decision/Makefile" ;;
     "test/regress/regress0/expect/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/expect/Makefile" ;;
     "test/regress/regress0/fmf/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/fmf/Makefile" ;;
+    "test/regress/regress0/ho/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/ho/Makefile" ;;
     "test/regress/regress0/lemmas/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/lemmas/Makefile" ;;
     "test/regress/regress0/nl/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/nl/Makefile" ;;
     "test/regress/regress0/parser/Makefile") CONFIG_FILES="$CONFIG_FILES test/regress/regress0/parser/Makefile" ;;
@@ -32659,9 +32676,11 @@ Bindings     : $bindings_to_be_built
 Multithreaded: $support_multithreaded
 Portfolio    : $with_portfolio
 
-MP library   : $mplibrary
-GLPK         : $with_glpk
 ABC          : $with_abc
+Cryptominisat: $with_cryptominisat
+GLPK         : $with_glpk
+LFSC         : $with_lfsc
+MP library   : $mplibrary
 Readline     : $with_readline
 
 CPPFLAGS     : $CPPFLAGS

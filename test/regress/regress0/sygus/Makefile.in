@@ -652,7 +652,16 @@ TESTS = commutative.sy \
         General_plus10.sy \
         qe.sy \
         cggmp.sy \
-        parse-bv-let.sy
+        parse-bv-let.sy \
+        cegar1.sy \
+        triv-type-mismatch-si.sy \
+        nia-max-square-ns.sy \
+        strings-concat-3-args.sy \
+        process-10-vars.sy \
+        process-10-vars-2fun.sy \
+        inv-unused.sy \
+        ccp16.lus.sy \
+        Base16_1.sy
 
 
 # sygus tests currently taking too long for make regress
@@ -1159,6 +1168,69 @@ cggmp.sy.log: cggmp.sy
 parse-bv-let.sy.log: parse-bv-let.sy
 	@p='parse-bv-let.sy'; \
 	b='parse-bv-let.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cegar1.sy.log: cegar1.sy
+	@p='cegar1.sy'; \
+	b='cegar1.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+triv-type-mismatch-si.sy.log: triv-type-mismatch-si.sy
+	@p='triv-type-mismatch-si.sy'; \
+	b='triv-type-mismatch-si.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nia-max-square-ns.sy.log: nia-max-square-ns.sy
+	@p='nia-max-square-ns.sy'; \
+	b='nia-max-square-ns.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+strings-concat-3-args.sy.log: strings-concat-3-args.sy
+	@p='strings-concat-3-args.sy'; \
+	b='strings-concat-3-args.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+process-10-vars.sy.log: process-10-vars.sy
+	@p='process-10-vars.sy'; \
+	b='process-10-vars.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+process-10-vars-2fun.sy.log: process-10-vars-2fun.sy
+	@p='process-10-vars-2fun.sy'; \
+	b='process-10-vars-2fun.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+inv-unused.sy.log: inv-unused.sy
+	@p='inv-unused.sy'; \
+	b='inv-unused.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ccp16.lus.sy.log: ccp16.lus.sy
+	@p='ccp16.lus.sy'; \
+	b='ccp16.lus.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+Base16_1.sy.log: Base16_1.sy
+	@p='Base16_1.sy'; \
+	b='Base16_1.sy'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

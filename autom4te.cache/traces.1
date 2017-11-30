@@ -1900,55 +1900,64 @@ m4trace:configure.ac:1299: -1- AC_DEFINE_TRACE_LITERAL([CVC4_RELEASE_STRING])
 m4trace:configure.ac:1299: -1- m4_pattern_allow([^CVC4_RELEASE_STRING$])
 m4trace:configure.ac:1299: -1- AH_OUTPUT([CVC4_RELEASE_STRING], [/* Full release string for CVC4. */
 @%:@undef CVC4_RELEASE_STRING])
-m4trace:configure.ac:1314: -1- AC_SUBST([FLAG_VISIBILITY_HIDDEN])
-m4trace:configure.ac:1314: -1- AC_SUBST_TRACE([FLAG_VISIBILITY_HIDDEN])
-m4trace:configure.ac:1314: -1- m4_pattern_allow([^FLAG_VISIBILITY_HIDDEN$])
-m4trace:configure.ac:1315: -1- AC_SUBST([cvc4_LDFLAGS])
-m4trace:configure.ac:1315: -1- AC_SUBST_TRACE([cvc4_LDFLAGS])
-m4trace:configure.ac:1315: -1- m4_pattern_allow([^cvc4_LDFLAGS$])
-m4trace:configure.ac:1316: -1- AC_SUBST([pcvc4_LDFLAGS])
-m4trace:configure.ac:1316: -1- AC_SUBST_TRACE([pcvc4_LDFLAGS])
-m4trace:configure.ac:1316: -1- m4_pattern_allow([^pcvc4_LDFLAGS$])
-m4trace:configure.ac:1318: -1- AM_CONDITIONAL([WHITE_AND_BLACK_TESTS], [test -z "$FLAG_VISIBILITY_HIDDEN"])
-m4trace:configure.ac:1318: -1- AC_SUBST([WHITE_AND_BLACK_TESTS_TRUE])
-m4trace:configure.ac:1318: -1- AC_SUBST_TRACE([WHITE_AND_BLACK_TESTS_TRUE])
-m4trace:configure.ac:1318: -1- m4_pattern_allow([^WHITE_AND_BLACK_TESTS_TRUE$])
-m4trace:configure.ac:1318: -1- AC_SUBST([WHITE_AND_BLACK_TESTS_FALSE])
-m4trace:configure.ac:1318: -1- AC_SUBST_TRACE([WHITE_AND_BLACK_TESTS_FALSE])
-m4trace:configure.ac:1318: -1- m4_pattern_allow([^WHITE_AND_BLACK_TESTS_FALSE$])
-m4trace:configure.ac:1318: -1- _AM_SUBST_NOTMAKE([WHITE_AND_BLACK_TESTS_TRUE])
-m4trace:configure.ac:1318: -1- _AM_SUBST_NOTMAKE([WHITE_AND_BLACK_TESTS_FALSE])
-m4trace:configure.ac:1321: -1- AC_SUBST([cvc4_config_cmdline])
-m4trace:configure.ac:1321: -1- AC_SUBST_TRACE([cvc4_config_cmdline])
-m4trace:configure.ac:1321: -1- m4_pattern_allow([^cvc4_config_cmdline$])
-m4trace:configure.ac:1337: -1- AC_SUBST([mk_include])
-m4trace:configure.ac:1337: -1- AC_SUBST_TRACE([mk_include])
-m4trace:configure.ac:1337: -1- m4_pattern_allow([^mk_include$])
-m4trace:configure.ac:1340: -1- AC_SUBST([mk_if])
-m4trace:configure.ac:1340: -1- AC_SUBST_TRACE([mk_if])
-m4trace:configure.ac:1340: -1- m4_pattern_allow([^mk_if$])
-m4trace:configure.ac:1342: -1- AC_SUBST([mk_empty])
-m4trace:configure.ac:1342: -1- AC_SUBST_TRACE([mk_empty])
-m4trace:configure.ac:1342: -1- m4_pattern_allow([^mk_empty$])
-m4trace:configure.ac:1348: -1- AM_CONDITIONAL([CVC4_FALSE], [false])
-m4trace:configure.ac:1348: -1- AC_SUBST([CVC4_FALSE_TRUE])
-m4trace:configure.ac:1348: -1- AC_SUBST_TRACE([CVC4_FALSE_TRUE])
-m4trace:configure.ac:1348: -1- m4_pattern_allow([^CVC4_FALSE_TRUE$])
-m4trace:configure.ac:1348: -1- AC_SUBST([CVC4_FALSE_FALSE])
-m4trace:configure.ac:1348: -1- AC_SUBST_TRACE([CVC4_FALSE_FALSE])
-m4trace:configure.ac:1348: -1- m4_pattern_allow([^CVC4_FALSE_FALSE$])
-m4trace:configure.ac:1348: -1- _AM_SUBST_NOTMAKE([CVC4_FALSE_TRUE])
-m4trace:configure.ac:1348: -1- _AM_SUBST_NOTMAKE([CVC4_FALSE_FALSE])
-m4trace:configure.ac:1358: -1- AC_SUBST([CVC4_USE_CLN_IMP])
-m4trace:configure.ac:1358: -1- AC_SUBST_TRACE([CVC4_USE_CLN_IMP])
-m4trace:configure.ac:1358: -1- m4_pattern_allow([^CVC4_USE_CLN_IMP$])
-m4trace:configure.ac:1359: -1- AC_SUBST([CVC4_USE_GMP_IMP])
-m4trace:configure.ac:1359: -1- AC_SUBST_TRACE([CVC4_USE_GMP_IMP])
-m4trace:configure.ac:1359: -1- m4_pattern_allow([^CVC4_USE_GMP_IMP$])
-m4trace:configure.ac:1363: -1- AC_SUBST([MAN_DATE])
-m4trace:configure.ac:1363: -1- AC_SUBST_TRACE([MAN_DATE])
-m4trace:configure.ac:1363: -1- m4_pattern_allow([^MAN_DATE$])
-m4trace:configure.ac:1365: -1- AC_CONFIG_FILES([
+m4trace:configure.ac:1316: -1- AM_CONDITIONAL([CVC4_WINDOWS_BUILD], [test "$windows_build" = "yes"])
+m4trace:configure.ac:1316: -1- AC_SUBST([CVC4_WINDOWS_BUILD_TRUE])
+m4trace:configure.ac:1316: -1- AC_SUBST_TRACE([CVC4_WINDOWS_BUILD_TRUE])
+m4trace:configure.ac:1316: -1- m4_pattern_allow([^CVC4_WINDOWS_BUILD_TRUE$])
+m4trace:configure.ac:1316: -1- AC_SUBST([CVC4_WINDOWS_BUILD_FALSE])
+m4trace:configure.ac:1316: -1- AC_SUBST_TRACE([CVC4_WINDOWS_BUILD_FALSE])
+m4trace:configure.ac:1316: -1- m4_pattern_allow([^CVC4_WINDOWS_BUILD_FALSE$])
+m4trace:configure.ac:1316: -1- _AM_SUBST_NOTMAKE([CVC4_WINDOWS_BUILD_TRUE])
+m4trace:configure.ac:1316: -1- _AM_SUBST_NOTMAKE([CVC4_WINDOWS_BUILD_FALSE])
+m4trace:configure.ac:1318: -1- AC_SUBST([FLAG_VISIBILITY_HIDDEN])
+m4trace:configure.ac:1318: -1- AC_SUBST_TRACE([FLAG_VISIBILITY_HIDDEN])
+m4trace:configure.ac:1318: -1- m4_pattern_allow([^FLAG_VISIBILITY_HIDDEN$])
+m4trace:configure.ac:1319: -1- AC_SUBST([cvc4_LDFLAGS])
+m4trace:configure.ac:1319: -1- AC_SUBST_TRACE([cvc4_LDFLAGS])
+m4trace:configure.ac:1319: -1- m4_pattern_allow([^cvc4_LDFLAGS$])
+m4trace:configure.ac:1320: -1- AC_SUBST([pcvc4_LDFLAGS])
+m4trace:configure.ac:1320: -1- AC_SUBST_TRACE([pcvc4_LDFLAGS])
+m4trace:configure.ac:1320: -1- m4_pattern_allow([^pcvc4_LDFLAGS$])
+m4trace:configure.ac:1322: -1- AM_CONDITIONAL([WHITE_AND_BLACK_TESTS], [test -z "$FLAG_VISIBILITY_HIDDEN"])
+m4trace:configure.ac:1322: -1- AC_SUBST([WHITE_AND_BLACK_TESTS_TRUE])
+m4trace:configure.ac:1322: -1- AC_SUBST_TRACE([WHITE_AND_BLACK_TESTS_TRUE])
+m4trace:configure.ac:1322: -1- m4_pattern_allow([^WHITE_AND_BLACK_TESTS_TRUE$])
+m4trace:configure.ac:1322: -1- AC_SUBST([WHITE_AND_BLACK_TESTS_FALSE])
+m4trace:configure.ac:1322: -1- AC_SUBST_TRACE([WHITE_AND_BLACK_TESTS_FALSE])
+m4trace:configure.ac:1322: -1- m4_pattern_allow([^WHITE_AND_BLACK_TESTS_FALSE$])
+m4trace:configure.ac:1322: -1- _AM_SUBST_NOTMAKE([WHITE_AND_BLACK_TESTS_TRUE])
+m4trace:configure.ac:1322: -1- _AM_SUBST_NOTMAKE([WHITE_AND_BLACK_TESTS_FALSE])
+m4trace:configure.ac:1325: -1- AC_SUBST([cvc4_config_cmdline])
+m4trace:configure.ac:1325: -1- AC_SUBST_TRACE([cvc4_config_cmdline])
+m4trace:configure.ac:1325: -1- m4_pattern_allow([^cvc4_config_cmdline$])
+m4trace:configure.ac:1341: -1- AC_SUBST([mk_include])
+m4trace:configure.ac:1341: -1- AC_SUBST_TRACE([mk_include])
+m4trace:configure.ac:1341: -1- m4_pattern_allow([^mk_include$])
+m4trace:configure.ac:1344: -1- AC_SUBST([mk_if])
+m4trace:configure.ac:1344: -1- AC_SUBST_TRACE([mk_if])
+m4trace:configure.ac:1344: -1- m4_pattern_allow([^mk_if$])
+m4trace:configure.ac:1346: -1- AC_SUBST([mk_empty])
+m4trace:configure.ac:1346: -1- AC_SUBST_TRACE([mk_empty])
+m4trace:configure.ac:1346: -1- m4_pattern_allow([^mk_empty$])
+m4trace:configure.ac:1352: -1- AM_CONDITIONAL([CVC4_FALSE], [false])
+m4trace:configure.ac:1352: -1- AC_SUBST([CVC4_FALSE_TRUE])
+m4trace:configure.ac:1352: -1- AC_SUBST_TRACE([CVC4_FALSE_TRUE])
+m4trace:configure.ac:1352: -1- m4_pattern_allow([^CVC4_FALSE_TRUE$])
+m4trace:configure.ac:1352: -1- AC_SUBST([CVC4_FALSE_FALSE])
+m4trace:configure.ac:1352: -1- AC_SUBST_TRACE([CVC4_FALSE_FALSE])
+m4trace:configure.ac:1352: -1- m4_pattern_allow([^CVC4_FALSE_FALSE$])
+m4trace:configure.ac:1352: -1- _AM_SUBST_NOTMAKE([CVC4_FALSE_TRUE])
+m4trace:configure.ac:1352: -1- _AM_SUBST_NOTMAKE([CVC4_FALSE_FALSE])
+m4trace:configure.ac:1362: -1- AC_SUBST([CVC4_USE_CLN_IMP])
+m4trace:configure.ac:1362: -1- AC_SUBST_TRACE([CVC4_USE_CLN_IMP])
+m4trace:configure.ac:1362: -1- m4_pattern_allow([^CVC4_USE_CLN_IMP$])
+m4trace:configure.ac:1363: -1- AC_SUBST([CVC4_USE_GMP_IMP])
+m4trace:configure.ac:1363: -1- AC_SUBST_TRACE([CVC4_USE_GMP_IMP])
+m4trace:configure.ac:1363: -1- m4_pattern_allow([^CVC4_USE_GMP_IMP$])
+m4trace:configure.ac:1367: -1- AC_SUBST([MAN_DATE])
+m4trace:configure.ac:1367: -1- AC_SUBST_TRACE([MAN_DATE])
+m4trace:configure.ac:1367: -1- m4_pattern_allow([^MAN_DATE$])
+m4trace:configure.ac:1369: -1- AC_CONFIG_FILES([
   Makefile.builds
   Makefile
   proofs/signatures/Makefile
@@ -1993,6 +2002,7 @@ test/regress/regress0/datatypes/Makefile
 test/regress/regress0/decision/Makefile
 test/regress/regress0/expect/Makefile
 test/regress/regress0/fmf/Makefile
+test/regress/regress0/ho/Makefile
 test/regress/regress0/lemmas/Makefile
 test/regress/regress0/nl/Makefile
 test/regress/regress0/parser/Makefile
@@ -2036,19 +2046,7 @@ test/system/Makefile
 test/unit/Makefile
 
 ])
-m4trace:configure.ac:1374: -1- AM_CONDITIONAL([CVC4_HAS_THREADS], [true])
-m4trace:configure.ac:1374: -1- AC_SUBST([CVC4_HAS_THREADS_TRUE])
-m4trace:configure.ac:1374: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS_TRUE])
-m4trace:configure.ac:1374: -1- m4_pattern_allow([^CVC4_HAS_THREADS_TRUE$])
-m4trace:configure.ac:1374: -1- AC_SUBST([CVC4_HAS_THREADS_FALSE])
-m4trace:configure.ac:1374: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS_FALSE])
-m4trace:configure.ac:1374: -1- m4_pattern_allow([^CVC4_HAS_THREADS_FALSE$])
-m4trace:configure.ac:1374: -1- _AM_SUBST_NOTMAKE([CVC4_HAS_THREADS_TRUE])
-m4trace:configure.ac:1374: -1- _AM_SUBST_NOTMAKE([CVC4_HAS_THREADS_FALSE])
-m4trace:configure.ac:1375: -1- AC_SUBST([CVC4_HAS_THREADS], [1])
-m4trace:configure.ac:1375: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS])
-m4trace:configure.ac:1375: -1- m4_pattern_allow([^CVC4_HAS_THREADS$])
-m4trace:configure.ac:1378: -1- AM_CONDITIONAL([CVC4_HAS_THREADS], [false])
+m4trace:configure.ac:1378: -1- AM_CONDITIONAL([CVC4_HAS_THREADS], [true])
 m4trace:configure.ac:1378: -1- AC_SUBST([CVC4_HAS_THREADS_TRUE])
 m4trace:configure.ac:1378: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS_TRUE])
 m4trace:configure.ac:1378: -1- m4_pattern_allow([^CVC4_HAS_THREADS_TRUE$])
@@ -2057,106 +2055,118 @@ m4trace:configure.ac:1378: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS_FALSE])
 m4trace:configure.ac:1378: -1- m4_pattern_allow([^CVC4_HAS_THREADS_FALSE$])
 m4trace:configure.ac:1378: -1- _AM_SUBST_NOTMAKE([CVC4_HAS_THREADS_TRUE])
 m4trace:configure.ac:1378: -1- _AM_SUBST_NOTMAKE([CVC4_HAS_THREADS_FALSE])
-m4trace:configure.ac:1379: -1- AC_SUBST([CVC4_HAS_THREADS], [0])
+m4trace:configure.ac:1379: -1- AC_SUBST([CVC4_HAS_THREADS], [1])
 m4trace:configure.ac:1379: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS])
 m4trace:configure.ac:1379: -1- m4_pattern_allow([^CVC4_HAS_THREADS$])
-m4trace:configure.ac:1418: -1- _m4_warn([obsolete], [The macro `AC_ERROR' is obsolete.
+m4trace:configure.ac:1382: -1- AM_CONDITIONAL([CVC4_HAS_THREADS], [false])
+m4trace:configure.ac:1382: -1- AC_SUBST([CVC4_HAS_THREADS_TRUE])
+m4trace:configure.ac:1382: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS_TRUE])
+m4trace:configure.ac:1382: -1- m4_pattern_allow([^CVC4_HAS_THREADS_TRUE$])
+m4trace:configure.ac:1382: -1- AC_SUBST([CVC4_HAS_THREADS_FALSE])
+m4trace:configure.ac:1382: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS_FALSE])
+m4trace:configure.ac:1382: -1- m4_pattern_allow([^CVC4_HAS_THREADS_FALSE$])
+m4trace:configure.ac:1382: -1- _AM_SUBST_NOTMAKE([CVC4_HAS_THREADS_TRUE])
+m4trace:configure.ac:1382: -1- _AM_SUBST_NOTMAKE([CVC4_HAS_THREADS_FALSE])
+m4trace:configure.ac:1383: -1- AC_SUBST([CVC4_HAS_THREADS], [0])
+m4trace:configure.ac:1383: -1- AC_SUBST_TRACE([CVC4_HAS_THREADS])
+m4trace:configure.ac:1383: -1- m4_pattern_allow([^CVC4_HAS_THREADS$])
+m4trace:configure.ac:1422: -1- _m4_warn([obsolete], [The macro `AC_ERROR' is obsolete.
 You should run autoupdate.], [../../lib/autoconf/oldnames.m4:34: AC_ERROR is expanded from...
-configure.ac:1418: the top level])
-m4trace:configure.ac:1427: -1- _m4_warn([obsolete], [The macro `AC_ERROR' is obsolete.
+configure.ac:1422: the top level])
+m4trace:configure.ac:1431: -1- _m4_warn([obsolete], [The macro `AC_ERROR' is obsolete.
 You should run autoupdate.], [../../lib/autoconf/oldnames.m4:34: AC_ERROR is expanded from...
-configure.ac:1427: the top level])
-m4trace:configure.ac:1454: -1- AC_DEFINE_TRACE_LITERAL([CVC4_GPL_DEPS])
-m4trace:configure.ac:1454: -1- m4_pattern_allow([^CVC4_GPL_DEPS$])
-m4trace:configure.ac:1454: -1- AH_OUTPUT([CVC4_GPL_DEPS], [/* Whether CVC4 is built with the (optional) GPLed library dependences. */
+configure.ac:1431: the top level])
+m4trace:configure.ac:1458: -1- AC_DEFINE_TRACE_LITERAL([CVC4_GPL_DEPS])
+m4trace:configure.ac:1458: -1- m4_pattern_allow([^CVC4_GPL_DEPS$])
+m4trace:configure.ac:1458: -1- AH_OUTPUT([CVC4_GPL_DEPS], [/* Whether CVC4 is built with the (optional) GPLed library dependences. */
 @%:@undef CVC4_GPL_DEPS])
-m4trace:configure.ac:1473: -1- AC_CONFIG_FILES([src/util/integer.h.tmp:src/util/integer.h.in], [
+m4trace:configure.ac:1477: -1- AC_CONFIG_FILES([src/util/integer.h.tmp:src/util/integer.h.in], [
 if diff -q "src/util/integer.h.tmp" "src/util/integer.h" >/dev/null 2>&1; then
     :
 else
     cp "src/util/integer.h.tmp" "src/util/integer.h"
 fi
 ])
-m4trace:configure.ac:1474: -1- AC_CONFIG_FILES([src/util/rational.h.tmp:src/util/rational.h.in], [
+m4trace:configure.ac:1478: -1- AC_CONFIG_FILES([src/util/rational.h.tmp:src/util/rational.h.in], [
 if diff -q "src/util/rational.h.tmp" "src/util/rational.h" >/dev/null 2>&1; then
     :
 else
     cp "src/util/rational.h.tmp" "src/util/rational.h"
 fi
 ])
-m4trace:configure.ac:1476: -1- AC_CONFIG_FILES([doc/cvc4.1_template.tmp:doc/cvc4.1_template.in], [
+m4trace:configure.ac:1480: -1- AC_CONFIG_FILES([doc/cvc4.1_template.tmp:doc/cvc4.1_template.in], [
 if diff -q "doc/cvc4.1_template.tmp" "doc/cvc4.1_template" >/dev/null 2>&1; then
     :
 else
     cp "doc/cvc4.1_template.tmp" "doc/cvc4.1_template"
 fi
 ])
-m4trace:configure.ac:1477: -1- AC_CONFIG_FILES([doc/cvc4.5.tmp:doc/cvc4.5.in], [
+m4trace:configure.ac:1481: -1- AC_CONFIG_FILES([doc/cvc4.5.tmp:doc/cvc4.5.in], [
 if diff -q "doc/cvc4.5.tmp" "doc/cvc4.5" >/dev/null 2>&1; then
     :
 else
     cp "doc/cvc4.5.tmp" "doc/cvc4.5"
 fi
 ])
-m4trace:configure.ac:1478: -1- AC_CONFIG_FILES([doc/libcvc4.3_template.tmp:doc/libcvc4.3_template.in], [
+m4trace:configure.ac:1482: -1- AC_CONFIG_FILES([doc/libcvc4.3_template.tmp:doc/libcvc4.3_template.in], [
 if diff -q "doc/libcvc4.3_template.tmp" "doc/libcvc4.3_template" >/dev/null 2>&1; then
     :
 else
     cp "doc/libcvc4.3_template.tmp" "doc/libcvc4.3_template"
 fi
 ])
-m4trace:configure.ac:1479: -1- AC_CONFIG_FILES([doc/SmtEngine.3cvc_template.tmp:doc/SmtEngine.3cvc_template.in], [
+m4trace:configure.ac:1483: -1- AC_CONFIG_FILES([doc/SmtEngine.3cvc_template.tmp:doc/SmtEngine.3cvc_template.in], [
 if diff -q "doc/SmtEngine.3cvc_template.tmp" "doc/SmtEngine.3cvc_template" >/dev/null 2>&1; then
     :
 else
     cp "doc/SmtEngine.3cvc_template.tmp" "doc/SmtEngine.3cvc_template"
 fi
 ])
-m4trace:configure.ac:1480: -1- AC_CONFIG_FILES([doc/options.3cvc_template.tmp:doc/options.3cvc_template.in], [
+m4trace:configure.ac:1484: -1- AC_CONFIG_FILES([doc/options.3cvc_template.tmp:doc/options.3cvc_template.in], [
 if diff -q "doc/options.3cvc_template.tmp" "doc/options.3cvc_template" >/dev/null 2>&1; then
     :
 else
     cp "doc/options.3cvc_template.tmp" "doc/options.3cvc_template"
 fi
 ])
-m4trace:configure.ac:1481: -1- AC_CONFIG_FILES([doc/libcvc4parser.3.tmp:doc/libcvc4parser.3.in], [
+m4trace:configure.ac:1485: -1- AC_CONFIG_FILES([doc/libcvc4parser.3.tmp:doc/libcvc4parser.3.in], [
 if diff -q "doc/libcvc4parser.3.tmp" "doc/libcvc4parser.3" >/dev/null 2>&1; then
     :
 else
     cp "doc/libcvc4parser.3.tmp" "doc/libcvc4parser.3"
 fi
 ])
-m4trace:configure.ac:1482: -1- AC_CONFIG_FILES([doc/libcvc4compat.3.tmp:doc/libcvc4compat.3.in], [
+m4trace:configure.ac:1486: -1- AC_CONFIG_FILES([doc/libcvc4compat.3.tmp:doc/libcvc4compat.3.in], [
 if diff -q "doc/libcvc4compat.3.tmp" "doc/libcvc4compat.3" >/dev/null 2>&1; then
     :
 else
     cp "doc/libcvc4compat.3.tmp" "doc/libcvc4compat.3"
 fi
 ])
-m4trace:configure.ac:1484: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([LIB@&t@OBJS])
-m4trace:configure.ac:1484: -1- m4_pattern_allow([^LIB@&t@OBJS$])
-m4trace:configure.ac:1484: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([LTLIBOBJS])
-m4trace:configure.ac:1484: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.ac:1484: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
-m4trace:configure.ac:1484: -1- AC_SUBST([am__EXEEXT_TRUE])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([am__EXEEXT_TRUE])
-m4trace:configure.ac:1484: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
-m4trace:configure.ac:1484: -1- AC_SUBST([am__EXEEXT_FALSE])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([am__EXEEXT_FALSE])
-m4trace:configure.ac:1484: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
-m4trace:configure.ac:1484: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
-m4trace:configure.ac:1484: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([top_builddir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([top_build_prefix])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([srcdir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([abs_srcdir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([top_srcdir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([abs_top_srcdir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([builddir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([abs_builddir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([abs_top_builddir])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([INSTALL])
-m4trace:configure.ac:1484: -1- AC_SUBST_TRACE([MKDIR_P])
-m4trace:configure.ac:1484: -1- AC_REQUIRE_AUX_FILE([ltmain.sh])
+m4trace:configure.ac:1488: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([LIB@&t@OBJS])
+m4trace:configure.ac:1488: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:1488: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([LTLIBOBJS])
+m4trace:configure.ac:1488: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:1488: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
+m4trace:configure.ac:1488: -1- AC_SUBST([am__EXEEXT_TRUE])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([am__EXEEXT_TRUE])
+m4trace:configure.ac:1488: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
+m4trace:configure.ac:1488: -1- AC_SUBST([am__EXEEXT_FALSE])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([am__EXEEXT_FALSE])
+m4trace:configure.ac:1488: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
+m4trace:configure.ac:1488: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
+m4trace:configure.ac:1488: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([top_builddir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([top_build_prefix])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([srcdir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([abs_srcdir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([top_srcdir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([abs_top_srcdir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([builddir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([abs_builddir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([abs_top_builddir])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([INSTALL])
+m4trace:configure.ac:1488: -1- AC_SUBST_TRACE([MKDIR_P])
+m4trace:configure.ac:1488: -1- AC_REQUIRE_AUX_FILE([ltmain.sh])

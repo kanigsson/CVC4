@@ -175,11 +175,12 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	decision/decision_engine.lo \
 	decision/justification_heuristic.lo \
 	printer/dagification_visitor.lo printer/printer.lo \
-	printer/ast/ast_printer.lo printer/cvc/cvc_printer.lo \
-	printer/smt1/smt1_printer.lo printer/smt2/smt2_printer.lo \
-	printer/tptp/tptp_printer.lo proof/arith_proof.lo \
-	proof/array_proof.lo proof/bitvector_proof.lo \
-	proof/cnf_proof.lo proof/lemma_proof.lo proof/proof_manager.lo \
+	printer/sygus_print_callback.lo printer/ast/ast_printer.lo \
+	printer/cvc/cvc_printer.lo printer/smt1/smt1_printer.lo \
+	printer/smt2/smt2_printer.lo printer/tptp/tptp_printer.lo \
+	proof/arith_proof.lo proof/array_proof.lo \
+	proof/bitvector_proof.lo proof/cnf_proof.lo \
+	proof/lemma_proof.lo proof/proof_manager.lo \
 	proof/proof_output_channel.lo proof/proof_utils.lo \
 	proof/simplify_boolean_node.lo proof/skolemization_manager.lo \
 	proof/theory_proof.lo proof/uf_proof.lo proof/unsat_core.lo \
@@ -196,9 +197,10 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	theory/sort_inference.lo theory/substitutions.lo \
 	theory/term_registration_visitor.lo theory/theory.lo \
 	theory/theory_engine.lo theory/theory_model.lo \
+	theory/theory_model_builder.lo theory/type_set.lo \
 	theory/unconstrained_simplifier.lo theory/valuation.lo \
 	theory/arith/approx_simplex.lo theory/arith/arith_ite_utils.lo \
-	theory/arith/arith_rewriter.lo \
+	theory/arith/arith_msum.lo theory/arith/arith_rewriter.lo \
 	theory/arith/arith_static_learner.lo theory/arith/arithvar.lo \
 	theory/arith/attempt_solution_simplex.lo \
 	theory/arith/callbacks.lo theory/arith/congruence_manager.lo \
@@ -225,9 +227,9 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	theory/booleans/theory_bool_rewriter.lo \
 	theory/builtin/theory_builtin.lo \
 	theory/builtin/theory_builtin_rewriter.lo \
-	theory/bv/abstraction.lo theory/bv/aig_bitblaster.lo \
-	theory/bv/bv_eager_solver.lo theory/bv/bv_inequality_graph.lo \
-	theory/bv/bv_quick_check.lo \
+	theory/builtin/type_enumerator.lo theory/bv/abstraction.lo \
+	theory/bv/aig_bitblaster.lo theory/bv/bv_eager_solver.lo \
+	theory/bv/bv_inequality_graph.lo theory/bv/bv_quick_check.lo \
 	theory/bv/bv_subtheory_algebraic.lo \
 	theory/bv/bv_subtheory_bitblast.lo \
 	theory/bv/bv_subtheory_core.lo \
@@ -239,48 +241,66 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	theory/datatypes/datatypes_sygus.lo \
 	theory/datatypes/theory_datatypes.lo \
 	theory/datatypes/type_enumerator.lo theory/fp/theory_fp.lo \
-	theory/fp/theory_fp_rewriter.lo theory/idl/idl_assertion.lo \
-	theory/idl/idl_assertion_db.lo theory/idl/idl_model.lo \
-	theory/idl/theory_idl.lo \
+	theory/fp/theory_fp_rewriter.lo theory/fp/fp_converter.lo \
+	theory/idl/idl_assertion.lo theory/idl/idl_assertion_db.lo \
+	theory/idl/idl_model.lo theory/idl/theory_idl.lo \
 	theory/quantifiers/alpha_equivalence.lo \
 	theory/quantifiers/ambqi_builder.lo \
 	theory/quantifiers/anti_skolem.lo \
 	theory/quantifiers/bounded_integers.lo \
+	theory/quantifiers/bv_inverter.lo \
 	theory/quantifiers/candidate_generator.lo \
+	theory/quantifiers/ce_guided_conjecture.lo \
 	theory/quantifiers/ce_guided_instantiation.lo \
 	theory/quantifiers/ce_guided_single_inv.lo \
-	theory/quantifiers/ce_guided_single_inv_ei.lo \
 	theory/quantifiers/ce_guided_pbe.lo \
 	theory/quantifiers/ce_guided_single_inv_sol.lo \
 	theory/quantifiers/ceg_instantiator.lo \
 	theory/quantifiers/ceg_t_instantiator.lo \
 	theory/quantifiers/conjecture_generator.lo \
+	theory/quantifiers/equality_query.lo \
 	theory/quantifiers/equality_infer.lo \
+	theory/quantifiers/extended_rewrite.lo \
 	theory/quantifiers/first_order_model.lo \
 	theory/quantifiers/full_model_check.lo \
 	theory/quantifiers/fun_def_engine.lo \
 	theory/quantifiers/fun_def_process.lo \
+	theory/quantifiers/ho_trigger.lo \
+	theory/quantifiers/instantiate.lo \
 	theory/quantifiers/inst_match.lo \
+	theory/quantifiers/inst_match_trie.lo \
 	theory/quantifiers/inst_match_generator.lo \
 	theory/quantifiers/inst_propagator.lo \
 	theory/quantifiers/inst_strategy_cbqi.lo \
 	theory/quantifiers/inst_strategy_e_matching.lo \
+	theory/quantifiers/inst_strategy_enumerative.lo \
 	theory/quantifiers/instantiation_engine.lo \
 	theory/quantifiers/local_theory_ext.lo \
 	theory/quantifiers/macros.lo \
 	theory/quantifiers/model_builder.lo \
 	theory/quantifiers/model_engine.lo \
 	theory/quantifiers/quant_conflict_find.lo \
+	theory/quantifiers/quant_epr.lo \
 	theory/quantifiers/quant_equality_engine.lo \
+	theory/quantifiers/quant_relevance.lo \
 	theory/quantifiers/quant_split.lo \
 	theory/quantifiers/quant_util.lo \
 	theory/quantifiers/quantifiers_attributes.lo \
 	theory/quantifiers/quantifiers_rewriter.lo \
 	theory/quantifiers/relevant_domain.lo \
 	theory/quantifiers/rewrite_engine.lo \
+	theory/quantifiers/single_inv_partition.lo \
+	theory/quantifiers/skolemize.lo \
+	theory/quantifiers/sygus_explain.lo \
+	theory/quantifiers/sygus_invariance.lo \
+	theory/quantifiers/sygus_grammar_cons.lo \
+	theory/quantifiers/sygus_grammar_norm.lo \
+	theory/quantifiers/sygus_process_conj.lo \
 	theory/quantifiers/symmetry_breaking.lo \
 	theory/quantifiers/term_database.lo \
 	theory/quantifiers/term_database_sygus.lo \
+	theory/quantifiers/term_enumeration.lo \
+	theory/quantifiers/term_util.lo \
 	theory/quantifiers/theory_quantifiers.lo \
 	theory/quantifiers/trigger.lo theory/sep/theory_sep.lo \
 	theory/sep/theory_sep_rewriter.lo theory/sets/theory_sets.lo \
@@ -745,6 +765,8 @@ libcvc4_la_SOURCES = \
 	printer/dagification_visitor.h \
 	printer/printer.cpp \
 	printer/printer.h \
+	printer/sygus_print_callback.cpp \
+	printer/sygus_print_callback.h \
 	printer/ast/ast_printer.cpp \
 	printer/ast/ast_printer.h \
 	printer/cvc/cvc_printer.cpp \
@@ -853,9 +875,13 @@ libcvc4_la_SOURCES = \
 	theory/theory_engine.h \
 	theory/theory_model.cpp \
 	theory/theory_model.h \
+	theory/theory_model_builder.cpp \
+	theory/theory_model_builder.h \
 	theory/theory_registrar.h \
 	theory/theory_test_utils.h \
 	theory/type_enumerator.h \
+	theory/type_set.cpp \
+	theory/type_set.h \
 	theory/unconstrained_simplifier.cpp \
 	theory/unconstrained_simplifier.h \
 	theory/valuation.cpp \
@@ -864,6 +890,8 @@ libcvc4_la_SOURCES = \
 	theory/arith/approx_simplex.h \
 	theory/arith/arith_ite_utils.cpp \
 	theory/arith/arith_ite_utils.h \
+	theory/arith/arith_msum.cpp \
+	theory/arith/arith_msum.h \
 	theory/arith/arith_rewriter.cpp \
 	theory/arith/arith_rewriter.h \
 	theory/arith/arith_static_learner.cpp \
@@ -951,6 +979,7 @@ libcvc4_la_SOURCES = \
 	theory/builtin/theory_builtin_rewriter.cpp \
 	theory/builtin/theory_builtin_rewriter.h \
 	theory/builtin/theory_builtin_type_rules.h \
+	theory/builtin/type_enumerator.cpp \
 	theory/builtin/type_enumerator.h \
 	theory/bv/abstraction.cpp \
 	theory/bv/abstraction.h \
@@ -1009,6 +1038,9 @@ libcvc4_la_SOURCES = \
 	theory/fp/theory_fp_rewriter.cpp \
 	theory/fp/theory_fp_rewriter.h \
 	theory/fp/theory_fp_type_rules.h \
+	theory/fp/type_enumerator.h \
+	theory/fp/fp_converter.h \
+	theory/fp/fp_converter.cpp \
 	theory/idl/idl_assertion.cpp \
 	theory/idl/idl_assertion.h \
 	theory/idl/idl_assertion_db.cpp \
@@ -1025,14 +1057,16 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/anti_skolem.h \
 	theory/quantifiers/bounded_integers.cpp \
 	theory/quantifiers/bounded_integers.h \
+	theory/quantifiers/bv_inverter.cpp \
+	theory/quantifiers/bv_inverter.h \
 	theory/quantifiers/candidate_generator.cpp \
 	theory/quantifiers/candidate_generator.h \
+	theory/quantifiers/ce_guided_conjecture.cpp \
+	theory/quantifiers/ce_guided_conjecture.h \
 	theory/quantifiers/ce_guided_instantiation.cpp \
 	theory/quantifiers/ce_guided_instantiation.h \
 	theory/quantifiers/ce_guided_single_inv.cpp \
 	theory/quantifiers/ce_guided_single_inv.h \
-	theory/quantifiers/ce_guided_single_inv_ei.cpp \
-	theory/quantifiers/ce_guided_single_inv_ei.h \
 	theory/quantifiers/ce_guided_pbe.cpp \
 	theory/quantifiers/ce_guided_pbe.h \
 	theory/quantifiers/ce_guided_single_inv_sol.cpp \
@@ -1043,8 +1077,12 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/ceg_t_instantiator.h \
 	theory/quantifiers/conjecture_generator.cpp \
 	theory/quantifiers/conjecture_generator.h \
+	theory/quantifiers/equality_query.cpp \
+	theory/quantifiers/equality_query.h \
 	theory/quantifiers/equality_infer.cpp \
 	theory/quantifiers/equality_infer.h \
+	theory/quantifiers/extended_rewrite.cpp \
+	theory/quantifiers/extended_rewrite.h \
 	theory/quantifiers/first_order_model.cpp \
 	theory/quantifiers/first_order_model.h \
 	theory/quantifiers/full_model_check.cpp \
@@ -1053,8 +1091,14 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/fun_def_engine.h \
 	theory/quantifiers/fun_def_process.cpp \
 	theory/quantifiers/fun_def_process.h \
+	theory/quantifiers/ho_trigger.cpp \
+	theory/quantifiers/ho_trigger.h \
+	theory/quantifiers/instantiate.cpp \
+	theory/quantifiers/instantiate.h \
 	theory/quantifiers/inst_match.cpp \
 	theory/quantifiers/inst_match.h \
+	theory/quantifiers/inst_match_trie.cpp \
+	theory/quantifiers/inst_match_trie.h \
 	theory/quantifiers/inst_match_generator.cpp \
 	theory/quantifiers/inst_match_generator.h \
 	theory/quantifiers/inst_propagator.cpp \
@@ -1063,6 +1107,8 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/inst_strategy_cbqi.h \
 	theory/quantifiers/inst_strategy_e_matching.cpp \
 	theory/quantifiers/inst_strategy_e_matching.h \
+	theory/quantifiers/inst_strategy_enumerative.cpp \
+	theory/quantifiers/inst_strategy_enumerative.h \
 	theory/quantifiers/instantiation_engine.cpp \
 	theory/quantifiers/instantiation_engine.h \
 	theory/quantifiers/local_theory_ext.cpp \
@@ -1075,8 +1121,12 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/model_engine.h \
 	theory/quantifiers/quant_conflict_find.cpp \
 	theory/quantifiers/quant_conflict_find.h \
+	theory/quantifiers/quant_epr.cpp \
+	theory/quantifiers/quant_epr.h \
 	theory/quantifiers/quant_equality_engine.cpp \
 	theory/quantifiers/quant_equality_engine.h \
+	theory/quantifiers/quant_relevance.cpp \
+	theory/quantifiers/quant_relevance.h \
 	theory/quantifiers/quant_split.cpp \
 	theory/quantifiers/quant_split.h \
 	theory/quantifiers/quant_util.cpp \
@@ -1089,12 +1139,30 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/relevant_domain.h \
 	theory/quantifiers/rewrite_engine.cpp \
 	theory/quantifiers/rewrite_engine.h \
+	theory/quantifiers/single_inv_partition.cpp \
+	theory/quantifiers/single_inv_partition.h \
+	theory/quantifiers/skolemize.cpp \
+	theory/quantifiers/skolemize.h \
+	theory/quantifiers/sygus_explain.cpp \
+	theory/quantifiers/sygus_explain.h \
+	theory/quantifiers/sygus_invariance.cpp \
+	theory/quantifiers/sygus_invariance.h \
+	theory/quantifiers/sygus_grammar_cons.cpp \
+	theory/quantifiers/sygus_grammar_cons.h \
+	theory/quantifiers/sygus_grammar_norm.cpp \
+	theory/quantifiers/sygus_grammar_norm.h \
+	theory/quantifiers/sygus_process_conj.cpp \
+	theory/quantifiers/sygus_process_conj.h \
 	theory/quantifiers/symmetry_breaking.cpp \
 	theory/quantifiers/symmetry_breaking.h \
 	theory/quantifiers/term_database.cpp \
 	theory/quantifiers/term_database.h \
 	theory/quantifiers/term_database_sygus.cpp \
 	theory/quantifiers/term_database_sygus.h \
+	theory/quantifiers/term_enumeration.cpp \
+	theory/quantifiers/term_enumeration.h \
+	theory/quantifiers/term_util.cpp \
+	theory/quantifiers/term_util.h \
 	theory/quantifiers/theory_quantifiers.cpp \
 	theory/quantifiers/theory_quantifiers.h \
 	theory/quantifiers/theory_quantifiers_type_rules.h \
@@ -1308,6 +1376,8 @@ printer/dagification_visitor.lo: printer/$(am__dirstamp) \
 	printer/$(DEPDIR)/$(am__dirstamp)
 printer/printer.lo: printer/$(am__dirstamp) \
 	printer/$(DEPDIR)/$(am__dirstamp)
+printer/sygus_print_callback.lo: printer/$(am__dirstamp) \
+	printer/$(DEPDIR)/$(am__dirstamp)
 printer/ast/$(am__dirstamp):
 	@$(MKDIR_P) printer/ast
 	@: > printer/ast/$(am__dirstamp)
@@ -1453,6 +1523,10 @@ theory/theory_engine.lo: theory/$(am__dirstamp) \
 	theory/$(DEPDIR)/$(am__dirstamp)
 theory/theory_model.lo: theory/$(am__dirstamp) \
 	theory/$(DEPDIR)/$(am__dirstamp)
+theory/theory_model_builder.lo: theory/$(am__dirstamp) \
+	theory/$(DEPDIR)/$(am__dirstamp)
+theory/type_set.lo: theory/$(am__dirstamp) \
+	theory/$(DEPDIR)/$(am__dirstamp)
 theory/unconstrained_simplifier.lo: theory/$(am__dirstamp) \
 	theory/$(DEPDIR)/$(am__dirstamp)
 theory/valuation.lo: theory/$(am__dirstamp) \
@@ -1466,6 +1540,8 @@ theory/arith/$(DEPDIR)/$(am__dirstamp):
 theory/arith/approx_simplex.lo: theory/arith/$(am__dirstamp) \
 	theory/arith/$(DEPDIR)/$(am__dirstamp)
 theory/arith/arith_ite_utils.lo: theory/arith/$(am__dirstamp) \
+	theory/arith/$(DEPDIR)/$(am__dirstamp)
+theory/arith/arith_msum.lo: theory/arith/$(am__dirstamp) \
 	theory/arith/$(DEPDIR)/$(am__dirstamp)
 theory/arith/arith_rewriter.lo: theory/arith/$(am__dirstamp) \
 	theory/arith/$(DEPDIR)/$(am__dirstamp)
@@ -1567,6 +1643,8 @@ theory/builtin/theory_builtin.lo: theory/builtin/$(am__dirstamp) \
 theory/builtin/theory_builtin_rewriter.lo:  \
 	theory/builtin/$(am__dirstamp) \
 	theory/builtin/$(DEPDIR)/$(am__dirstamp)
+theory/builtin/type_enumerator.lo: theory/builtin/$(am__dirstamp) \
+	theory/builtin/$(DEPDIR)/$(am__dirstamp)
 theory/bv/$(am__dirstamp):
 	@$(MKDIR_P) theory/bv
 	@: > theory/bv/$(am__dirstamp)
@@ -1630,6 +1708,8 @@ theory/fp/theory_fp.lo: theory/fp/$(am__dirstamp) \
 	theory/fp/$(DEPDIR)/$(am__dirstamp)
 theory/fp/theory_fp_rewriter.lo: theory/fp/$(am__dirstamp) \
 	theory/fp/$(DEPDIR)/$(am__dirstamp)
+theory/fp/fp_converter.lo: theory/fp/$(am__dirstamp) \
+	theory/fp/$(DEPDIR)/$(am__dirstamp)
 theory/idl/$(am__dirstamp):
 	@$(MKDIR_P) theory/idl
 	@: > theory/idl/$(am__dirstamp)
@@ -1661,16 +1741,18 @@ theory/quantifiers/anti_skolem.lo: theory/quantifiers/$(am__dirstamp) \
 theory/quantifiers/bounded_integers.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/bv_inverter.lo: theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/candidate_generator.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/ce_guided_conjecture.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/ce_guided_instantiation.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/ce_guided_single_inv.lo:  \
-	theory/quantifiers/$(am__dirstamp) \
-	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
-theory/quantifiers/ce_guided_single_inv_ei.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/ce_guided_pbe.lo:  \
@@ -1688,7 +1770,13 @@ theory/quantifiers/ceg_t_instantiator.lo:  \
 theory/quantifiers/conjecture_generator.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/equality_query.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/equality_infer.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/extended_rewrite.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/first_order_model.lo:  \
@@ -1703,7 +1791,14 @@ theory/quantifiers/fun_def_engine.lo:  \
 theory/quantifiers/fun_def_process.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/ho_trigger.lo: theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/instantiate.lo: theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/inst_match.lo: theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/inst_match_trie.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/inst_match_generator.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
@@ -1715,6 +1810,9 @@ theory/quantifiers/inst_strategy_cbqi.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/inst_strategy_e_matching.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/inst_strategy_enumerative.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/instantiation_engine.lo:  \
@@ -1734,7 +1832,12 @@ theory/quantifiers/model_engine.lo:  \
 theory/quantifiers/quant_conflict_find.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/quant_epr.lo: theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/quant_equality_engine.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/quant_relevance.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/quant_split.lo: theory/quantifiers/$(am__dirstamp) \
@@ -1753,6 +1856,26 @@ theory/quantifiers/relevant_domain.lo:  \
 theory/quantifiers/rewrite_engine.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/single_inv_partition.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/skolemize.lo: theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/sygus_explain.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/sygus_invariance.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/sygus_grammar_cons.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/sygus_grammar_norm.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/sygus_process_conj.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/symmetry_breaking.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
@@ -1761,6 +1884,11 @@ theory/quantifiers/term_database.lo:  \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/term_database_sygus.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/term_enumeration.lo:  \
+	theory/quantifiers/$(am__dirstamp) \
+	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/term_util.lo: theory/quantifiers/$(am__dirstamp) \
 	theory/quantifiers/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/theory_quantifiers.lo:  \
 	theory/quantifiers/$(am__dirstamp) \
@@ -1894,6 +2022,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@decision/$(DEPDIR)/justification_heuristic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/$(DEPDIR)/dagification_visitor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/$(DEPDIR)/printer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@printer/$(DEPDIR)/sygus_print_callback.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/ast/$(DEPDIR)/ast_printer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/cvc/$(DEPDIR)/cvc_printer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/smt1/$(DEPDIR)/smt1_printer.Plo@am__quote@
@@ -1942,11 +2071,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/theory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/theory_engine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/theory_model.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/theory_model_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/type_enumerator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/type_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/unconstrained_simplifier.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/$(DEPDIR)/valuation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/arith/$(DEPDIR)/approx_simplex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/arith/$(DEPDIR)/arith_ite_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/arith/$(DEPDIR)/arith_msum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/arith/$(DEPDIR)/arith_rewriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/arith/$(DEPDIR)/arith_static_learner.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/arith/$(DEPDIR)/arithvar.Plo@am__quote@
@@ -1985,6 +2117,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@theory/booleans/$(DEPDIR)/theory_bool_rewriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/builtin/$(DEPDIR)/theory_builtin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/builtin/$(DEPDIR)/theory_builtin_rewriter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/builtin/$(DEPDIR)/type_enumerator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/bv/$(DEPDIR)/abstraction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/bv/$(DEPDIR)/aig_bitblaster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/bv/$(DEPDIR)/bv_eager_solver.Plo@am__quote@
@@ -2005,6 +2138,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@theory/datatypes/$(DEPDIR)/datatypes_sygus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/datatypes/$(DEPDIR)/theory_datatypes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/datatypes/$(DEPDIR)/type_enumerator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/fp/$(DEPDIR)/fp_converter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/fp/$(DEPDIR)/theory_fp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/fp/$(DEPDIR)/theory_fp_rewriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/idl/$(DEPDIR)/idl_assertion.Plo@am__quote@
@@ -2015,41 +2149,59 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ambqi_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/anti_skolem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/bounded_integers.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/bv_inverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/candidate_generator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ce_guided_conjecture.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ce_guided_instantiation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ce_guided_pbe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ce_guided_single_inv.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ce_guided_single_inv_ei.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ce_guided_single_inv_sol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ceg_instantiator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ceg_t_instantiator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/conjecture_generator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/equality_infer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/equality_query.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/extended_rewrite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/first_order_model.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/full_model_check.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/fun_def_engine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/fun_def_process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/ho_trigger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_match.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_match_generator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_match_trie.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_propagator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_strategy_cbqi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_strategy_e_matching.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/inst_strategy_enumerative.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/instantiate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/instantiation_engine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/local_theory_ext.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/macros.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/model_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/model_engine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quant_conflict_find.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quant_epr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quant_equality_engine.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quant_relevance.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quant_split.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quant_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quantifiers_attributes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/quantifiers_rewriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/relevant_domain.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/rewrite_engine.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/single_inv_partition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/skolemize.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/sygus_explain.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/sygus_grammar_cons.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/sygus_grammar_norm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/sygus_invariance.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/sygus_process_conj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/symmetry_breaking.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/term_database.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/term_database_sygus.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/term_enumeration.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/term_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/theory_quantifiers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/$(DEPDIR)/trigger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/sep/$(DEPDIR)/theory_sep.Plo@am__quote@

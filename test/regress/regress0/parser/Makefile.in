@@ -612,7 +612,8 @@ TESTS = \
 	declarefun-emptyset-uf.smt2 \
 	constraint.smt2 \
 	strings20.smt2 \
-	strings25.smt2
+	strings25.smt2 \
+	as.smt2
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -826,6 +827,13 @@ strings20.smt2.log: strings20.smt2
 strings25.smt2.log: strings25.smt2
 	@p='strings25.smt2'; \
 	b='strings25.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+as.smt2.log: as.smt2
+	@p='as.smt2'; \
+	b='as.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

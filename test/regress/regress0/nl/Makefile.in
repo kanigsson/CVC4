@@ -699,6 +699,7 @@ TESTS = \
   div-mod-partial.smt2 \
   all-logic.smt2 \
   sqrt-problem-1.smt2 \
+  real-as-int.smt2 \
   nta/bad-050217.smt2 \
   nta/cos-bound.smt2 \
   nta/cos-sig-value.smt2 \
@@ -713,7 +714,19 @@ TESTS = \
   nta/tan-rewrite2.smt2 \
   nta/tan-rewrite.smt2 \
   nta/arrowsmith-050317.smt2 \
-  nta/sin-init-tangents.smt2
+  nta/sin-init-tangents.smt2 \
+  nta/cos1-tc.smt2 \
+  nta/sin1-ub.smt2 \
+  nta/sin1-lb.smt2 \
+  nta/sin2-ub.smt2 \
+  nta/sin2-lb.smt2 \
+  nta/exp1-ub.smt2 \
+  nta/exp1-lb.smt2 \
+  nta/exp-4.5-lt.smt2 \
+  nta/exp-n0.5-ub.smt2 \
+  nta/exp-n0.5-lb.smt2 \
+  nta/dumortier_llibre_artes_ex_5_13.transcendental.k2.smt2 \
+  nta/NAVIGATION2.smt2
 
 
 # unsolved : garbage_collect.cvc
@@ -1208,6 +1221,13 @@ sqrt-problem-1.smt2.log: sqrt-problem-1.smt2
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+real-as-int.smt2.log: real-as-int.smt2
+	@p='real-as-int.smt2'; \
+	b='real-as-int.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 nta/bad-050217.smt2.log: nta/bad-050217.smt2
 	@p='nta/bad-050217.smt2'; \
 	b='nta/bad-050217.smt2'; \
@@ -1309,6 +1329,90 @@ nta/arrowsmith-050317.smt2.log: nta/arrowsmith-050317.smt2
 nta/sin-init-tangents.smt2.log: nta/sin-init-tangents.smt2
 	@p='nta/sin-init-tangents.smt2'; \
 	b='nta/sin-init-tangents.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/cos1-tc.smt2.log: nta/cos1-tc.smt2
+	@p='nta/cos1-tc.smt2'; \
+	b='nta/cos1-tc.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/sin1-ub.smt2.log: nta/sin1-ub.smt2
+	@p='nta/sin1-ub.smt2'; \
+	b='nta/sin1-ub.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/sin1-lb.smt2.log: nta/sin1-lb.smt2
+	@p='nta/sin1-lb.smt2'; \
+	b='nta/sin1-lb.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/sin2-ub.smt2.log: nta/sin2-ub.smt2
+	@p='nta/sin2-ub.smt2'; \
+	b='nta/sin2-ub.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/sin2-lb.smt2.log: nta/sin2-lb.smt2
+	@p='nta/sin2-lb.smt2'; \
+	b='nta/sin2-lb.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/exp1-ub.smt2.log: nta/exp1-ub.smt2
+	@p='nta/exp1-ub.smt2'; \
+	b='nta/exp1-ub.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/exp1-lb.smt2.log: nta/exp1-lb.smt2
+	@p='nta/exp1-lb.smt2'; \
+	b='nta/exp1-lb.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/exp-4.5-lt.smt2.log: nta/exp-4.5-lt.smt2
+	@p='nta/exp-4.5-lt.smt2'; \
+	b='nta/exp-4.5-lt.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/exp-n0.5-ub.smt2.log: nta/exp-n0.5-ub.smt2
+	@p='nta/exp-n0.5-ub.smt2'; \
+	b='nta/exp-n0.5-ub.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/exp-n0.5-lb.smt2.log: nta/exp-n0.5-lb.smt2
+	@p='nta/exp-n0.5-lb.smt2'; \
+	b='nta/exp-n0.5-lb.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/dumortier_llibre_artes_ex_5_13.transcendental.k2.smt2.log: nta/dumortier_llibre_artes_ex_5_13.transcendental.k2.smt2
+	@p='nta/dumortier_llibre_artes_ex_5_13.transcendental.k2.smt2'; \
+	b='nta/dumortier_llibre_artes_ex_5_13.transcendental.k2.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nta/NAVIGATION2.smt2.log: nta/NAVIGATION2.smt2
+	@p='nta/NAVIGATION2.smt2'; \
+	b='nta/NAVIGATION2.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

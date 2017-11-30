@@ -616,7 +616,10 @@ TESTS = \
 	inv_gen_n_c11.sy \
 	unbdd_inv_gen_ex7.sy \
 	icfp_easy_mt_ite.sy \
-  three.sy
+	three.sy \
+	nia-max-square.sy \
+	MPwL_d1s3.sy \
+	process-arg-invariance.sy
 
 EXTRA_DIST = $(TESTS)
 all: all-am
@@ -865,6 +868,27 @@ icfp_easy_mt_ite.sy.log: icfp_easy_mt_ite.sy
 three.sy.log: three.sy
 	@p='three.sy'; \
 	b='three.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+nia-max-square.sy.log: nia-max-square.sy
+	@p='nia-max-square.sy'; \
+	b='nia-max-square.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+MPwL_d1s3.sy.log: MPwL_d1s3.sy
+	@p='MPwL_d1s3.sy'; \
+	b='MPwL_d1s3.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+process-arg-invariance.sy.log: process-arg-invariance.sy
+	@p='process-arg-invariance.sy'; \
+	b='process-arg-invariance.sy'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

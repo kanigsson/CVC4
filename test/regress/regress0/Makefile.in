@@ -667,7 +667,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 zz_cvc4_use_personal_make_rules = @zz_cvc4_use_personal_make_rules@
-SUBDIRS = . expect arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep nl
+SUBDIRS = . expect arith precedence uf uflra uflia bv arrays aufbv auflia datatypes quantifiers rewriterules lemmas push-pop preprocess tptp unconstrained decision fmf strings sets rels parser sygus sep nl ho
 DIST_SUBDIRS = $(SUBDIRS)
 @mk_empty@BINARY = cvc4
 LOG_COMPILER = @srcdir@/../run_regression
@@ -726,7 +726,13 @@ SMT2_TESTS = \
 	hung10_itesdk_output1.smt2 \
 	hung13sdk_output2.smt2 \
 	declare-funs.smt2 \
-	declare-fun-is-match.smt2
+	declare-fun-is-match.smt2 \
+	issue1063-overloading-dt-cons.smt2 \
+	issue1063-overloading-dt-sel.smt2 \
+	issue1063-overloading-dt-fun.smt2 \
+	non-fatal-errors.smt2 \
+	sqrt2-sort-inf-unk.smt2 \
+	rec-fun-const-parse-bug.smt2
 
 
 # Regression tests for PL inputs
@@ -839,13 +845,15 @@ BUG_TESTS = \
 	bug605.cvc \
 	bug639.smt2 \
 	bt-test-00.smt2 \
-	bt-test-01.smt2
+	bt-test-01.smt2 \
+	bug1247.smt2
 
 
 # bug512 -- taking too long, --time-per not working perhaps? in any case,
 # we have a minimized version still getting tested
 # bug639 -- still fails, reopened bug
 # bug585 -- contains subrange type (not supported)
+# issue1048-arrays-int-real.smt2 -- different errors on debug and production
 DISABLED_TESTS = \
 	bug512.smt2 \
 	bug585.cvc
@@ -1432,6 +1440,48 @@ declare-funs.smt2.log: declare-funs.smt2
 declare-fun-is-match.smt2.log: declare-fun-is-match.smt2
 	@p='declare-fun-is-match.smt2'; \
 	b='declare-fun-is-match.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+issue1063-overloading-dt-cons.smt2.log: issue1063-overloading-dt-cons.smt2
+	@p='issue1063-overloading-dt-cons.smt2'; \
+	b='issue1063-overloading-dt-cons.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+issue1063-overloading-dt-sel.smt2.log: issue1063-overloading-dt-sel.smt2
+	@p='issue1063-overloading-dt-sel.smt2'; \
+	b='issue1063-overloading-dt-sel.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+issue1063-overloading-dt-fun.smt2.log: issue1063-overloading-dt-fun.smt2
+	@p='issue1063-overloading-dt-fun.smt2'; \
+	b='issue1063-overloading-dt-fun.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+non-fatal-errors.smt2.log: non-fatal-errors.smt2
+	@p='non-fatal-errors.smt2'; \
+	b='non-fatal-errors.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+sqrt2-sort-inf-unk.smt2.log: sqrt2-sort-inf-unk.smt2
+	@p='sqrt2-sort-inf-unk.smt2'; \
+	b='sqrt2-sort-inf-unk.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+rec-fun-const-parse-bug.smt2.log: rec-fun-const-parse-bug.smt2
+	@p='rec-fun-const-parse-bug.smt2'; \
+	b='rec-fun-const-parse-bug.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -2146,6 +2196,13 @@ bt-test-00.smt2.log: bt-test-00.smt2
 bt-test-01.smt2.log: bt-test-01.smt2
 	@p='bt-test-01.smt2'; \
 	b='bt-test-01.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+bug1247.smt2.log: bug1247.smt2
+	@p='bug1247.smt2'; \
+	b='bug1247.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
