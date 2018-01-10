@@ -123,7 +123,7 @@ int runCvc4(int argc, char* argv[], Options& opts) {
     Options::printLanguageHelp(*(opts.getOut()));
     exit(1);
   } else if( opts.getVersion() ) {
-    *(opts.getOut()) << Configuration::about().c_str() << flush;
+    *(opts.getOut()) << Configuration::short_about().c_str() << flush;
     exit(0);
   }
 

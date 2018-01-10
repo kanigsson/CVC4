@@ -208,6 +208,12 @@ std::string Configuration::about() {
   return ss.str();
 }
 
+std::string Configuration::short_about() {
+  std::stringstream ss;
+  ss << "CVC4 version " << CVC4_RELEASE_STRING << std::endl;
+  return ss.str();
+}
+
 bool Configuration::licenseIsGpl() {
   return IS_GPL_BUILD;
 }

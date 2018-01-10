@@ -84,6 +84,7 @@ public:
   static std::string copyright();
 
   static std::string about();
+  static std::string short_about();
 
   static bool licenseIsGpl();
 
