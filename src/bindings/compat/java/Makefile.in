@@ -101,6 +101,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
+	$(top_srcdir)/config/cadical.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
@@ -279,6 +280,9 @@ BOOST_THREAD_WIN32_LDPATH = @BOOST_THREAD_WIN32_LDPATH@
 BOOST_THREAD_WIN32_LIBS = @BOOST_THREAD_WIN32_LIBS@
 BUILDING_SHARED = @BUILDING_SHARED@
 BUILDING_STATIC = @BUILDING_STATIC@
+CADICAL_HOME = @CADICAL_HOME@
+CADICAL_LDFLAGS = @CADICAL_LDFLAGS@
+CADICAL_LIBS = @CADICAL_LIBS@
 CAMLP4O = @CAMLP4O@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -434,6 +438,7 @@ WNO_PARENTHESES = @WNO_PARENTHESES@
 WNO_TAUTOLOGICAL_COMPARE = @WNO_TAUTOLOGICAL_COMPARE@
 WNO_UNINITIALIZED = @WNO_UNINITIALIZED@
 WNO_UNUSED_VARIABLE = @WNO_UNUSED_VARIABLE@
+W_SUGGEST_OVERRIDE = @W_SUGGEST_OVERRIDE@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -1004,7 +1009,7 @@ JniUtils.lo: src/cvc3/JniUtils.cpp .headers
 
 $(LIB_FILES:%=classes/cvc3/%.class) classes/cvc3/JniUtils.class: .classes
 .classes:
-	$(AM_V_GEN)mkdir -p classes && $(JAVAC) -source 1.4 -target 1.4 -sourcepath $(srcdir)/src -d classes $(LIB_FILES:%=$(srcdir)/src/cvc3/%.java)
+	$(AM_V_GEN)mkdir -p classes && $(JAVAC) -source 1.6 -target 1.6 -sourcepath $(srcdir)/src -d classes $(LIB_FILES:%=$(srcdir)/src/cvc3/%.java)
 	@touch .classes
 .headers: $(LIB_FILES:%=cvc3/%.h)
 	@touch .headers

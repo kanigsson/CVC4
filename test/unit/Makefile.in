@@ -91,11 +91,14 @@ host_triplet = @host@
 target_triplet = @target@
 @WHITE_AND_BLACK_TESTS_TRUE@am__append_1 = \
 @WHITE_AND_BLACK_TESTS_TRUE@	theory/logic_info_white \
-@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_engine_white \
-@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_black \
-@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_arith_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_bv_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_engine_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_quantifiers_bv_instantiator_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_quantifiers_bv_inverter_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_strings_rewriter_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	theory/theory_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	theory/type_enumerator_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	expr/node_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	expr/node_black \
@@ -111,18 +114,19 @@ target_triplet = @target@
 @WHITE_AND_BLACK_TESTS_TRUE@	expr/type_node_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	parser/parser_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	parser/parser_builder_black \
+@WHITE_AND_BLACK_TESTS_TRUE@	preprocessing/pass_bv_gauss_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	prop/cnf_stream_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/context_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/context_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/context_mm_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/cdo_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/cdlist_black \
-@WHITE_AND_BLACK_TESTS_TRUE@	context/cdlist_context_memory_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/cdmap_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/cdmap_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	context/cdvector_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	util/array_store_all_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	util/assert_white \
+@WHITE_AND_BLACK_TESTS_TRUE@	util/check_white \
 @WHITE_AND_BLACK_TESTS_TRUE@	util/binary_heap_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	util/bitvector_black \
 @WHITE_AND_BLACK_TESTS_TRUE@	util/datatype_black \
@@ -146,6 +150,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
+	$(top_srcdir)/config/cadical.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
@@ -471,6 +476,9 @@ BOOST_THREAD_WIN32_LDPATH = @BOOST_THREAD_WIN32_LDPATH@
 BOOST_THREAD_WIN32_LIBS = @BOOST_THREAD_WIN32_LIBS@
 BUILDING_SHARED = @BUILDING_SHARED@
 BUILDING_STATIC = @BUILDING_STATIC@
+CADICAL_HOME = @CADICAL_HOME@
+CADICAL_LDFLAGS = @CADICAL_LDFLAGS@
+CADICAL_LIBS = @CADICAL_LIBS@
 CAMLP4O = @CAMLP4O@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -498,6 +506,7 @@ CVC4_USE_GMP_IMP = @CVC4_USE_GMP_IMP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
+@HAVE_CXXTESTGEN_TRUE@CXXFLAGS = -Wno-suggest-override
 CXXFLAGS = @CXXFLAGS@
 CXXTEST = @CXXTEST@
 CXXTESTGEN = @CXXTESTGEN@
@@ -626,6 +635,7 @@ WNO_PARENTHESES = @WNO_PARENTHESES@
 WNO_TAUTOLOGICAL_COMPARE = @WNO_TAUTOLOGICAL_COMPARE@
 WNO_UNINITIALIZED = @WNO_UNINITIALIZED@
 WNO_UNUSED_VARIABLE = @WNO_UNUSED_VARIABLE@
+W_SUGGEST_OVERRIDE = @W_SUGGEST_OVERRIDE@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -1101,9 +1111,9 @@ theory/logic_info_white.log: theory/logic_info_white
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-theory/theory_engine_white.log: theory/theory_engine_white
-	@p='theory/theory_engine_white'; \
-	b='theory/theory_engine_white'; \
+theory/theory_arith_white.log: theory/theory_arith_white
+	@p='theory/theory_arith_white'; \
+	b='theory/theory_arith_white'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1115,23 +1125,44 @@ theory/theory_black.log: theory/theory_black
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-theory/theory_white.log: theory/theory_white
-	@p='theory/theory_white'; \
-	b='theory/theory_white'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-theory/theory_arith_white.log: theory/theory_arith_white
-	@p='theory/theory_arith_white'; \
-	b='theory/theory_arith_white'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 theory/theory_bv_white.log: theory/theory_bv_white
 	@p='theory/theory_bv_white'; \
 	b='theory/theory_bv_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+theory/theory_engine_white.log: theory/theory_engine_white
+	@p='theory/theory_engine_white'; \
+	b='theory/theory_engine_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+theory/theory_quantifiers_bv_instantiator_white.log: theory/theory_quantifiers_bv_instantiator_white
+	@p='theory/theory_quantifiers_bv_instantiator_white'; \
+	b='theory/theory_quantifiers_bv_instantiator_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+theory/theory_quantifiers_bv_inverter_white.log: theory/theory_quantifiers_bv_inverter_white
+	@p='theory/theory_quantifiers_bv_inverter_white'; \
+	b='theory/theory_quantifiers_bv_inverter_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+theory/theory_strings_rewriter_white.log: theory/theory_strings_rewriter_white
+	@p='theory/theory_strings_rewriter_white'; \
+	b='theory/theory_strings_rewriter_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+theory/theory_white.log: theory/theory_white
+	@p='theory/theory_white'; \
+	b='theory/theory_white'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1241,6 +1272,13 @@ parser/parser_builder_black.log: parser/parser_builder_black
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+preprocessing/pass_bv_gauss_white.log: preprocessing/pass_bv_gauss_white
+	@p='preprocessing/pass_bv_gauss_white'; \
+	b='preprocessing/pass_bv_gauss_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 prop/cnf_stream_white.log: prop/cnf_stream_white
 	@p='prop/cnf_stream_white'; \
 	b='prop/cnf_stream_white'; \
@@ -1283,13 +1321,6 @@ context/cdlist_black.log: context/cdlist_black
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-context/cdlist_context_memory_black.log: context/cdlist_context_memory_black
-	@p='context/cdlist_context_memory_black'; \
-	b='context/cdlist_context_memory_black'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 context/cdmap_black.log: context/cdmap_black
 	@p='context/cdmap_black'; \
 	b='context/cdmap_black'; \
@@ -1321,6 +1352,13 @@ util/array_store_all_black.log: util/array_store_all_black
 util/assert_white.log: util/assert_white
 	@p='util/assert_white'; \
 	b='util/assert_white'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+util/check_white.log: util/check_white
+	@p='util/check_white'; \
+	b='util/check_white'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

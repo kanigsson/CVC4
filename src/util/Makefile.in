@@ -105,6 +105,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
+	$(top_srcdir)/config/cadical.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
@@ -127,26 +128,27 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libutil_la_LIBADD =
 am__libutil_la_SOURCES_DIST = Makefile.am Makefile.in \
 	abstract_value.cpp abstract_value.h bin_heap.h bitvector.h \
-	bool.h cache.h cardinality.cpp cardinality.h channel.h debug.h \
-	dense_map.h divisible.cpp divisible.h dynamic_array.h \
+	bitvector.cpp bool.h cardinality.cpp cardinality.h channel.h \
+	debug.h dense_map.h divisible.cpp divisible.h dynamic_array.h \
 	floatingpoint.cpp floatingpoint.h gmp_util.h hash.h index.cpp \
-	index.h maybe.h ntuple.h proof.h regexp.cpp regexp.h \
-	resource_manager.cpp resource_manager.h result.cpp random.h \
-	random.cpp result.h safe_print.cpp safe_print.h sexpr.cpp \
-	sexpr.h smt2_quote_string.cpp smt2_quote_string.h \
-	statistics.cpp statistics.h statistics_registry.cpp \
-	statistics_registry.h tuple.h unsafe_interrupt_exception.h \
-	utility.h rational_cln_imp.cpp integer_cln_imp.cpp \
-	rational_gmp_imp.cpp integer_gmp_imp.cpp
+	index.h maybe.h ntuple.h ostream_util.cpp ostream_util.h \
+	proof.h regexp.cpp regexp.h resource_manager.cpp \
+	resource_manager.h result.cpp random.h random.cpp result.h \
+	safe_print.cpp safe_print.h sexpr.cpp sexpr.h \
+	smt2_quote_string.cpp smt2_quote_string.h statistics.cpp \
+	statistics.h statistics_registry.cpp statistics_registry.h \
+	tuple.h unsafe_interrupt_exception.h utility.h \
+	rational_cln_imp.cpp integer_cln_imp.cpp rational_gmp_imp.cpp \
+	integer_gmp_imp.cpp
 @CVC4_CLN_IMP_TRUE@am__objects_1 = rational_cln_imp.lo \
 @CVC4_CLN_IMP_TRUE@	integer_cln_imp.lo
 @CVC4_GMP_IMP_TRUE@am__objects_2 = rational_gmp_imp.lo \
 @CVC4_GMP_IMP_TRUE@	integer_gmp_imp.lo
-am_libutil_la_OBJECTS = abstract_value.lo cardinality.lo divisible.lo \
-	floatingpoint.lo index.lo regexp.lo resource_manager.lo \
-	result.lo random.lo safe_print.lo sexpr.lo \
-	smt2_quote_string.lo statistics.lo statistics_registry.lo \
-	$(am__objects_1) $(am__objects_2)
+am_libutil_la_OBJECTS = abstract_value.lo bitvector.lo cardinality.lo \
+	divisible.lo floatingpoint.lo index.lo ostream_util.lo \
+	regexp.lo resource_manager.lo result.lo random.lo \
+	safe_print.lo sexpr.lo smt2_quote_string.lo statistics.lo \
+	statistics_registry.lo $(am__objects_1) $(am__objects_2)
 libutil_la_OBJECTS = $(am_libutil_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -262,6 +264,9 @@ BOOST_THREAD_WIN32_LDPATH = @BOOST_THREAD_WIN32_LDPATH@
 BOOST_THREAD_WIN32_LIBS = @BOOST_THREAD_WIN32_LIBS@
 BUILDING_SHARED = @BUILDING_SHARED@
 BUILDING_STATIC = @BUILDING_STATIC@
+CADICAL_HOME = @CADICAL_HOME@
+CADICAL_LDFLAGS = @CADICAL_LDFLAGS@
+CADICAL_LIBS = @CADICAL_LIBS@
 CAMLP4O = @CAMLP4O@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -417,6 +422,7 @@ WNO_PARENTHESES = @WNO_PARENTHESES@
 WNO_TAUTOLOGICAL_COMPARE = @WNO_TAUTOLOGICAL_COMPARE@
 WNO_UNINITIALIZED = @WNO_UNINITIALIZED@
 WNO_UNUSED_VARIABLE = @WNO_UNUSED_VARIABLE@
+W_SUGGEST_OVERRIDE = @W_SUGGEST_OVERRIDE@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -501,17 +507,17 @@ noinst_LTLIBRARIES = libutil.la
 # configured at the time of the "make dist", which (1) may not be the
 # configuration that the user wants, and (2) might cause link errors.
 libutil_la_SOURCES = Makefile.am Makefile.in abstract_value.cpp \
-	abstract_value.h bin_heap.h bitvector.h bool.h cache.h \
+	abstract_value.h bin_heap.h bitvector.h bitvector.cpp bool.h \
 	cardinality.cpp cardinality.h channel.h debug.h dense_map.h \
 	divisible.cpp divisible.h dynamic_array.h floatingpoint.cpp \
 	floatingpoint.h gmp_util.h hash.h index.cpp index.h maybe.h \
-	ntuple.h proof.h regexp.cpp regexp.h resource_manager.cpp \
-	resource_manager.h result.cpp random.h random.cpp result.h \
-	safe_print.cpp safe_print.h sexpr.cpp sexpr.h \
-	smt2_quote_string.cpp smt2_quote_string.h statistics.cpp \
-	statistics.h statistics_registry.cpp statistics_registry.h \
-	tuple.h unsafe_interrupt_exception.h utility.h $(am__append_1) \
-	$(am__append_2)
+	ntuple.h ostream_util.cpp ostream_util.h proof.h regexp.cpp \
+	regexp.h resource_manager.cpp resource_manager.h result.cpp \
+	random.h random.cpp result.h safe_print.cpp safe_print.h \
+	sexpr.cpp sexpr.h smt2_quote_string.cpp smt2_quote_string.h \
+	statistics.cpp statistics.h statistics_registry.cpp \
+	statistics_registry.h tuple.h unsafe_interrupt_exception.h \
+	utility.h $(am__append_1) $(am__append_2)
 BUILT_SOURCES = \
 	rational.h \
 	integer.h
@@ -610,12 +616,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/abstract_value.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bitvector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cardinality.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/divisible.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/floatingpoint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/index.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/integer_cln_imp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/integer_gmp_imp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ostream_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rational_cln_imp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rational_gmp_imp.Plo@am__quote@

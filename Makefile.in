@@ -128,6 +128,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
+	$(top_srcdir)/config/cadical.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
@@ -148,7 +149,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = cvc4autoconfig.h
 CONFIG_CLEAN_FILES = Makefile.builds doc/cvc4.1_template.tmp \
-	doc/cvc4.5.tmp doc/libcvc4.3_template.tmp \
+	doc/cvc4.5.tmp doc/libcvc4.3.tmp \
 	doc/SmtEngine.3cvc_template.tmp doc/options.3cvc_template.tmp \
 	doc/libcvc4parser.3.tmp doc/libcvc4compat.3.tmp
 CONFIG_CLEAN_VPATH_FILES =
@@ -249,10 +250,10 @@ am__DIST_COMMON = $(srcdir)/Makefile.builds.in $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/doxygen.am \
 	$(top_srcdir)/config/install-sh $(top_srcdir)/config/ltmain.sh \
 	$(top_srcdir)/config/missing \
+	$(top_srcdir)/config/tap-driver.sh \
 	$(top_srcdir)/doc/SmtEngine.3cvc_template.in \
 	$(top_srcdir)/doc/cvc4.1_template.in \
-	$(top_srcdir)/doc/cvc4.5.in \
-	$(top_srcdir)/doc/libcvc4.3_template.in \
+	$(top_srcdir)/doc/cvc4.5.in $(top_srcdir)/doc/libcvc4.3.in \
 	$(top_srcdir)/doc/libcvc4compat.3.in \
 	$(top_srcdir)/doc/libcvc4parser.3.in \
 	$(top_srcdir)/doc/options.3cvc_template.in AUTHORS COPYING \
@@ -330,6 +331,9 @@ BOOST_THREAD_WIN32_LDPATH = @BOOST_THREAD_WIN32_LDPATH@
 BOOST_THREAD_WIN32_LIBS = @BOOST_THREAD_WIN32_LIBS@
 BUILDING_SHARED = @BUILDING_SHARED@
 BUILDING_STATIC = @BUILDING_STATIC@
+CADICAL_HOME = @CADICAL_HOME@
+CADICAL_LDFLAGS = @CADICAL_LDFLAGS@
+CADICAL_LIBS = @CADICAL_LIBS@
 CAMLP4O = @CAMLP4O@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -485,6 +489,7 @@ WNO_PARENTHESES = @WNO_PARENTHESES@
 WNO_TAUTOLOGICAL_COMPARE = @WNO_TAUTOLOGICAL_COMPARE@
 WNO_UNINITIALIZED = @WNO_UNINITIALIZED@
 WNO_UNUSED_VARIABLE = @WNO_UNUSED_VARIABLE@
+W_SUGGEST_OVERRIDE = @W_SUGGEST_OVERRIDE@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -607,7 +612,7 @@ EXTRA_DIST = \
 	doc/find_public_interface.sh \
 	doc/cvc4.1_template.in \
 	doc/cvc4.5.in \
-	doc/libcvc4.3_template.in \
+	doc/libcvc4.3.in \
 	doc/SmtEngine.3cvc_template.in \
 	doc/options.3cvc_template.in \
 	doc/libcvc4parser.3.in \
@@ -631,7 +636,6 @@ DISTCLEANFILES = \
 	doc/pcvc4.1 \
 	doc/cvc4.5 \
 	doc/libcvc4.3 \
-	doc/libcvc4.3_template \
 	doc/libcvc4compat.3 \
 	doc/libcvc4parser.3 \
 	doc/SmtEngine.3cvc \
@@ -698,7 +702,7 @@ doc/cvc4.1_template.tmp: $(top_builddir)/config.status $(top_srcdir)/doc/cvc4.1_
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 doc/cvc4.5.tmp: $(top_builddir)/config.status $(top_srcdir)/doc/cvc4.5.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-doc/libcvc4.3_template.tmp: $(top_builddir)/config.status $(top_srcdir)/doc/libcvc4.3_template.in
+doc/libcvc4.3.tmp: $(top_builddir)/config.status $(top_srcdir)/doc/libcvc4.3.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 doc/SmtEngine.3cvc_template.tmp: $(top_builddir)/config.status $(top_srcdir)/doc/SmtEngine.3cvc_template.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

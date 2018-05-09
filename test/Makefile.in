@@ -96,6 +96,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/config/ax_prog_doxygen.m4 \
 	$(top_srcdir)/config/bindings.m4 $(top_srcdir)/config/boost.m4 \
+	$(top_srcdir)/config/cadical.m4 \
 	$(top_srcdir)/config/cryptominisat.m4 \
 	$(top_srcdir)/config/cvc4.m4 \
 	$(top_srcdir)/config/gcc_version.m4 \
@@ -225,6 +226,9 @@ BOOST_THREAD_WIN32_LDPATH = @BOOST_THREAD_WIN32_LDPATH@
 BOOST_THREAD_WIN32_LIBS = @BOOST_THREAD_WIN32_LIBS@
 BUILDING_SHARED = @BUILDING_SHARED@
 BUILDING_STATIC = @BUILDING_STATIC@
+CADICAL_HOME = @CADICAL_HOME@
+CADICAL_LDFLAGS = @CADICAL_LDFLAGS@
+CADICAL_LIBS = @CADICAL_LIBS@
 CAMLP4O = @CAMLP4O@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -380,6 +384,7 @@ WNO_PARENTHESES = @WNO_PARENTHESES@
 WNO_TAUTOLOGICAL_COMPARE = @WNO_TAUTOLOGICAL_COMPARE@
 WNO_UNINITIALIZED = @WNO_UNINITIALIZED@
 WNO_UNUSED_VARIABLE = @WNO_UNUSED_VARIABLE@
+W_SUGGEST_OVERRIDE = @W_SUGGEST_OVERRIDE@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -466,57 +471,6 @@ test "X$(AM_COLOR_TESTS)" != Xno \
 }
 
 subdirs_to_check = \
-	regress/regress0 \
-	regress/regress0/arith \
-	regress/regress0/arith/integers \
-	regress/regress0/arrays \
-	regress/regress0/aufbv \
-	regress/regress0/auflia \
-	regress/regress0/bv \
-	regress/regress0/bv/core \
-	regress/regress0/datatypes \
-	regress/regress0/decision \
-	regress/regress0/expect \
-	regress/regress0/fmf \
-	regress/regress0/ho \
-	regress/regress0/lemmas \
-	regress/regress0/nl \
-	regress/regress0/parser \
-	regress/regress0/precedence \
-	regress/regress0/preprocess \
-	regress/regress0/push-pop \
-	regress/regress0/push-pop/arith \
-	regress/regress0/push-pop/boolean \
-	regress/regress0/quantifiers \
-	regress/regress0/rels \
-	regress/regress0/rewriterules \
-	regress/regress0/sep \
-	regress/regress0/sets \
-	regress/regress0/strings \
-	regress/regress0/sygus \
-	regress/regress0/tptp \
-	regress/regress0/uf \
-	regress/regress0/uflia \
-	regress/regress0/uflra \
-	regress/regress0/unconstrained \
-	regress/regress1 \
-	regress/regress1/aufbv \
-	regress/regress1/auflia \
-	regress/regress1/bv \
-	regress/regress1/datatypes \
-	regress/regress1/decision \
-	regress/regress1/fmf \
-	regress/regress1/lemmas \
-	regress/regress1/rewriterules \
-	regress/regress1/sep \
-	regress/regress1/sets \
-	regress/regress1/strings \
-	regress/regress1/sygus \
-	regress/regress1/quantifiers \
-	regress/regress2 \
-	regress/regress2/arith \
-	regress/regress3 \
-	regress/regress4 \
 	system \
 	unit
 
@@ -859,6 +813,7 @@ check-recursive: check-pre
 .PHONY: check-pre
 check-pre:
 	@rm -f $(subdirs_to_check:=/test-suite.log)
+	@find regress -name '*.trs' -exec rm {} \;
 
 # automake 1.11 version
 @AUTOMAKE_1_11_TRUE@check-local:
@@ -868,18 +823,7 @@ check-pre:
 @AUTOMAKE_1_11_TRUE@	if test -s "system/test-suite.log"; then :; else \
 @AUTOMAKE_1_11_TRUE@		echo "$${red}System tests did not run; maybe there were compilation problems ?$$std"; \
 @AUTOMAKE_1_11_TRUE@	fi; \
-@AUTOMAKE_1_11_TRUE@	for dir in $(subdirs_to_check); do \
-@AUTOMAKE_1_11_TRUE@		log=$$dir/test-suite.log; \
-@AUTOMAKE_1_11_TRUE@		if test -s "$$log"; then \
-@AUTOMAKE_1_11_TRUE@			status="`head -n 5 $$log | tail -1`"; \
-@AUTOMAKE_1_11_TRUE@			if echo "$$status" | grep -q failed; then \
-@AUTOMAKE_1_11_TRUE@				echo "$$red$$status"; \
-@AUTOMAKE_1_11_TRUE@				echo "    @abs_builddir@/$$log$$std"; \
-@AUTOMAKE_1_11_TRUE@			else \
-@AUTOMAKE_1_11_TRUE@				printf "$$grn%-30s in $$dir$$std\\n" "$$status"; \
-@AUTOMAKE_1_11_TRUE@			fi; \
-@AUTOMAKE_1_11_TRUE@		fi; \
-@AUTOMAKE_1_11_TRUE@	done; \
+@AUTOMAKE_1_11_TRUE@	echo $${red}Upgrade to a newer version of Automake to get a more detailed summary; \
 @AUTOMAKE_1_11_TRUE@	echo $${blu}===============================  TESTING SUMMARY  =============================$$std
 # automake 1.12 version
 @AUTOMAKE_1_11_FALSE@check-local:
@@ -903,6 +847,38 @@ check-pre:
 @AUTOMAKE_1_11_FALSE@				echo "$$red$$nicestatus"; \
 @AUTOMAKE_1_11_FALSE@				echo "    @abs_builddir@/$$log$$std"; \
 @AUTOMAKE_1_11_FALSE@			fi; \
+@AUTOMAKE_1_11_FALSE@		fi; \
+@AUTOMAKE_1_11_FALSE@	done; \
+@AUTOMAKE_1_11_FALSE@	for dir in `find regress -maxdepth 2 -not -empty -type d | sort`; do \
+@AUTOMAKE_1_11_FALSE@		if [[ "$$dir" =~ .*regress[0-4]$$ ]]; then \
+@AUTOMAKE_1_11_FALSE@			status_info=`grep -d skip ":test-result: " $$dir/*`; \
+@AUTOMAKE_1_11_FALSE@		else \
+@AUTOMAKE_1_11_FALSE@			status_info=`grep -r ":test-result: " $$dir`; \
+@AUTOMAKE_1_11_FALSE@		fi; \
+@AUTOMAKE_1_11_FALSE@		total=`echo "$$status_info" | grep ":test-result: " | wc -l`; \
+@AUTOMAKE_1_11_FALSE@		if [ $$total -ne 0 ]; then \
+@AUTOMAKE_1_11_FALSE@			status="$${std}$$total TOTAL"; \
+@AUTOMAKE_1_11_FALSE@			pass=`echo "$$status_info" | grep " PASS" | wc -l`; \
+@AUTOMAKE_1_11_FALSE@			if [ $$pass -ne 0 ]; then \
+@AUTOMAKE_1_11_FALSE@				status="$$status $${grn}$$pass PASS"; \
+@AUTOMAKE_1_11_FALSE@			fi; \
+@AUTOMAKE_1_11_FALSE@			fail=`echo "$$status_info" | grep " FAIL" | wc -l`; \
+@AUTOMAKE_1_11_FALSE@			if [ $$fail -ne 0 ]; then \
+@AUTOMAKE_1_11_FALSE@				status="$$status $${red}$$fail FAIL"; \
+@AUTOMAKE_1_11_FALSE@			fi; \
+@AUTOMAKE_1_11_FALSE@			xpass=`echo "$$status_info" | grep " XPASS" | wc -l`; \
+@AUTOMAKE_1_11_FALSE@			if [ $$xpass -ne 0 ]; then \
+@AUTOMAKE_1_11_FALSE@				status="$$status $${red}$$xpass XPASS"; \
+@AUTOMAKE_1_11_FALSE@			fi; \
+@AUTOMAKE_1_11_FALSE@			error=`echo "$$status_info" | grep " ERROR" | wc -l`; \
+@AUTOMAKE_1_11_FALSE@			if [ $$error -ne 0 ]; then \
+@AUTOMAKE_1_11_FALSE@				status="$$status $${red}$$error ERROR"; \
+@AUTOMAKE_1_11_FALSE@			fi; \
+@AUTOMAKE_1_11_FALSE@			skip=`echo "$$status_info" | grep " SKIP" | wc -l`; \
+@AUTOMAKE_1_11_FALSE@			if [ $$skip -ne 0 ]; then \
+@AUTOMAKE_1_11_FALSE@				status="$$status $${blu}$$skip SKIP"; \
+@AUTOMAKE_1_11_FALSE@			fi; \
+@AUTOMAKE_1_11_FALSE@			printf "$$grn%-30s in $$dir\\n" "$$status"; \
 @AUTOMAKE_1_11_FALSE@		fi; \
 @AUTOMAKE_1_11_FALSE@	done; \
 @AUTOMAKE_1_11_FALSE@	echo $${blu}===============================  TESTING SUMMARY  =============================$$std
