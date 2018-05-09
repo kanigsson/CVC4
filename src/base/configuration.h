@@ -96,6 +96,8 @@ public:
 
   static bool isBuiltWithAbc();
 
+  static bool isBuiltWithCadical();
+
   static bool isBuiltWithCryptominisat();
 
   static bool isBuiltWithReadline();

@@ -84,12 +84,12 @@ public:
 
   bool isTheoryEnabled(Theory theory) const;
 
-  bool logicIsSet();
-  
+  bool logicIsSet() override;
+
   /**
    * Returns the expression that name should be interpreted as. 
    */
-  virtual Expr getExpressionForNameAndType(const std::string& name, Type t);
+  Expr getExpressionForNameAndType(const std::string& name, Type t) override;
 
   /** Make function defined by a define-fun(s)-rec command.
   *
@@ -127,17 +127,15 @@ public:
   * (1) Calls Parser::pushScope(bindingLevel).
   * (2) Computes the bound variable list for the quantified formula
   *     that defined this definition and stores it in bvs.
-  * (3) Sets func_app to the APPLY_UF with func applied to bvs.
   */
   void pushDefineFunRecScope(
       const std::vector<std::pair<std::string, Type> >& sortedVarNames,
       Expr func,
       const std::vector<Expr>& flattenVars,
-      Expr& func_app,
       std::vector<Expr>& bvs,
       bool bindingLevel = false);
 
-  void reset();
+  void reset() override;
 
   void resetAssertions();
 
@@ -157,14 +155,21 @@ public:
   bool v2_0() const {
     return getInput()->getLanguage() == language::input::LANG_SMTLIB_V2_0;
   }
-  // 2.6 is a superset of 2.5, use exact=false to query whether smt lib 2.5 or above
-  bool v2_5( bool exact = true ) const {
-    return exact ? getInput()->getLanguage() == language::input::LANG_SMTLIB_V2_5 : 
-                   ( getInput()->getLanguage() >= language::input::LANG_SMTLIB_V2_5 && 
-                     getInput()->getLanguage() <= language::input::LANG_SMTLIB_V2 );
+  /**
+   * Are we using smtlib 2.5 or above? If exact=true, then this method returns
+   * false if the input language is not exactly SMT-LIB 2.5.
+   */
+  bool v2_5(bool exact = false) const
+  {
+    return language::isInputLang_smt2_5(getInput()->getLanguage(), exact);
   }
-  bool v2_6() const {
-    return getInput()->getLanguage() == language::input::LANG_SMTLIB_V2_6;
+  /**
+   * Are we using smtlib 2.6 or above? If exact=true, then this method returns
+   * false if the input language is not exactly SMT-LIB 2.6.
+   */
+  bool v2_6(bool exact = false) const
+  {
+    return language::isInputLang_smt2_6(getInput()->getLanguage(), exact);
   }
   bool sygus() const {
     return getInput()->getLanguage() == language::input::LANG_SYGUS;
@@ -280,9 +285,11 @@ public:
    * Smt2 parser provides its own checkDeclaration, which does the
    * same as the base, but with some more helpful errors.
    */
-  void checkDeclaration(const std::string& name, DeclarationCheck check,
+  void checkDeclaration(const std::string& name,
+                        DeclarationCheck check,
                         SymbolType type = SYM_VARIABLE,
-                        std::string notes = "") throw(ParserException) {
+                        std::string notes = "")
+  {
     // if the symbol is something like "-1", we'll give the user a helpful
     // syntax hint.  (-1 is a valid identifier in SMT-LIB, NOT unary minus.)
     if( check != CHECK_DECLARED ||
@@ -306,7 +313,8 @@ public:
     this->Parser::checkDeclaration(name, check, type, ss.str());
   }
 
-  void checkOperator(Kind kind, unsigned numArgs) throw(ParserException) {
+  void checkOperator(Kind kind, unsigned numArgs)
+  {
     Parser::checkOperator(kind, numArgs);
     // strict SMT-LIB mode enables extra checks for some bitvector operators
     // that CVC4 permits as N-ary but the standard requires is binary
@@ -330,7 +338,8 @@ public:
   }
 
   // Throw a ParserException with msg appended with the current logic.
-  inline void parseErrorLogic(const std::string& msg) throw(ParserException) {
+  inline void parseErrorLogic(const std::string& msg)
+  {
     const std::string withLogic = msg + getLogic().getLogicString();
     parseError(withLogic);
   }

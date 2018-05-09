@@ -61,6 +61,17 @@ void Smt2::addArithmeticOperators() {
   addOperator(kind::SINE, "sin");
   addOperator(kind::COSINE, "cos");
   addOperator(kind::TANGENT, "tan");
+  addOperator(kind::COSECANT, "csc");
+  addOperator(kind::SECANT, "sec");
+  addOperator(kind::COTANGENT, "cot");
+  addOperator(kind::ARCSINE, "arcsin");
+  addOperator(kind::ARCCOSINE, "arccos");
+  addOperator(kind::ARCTANGENT, "arctan");
+  addOperator(kind::ARCCOSECANT, "arccsc");
+  addOperator(kind::ARCSECANT, "arcsec");
+  addOperator(kind::ARCCOTANGENT, "arccot");
+
+  addOperator(kind::SQRT, "sqrt");
 }
 
 void Smt2::addBitvectorOperators() {
@@ -118,10 +129,22 @@ void Smt2::addStringOperators() {
   addOperator(kind::STRING_STRREPL, "str.replace" );
   addOperator(kind::STRING_PREFIX, "str.prefixof" );
   addOperator(kind::STRING_SUFFIX, "str.suffixof" );
-  addOperator(kind::STRING_ITOS, "int.to.str" );
-  addOperator(kind::STRING_STOI, "str.to.int" );
-  addOperator(kind::STRING_IN_REGEXP, "str.in.re");
-  addOperator(kind::STRING_TO_REGEXP, "str.to.re");
+  // at the moment, we only use this syntax for smt2.6.1
+  if (getInput()->getLanguage() == language::input::LANG_SMTLIB_V2_6_1)
+  {
+    addOperator(kind::STRING_ITOS, "str.from-int");
+    addOperator(kind::STRING_STOI, "str.to-int");
+    addOperator(kind::STRING_IN_REGEXP, "str.in-re");
+    addOperator(kind::STRING_TO_REGEXP, "str.to-re");
+  }
+  else
+  {
+    addOperator(kind::STRING_ITOS, "int.to.str");
+    addOperator(kind::STRING_STOI, "str.to.int");
+    addOperator(kind::STRING_IN_REGEXP, "str.in.re");
+    addOperator(kind::STRING_TO_REGEXP, "str.to.re");
+  }
+
   addOperator(kind::REGEXP_CONCAT, "re.++");
   addOperator(kind::REGEXP_UNION, "re.union");
   addOperator(kind::REGEXP_INTER, "re.inter");
@@ -130,6 +153,9 @@ void Smt2::addStringOperators() {
   addOperator(kind::REGEXP_OPT, "re.opt");
   addOperator(kind::REGEXP_RANGE, "re.range");
   addOperator(kind::REGEXP_LOOP, "re.loop");
+  addOperator(kind::STRING_CODE, "str.code");
+  addOperator(kind::STRING_LT, "str.<");
+  addOperator(kind::STRING_LEQ, "str.<=");
 }
 
 void Smt2::addFloatingPointOperators() {
@@ -240,14 +266,22 @@ void Smt2::addTheory(Theory theory) {
     addOperator(kind::INSERT, "insert");
     addOperator(kind::CARD, "card");
     addOperator(kind::COMPLEMENT, "complement");
+    addOperator(kind::JOIN, "join");
+    addOperator(kind::PRODUCT, "product");
+    addOperator(kind::TRANSPOSE, "transpose");
+    addOperator(kind::TCLOSURE, "tclosure");
     break;
 
   case THEORY_DATATYPES:
+  {
+    const std::vector<Type> types;
+    defineType("Tuple", getExprManager()->mkTupleType(types));
     Parser::addOperator(kind::APPLY_CONSTRUCTOR);
     Parser::addOperator(kind::APPLY_TESTER);
     Parser::addOperator(kind::APPLY_SELECTOR);
     Parser::addOperator(kind::APPLY_SELECTOR_TOTAL);
     break;
+  }
 
   case THEORY_STRINGS:
     defineType("String", getExprManager()->stringType());
@@ -298,7 +332,7 @@ bool Smt2::isOperatorEnabled(const std::string& name) const {
 bool Smt2::isTheoryEnabled(Theory theory) const {
   switch(theory) {
   case THEORY_ARRAYS:
-    return d_logic.isTheoryEnabled(theory::THEORY_ARRAY);
+    return d_logic.isTheoryEnabled(theory::THEORY_ARRAYS);
   case THEORY_BITVECTORS:
     return d_logic.isTheoryEnabled(theory::THEORY_BV);
   case THEORY_CORE:
@@ -373,35 +407,20 @@ void Smt2::pushDefineFunRecScope(
     const std::vector<std::pair<std::string, Type> >& sortedVarNames,
     Expr func,
     const std::vector<Expr>& flattenVars,
-    Expr& func_app,
     std::vector<Expr>& bvs,
     bool bindingLevel)
 {
   pushScope(bindingLevel);
 
-  std::vector<Expr> f_app;
-  f_app.push_back(func);
   // bound variables are those that are explicitly named in the preamble
   // of the define-fun(s)-rec command, we define them here
   for (const std::pair<std::string, CVC4::Type>& svn : sortedVarNames)
   {
     Expr v = mkBoundVar(svn.first, svn.second);
     bvs.push_back(v);
-    f_app.push_back(v);
   }
 
   bvs.insert(bvs.end(), flattenVars.begin(), flattenVars.end());
-
-  // make the function application
-  if (bvs.empty())
-  {
-    // it has no arguments
-    func_app = func;
-  }
-  else
-  {
-    func_app = getExprManager()->mkExpr(kind::APPLY_UF, f_app);
-  }
 }
 
 void Smt2::reset() {
@@ -417,7 +436,10 @@ void Smt2::reset() {
 }
 
 void Smt2::resetAssertions() {
-  this->Parser::reset();
+  // Remove all declarations except the ones at level 0.
+  while (this->scopeLevel() > 0) {
+    this->popScope();
+  }
 }
 
 void Smt2::setLogic(std::string name) {
@@ -470,7 +492,7 @@ void Smt2::setLogic(std::string name) {
     }
   }
 
-  if(d_logic.isTheoryEnabled(theory::THEORY_ARRAY)) {
+  if(d_logic.isTheoryEnabled(theory::THEORY_ARRAYS)) {
     addTheory(THEORY_ARRAYS);
   }
 
@@ -985,7 +1007,8 @@ void Smt2::mkSygusDatatype( CVC4::Datatype& dt, std::vector<CVC4::Expr>& ops,
   
   Debug("parser-sygus") << "SMT2 sygus parser : Making constructors for sygus datatype " << dt.getName() << std::endl;
   Debug("parser-sygus") << "  add constructors..." << std::endl;
-  for (unsigned i = 0, size = cnames.size(); i < size; i++)
+  // size of cnames changes, this loop must check size
+  for (unsigned i = 0; i < cnames.size(); i++)
   {
     bool is_dup = false;
     bool is_dup_op = false;
@@ -1121,8 +1144,12 @@ void Smt2::mkSygusDatatype( CVC4::Datatype& dt, std::vector<CVC4::Expr>& ops,
       std::stringstream ss;
       ss << dt.getName() << "_" << i << "_" << cnames[i];
       cnames[i] = ss.str();
+      Debug("parser-sygus") << "  construct the datatype " << cnames[i] << "..."
+                            << std::endl;
       // add the sygus constructor
       dt.addSygusConstructor(ops[i], cnames[i], cargs[i], spc);
+      Debug("parser-sygus") << "  finished constructing the datatype"
+                            << std::endl;
     }
   }
 
