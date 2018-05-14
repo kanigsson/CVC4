@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """
     Generate option handling code and documentation in one pass. The generated
     files are only written to the destination file if the contents of the file
@@ -303,10 +303,10 @@ def write_file(directory, name, content):
         if os.path.isfile(fname):
             with open(fname, 'r') as file:
                 if content == file.read():
-                    print '{} is up-to-date'.format(name)
+                    print('{} is up-to-date'.format(name))
                     return
         with open(fname, 'w') as file:
-            print 'generated {}'.format(name)
+            print('generated {}'.format(name))
             file.write(content)
     except IOError:
         die("Could not write '{}'".format(fname))
@@ -1347,13 +1347,13 @@ def parse_module(filename, file):
 
 
 def usage():
-    print 'mkoptions.py <tpl-src> <tpl-doc> <dst> <toml>+'
-    print ''
-    print '  <tpl-src> location of all *_template.{cpp,h} files'
-    print '  <tpl-doc> location of all *_template documentation files'
-    print '  <dst>     destination directory for the generated files'
-    print '  <toml>+   one or more *_optios.toml files'
-    print ''
+    print('mkoptions.py <tpl-src> <tpl-doc> <dst> <toml>+')
+    print('')
+    print('  <tpl-src> location of all *_template.{cpp,h} files')
+    print('  <tpl-doc> location of all *_template documentation files')
+    print('  <dst>     destination directory for the generated files')
+    print('  <toml>+   one or more *_optios.toml files')
+    print('')
 
 
 def mkoptions_main():
