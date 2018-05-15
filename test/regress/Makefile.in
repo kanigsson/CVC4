@@ -107,7 +107,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
 	$(top_srcdir)/config/lt~obsolete.m4 \
 	$(top_srcdir)/config/pkg.m4 $(top_srcdir)/config/readline.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/config/symfpu.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -516,6 +516,7 @@ SHELL = @SHELL@
 STATIC_BINARY = @STATIC_BINARY@
 STRIP = @STRIP@
 SWIG = @SWIG@
+SYMFPU_HOME = @SYMFPU_HOME@
 TCL_CPPFLAGS = @TCL_CPPFLAGS@
 
 # old-style (pre-automake 1.12) test harness
@@ -2080,6 +2081,8 @@ REG1_TESTS = \
 	regress1/sygus/clock-inc-tuple.sy \
 	regress1/sygus/commutative.sy \
 	regress1/sygus/constant.sy \
+	regress1/sygus/constant-ite-bv.sy \
+	regress1/sygus/crci-ssb-unk.sy \
 	regress1/sygus/dt-test-ns.sy \
 	regress1/sygus/dup-op.sy \
 	regress1/sygus/fg_polynomial3.sy \
@@ -2092,6 +2095,7 @@ REG1_TESTS = \
 	regress1/sygus/icfp_easy-ite.sy \
 	regress1/sygus/inv-example.sy \
 	regress1/sygus/inv-unused.sy \
+	regress1/sygus/large-const-simp.sy \
 	regress1/sygus/list-head-x.sy \
 	regress1/sygus/max.sy \
 	regress1/sygus/multi-fun-polynomial2.sy \
@@ -2128,6 +2132,7 @@ REG1_TESTS = \
 	regress1/sym/sym4.smt2 \
 	regress1/sym/sym5.smt2 \
 	regress1/sym/sym6.smt2 \
+	regress1/sym/sym7-uf.smt2 \
 	regress1/test12.cvc \
 	regress1/trim.cvc \
 	regress1/uf2.smt2 \
@@ -2192,6 +2197,7 @@ REG2_TESTS = \
 	regress2/strings/norn-dis-0707-3.smt2 \
 	regress2/sygus/MPwL_d1s3.sy \
 	regress2/sygus/array_sum_dd.sy \
+	regress2/sygus/ex23.sy \
 	regress2/sygus/icfp_easy_mt_ite.sy \
 	regress2/sygus/inv_gen_n_c11.sy \
 	regress2/sygus/lustre-real.sy \
@@ -2202,7 +2208,9 @@ REG2_TESTS = \
 	regress2/sygus/process-10-vars-2fun.sy \
 	regress2/sygus/process-arg-invariance.sy \
 	regress2/sygus/real-grammar-neg.sy \
+	regress2/sygus/sixfuncs.sy \
 	regress2/sygus/three.sy \
+	regress2/sygus/vcb.sy \
 	regress2/typed_v1l50016-simp.cvc \
 	regress2/uflia-error0.smt2 \
 	regress2/xs-09-16-3-4-1-5.decn.smt \
@@ -13092,6 +13100,20 @@ regress1/sygus/constant.sy.log: regress1/sygus/constant.sy
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress1/sygus/constant-ite-bv.sy.log: regress1/sygus/constant-ite-bv.sy
+	@p='regress1/sygus/constant-ite-bv.sy'; \
+	b='regress1/sygus/constant-ite-bv.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress1/sygus/crci-ssb-unk.sy.log: regress1/sygus/crci-ssb-unk.sy
+	@p='regress1/sygus/crci-ssb-unk.sy'; \
+	b='regress1/sygus/crci-ssb-unk.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 regress1/sygus/dt-test-ns.sy.log: regress1/sygus/dt-test-ns.sy
 	@p='regress1/sygus/dt-test-ns.sy'; \
 	b='regress1/sygus/dt-test-ns.sy'; \
@@ -13172,6 +13194,13 @@ regress1/sygus/inv-example.sy.log: regress1/sygus/inv-example.sy
 regress1/sygus/inv-unused.sy.log: regress1/sygus/inv-unused.sy
 	@p='regress1/sygus/inv-unused.sy'; \
 	b='regress1/sygus/inv-unused.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress1/sygus/large-const-simp.sy.log: regress1/sygus/large-const-simp.sy
+	@p='regress1/sygus/large-const-simp.sy'; \
+	b='regress1/sygus/large-const-simp.sy'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -13424,6 +13453,13 @@ regress1/sym/sym5.smt2.log: regress1/sym/sym5.smt2
 regress1/sym/sym6.smt2.log: regress1/sym/sym6.smt2
 	@p='regress1/sym/sym6.smt2'; \
 	b='regress1/sym/sym6.smt2'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress1/sym/sym7-uf.smt2.log: regress1/sym/sym7-uf.smt2
+	@p='regress1/sym/sym7-uf.smt2'; \
+	b='regress1/sym/sym7-uf.smt2'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -13862,6 +13898,13 @@ regress2/sygus/array_sum_dd.sy.log: regress2/sygus/array_sum_dd.sy
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress2/sygus/ex23.sy.log: regress2/sygus/ex23.sy
+	@p='regress2/sygus/ex23.sy'; \
+	b='regress2/sygus/ex23.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 regress2/sygus/icfp_easy_mt_ite.sy.log: regress2/sygus/icfp_easy_mt_ite.sy
 	@p='regress2/sygus/icfp_easy_mt_ite.sy'; \
 	b='regress2/sygus/icfp_easy_mt_ite.sy'; \
@@ -13932,9 +13975,23 @@ regress2/sygus/real-grammar-neg.sy.log: regress2/sygus/real-grammar-neg.sy
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress2/sygus/sixfuncs.sy.log: regress2/sygus/sixfuncs.sy
+	@p='regress2/sygus/sixfuncs.sy'; \
+	b='regress2/sygus/sixfuncs.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 regress2/sygus/three.sy.log: regress2/sygus/three.sy
 	@p='regress2/sygus/three.sy'; \
 	b='regress2/sygus/three.sy'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+regress2/sygus/vcb.sy.log: regress2/sygus/vcb.sy
+	@p='regress2/sygus/vcb.sy'; \
+	b='regress2/sygus/vcb.sy'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

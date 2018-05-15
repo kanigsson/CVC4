@@ -121,7 +121,7 @@ am__aclocal_m4_deps = $(top_srcdir)/config/abc.m4 \
 	$(top_srcdir)/config/ltversion.m4 \
 	$(top_srcdir)/config/lt~obsolete.m4 \
 	$(top_srcdir)/config/pkg.m4 $(top_srcdir)/config/readline.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/config/symfpu.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -179,6 +179,7 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	decision/decision_engine.lo \
 	decision/justification_heuristic.lo \
 	preprocessing/passes/bv_abstraction.lo \
+	preprocessing/passes/bv_ackermann.lo \
 	preprocessing/passes/bv_gauss.lo \
 	preprocessing/passes/bv_intro_pow2.lo \
 	preprocessing/passes/int_to_bv.lo \
@@ -186,6 +187,7 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	preprocessing/passes/bool_to_bv.lo \
 	preprocessing/passes/bv_to_bool.lo \
 	preprocessing/passes/real_to_int.lo \
+	preprocessing/passes/symmetry_breaker.lo \
 	preprocessing/passes/symmetry_detect.lo \
 	preprocessing/preprocessing_pass.lo \
 	preprocessing/preprocessing_pass_context.lo \
@@ -320,6 +322,7 @@ am_libcvc4_la_OBJECTS = git_versioninfo.lo svn_versioninfo.lo \
 	theory/quantifiers/sygus/sygus_grammar_red.lo \
 	theory/quantifiers/sygus/sygus_module.lo \
 	theory/quantifiers/sygus/sygus_process_conj.lo \
+	theory/quantifiers/sygus/sygus_repair_const.lo \
 	theory/quantifiers/sygus/sygus_unif.lo \
 	theory/quantifiers/sygus/sygus_unif_io.lo \
 	theory/quantifiers/sygus/sygus_unif_rl.lo \
@@ -650,6 +653,7 @@ SHELL = @SHELL@
 STATIC_BINARY = @STATIC_BINARY@
 STRIP = @STRIP@
 SWIG = @SWIG@
+SYMFPU_HOME = @SYMFPU_HOME@
 TCL_CPPFLAGS = @TCL_CPPFLAGS@
 TESTS_ENVIRONMENT = @TESTS_ENVIRONMENT@
 TEST_CPPFLAGS = @TEST_CPPFLAGS@
@@ -794,6 +798,8 @@ libcvc4_la_SOURCES = \
 	decision/justification_heuristic.h \
 	preprocessing/passes/bv_abstraction.cpp \
 	preprocessing/passes/bv_abstraction.h \
+	preprocessing/passes/bv_ackermann.cpp \
+	preprocessing/passes/bv_ackermann.h \
 	preprocessing/passes/bv_gauss.cpp \
 	preprocessing/passes/bv_gauss.h \
 	preprocessing/passes/bv_intro_pow2.cpp \
@@ -808,6 +814,8 @@ libcvc4_la_SOURCES = \
 	preprocessing/passes/bv_to_bool.h \
 	preprocessing/passes/real_to_int.cpp \
 	preprocessing/passes/real_to_int.h \
+	preprocessing/passes/symmetry_breaker.cpp \
+	preprocessing/passes/symmetry_breaker.h \
 	preprocessing/passes/symmetry_detect.cpp \
 	preprocessing/passes/symmetry_detect.h \
 	preprocessing/preprocessing_pass.cpp \
@@ -1219,6 +1227,8 @@ libcvc4_la_SOURCES = \
 	theory/quantifiers/sygus/sygus_module.h \
 	theory/quantifiers/sygus/sygus_process_conj.cpp \
 	theory/quantifiers/sygus/sygus_process_conj.h \
+	theory/quantifiers/sygus/sygus_repair_const.cpp \
+	theory/quantifiers/sygus/sygus_repair_const.h \
 	theory/quantifiers/sygus/sygus_unif.cpp \
 	theory/quantifiers/sygus/sygus_unif.h \
 	theory/quantifiers/sygus/sygus_unif_io.cpp \
@@ -1450,6 +1460,9 @@ preprocessing/passes/$(DEPDIR)/$(am__dirstamp):
 preprocessing/passes/bv_abstraction.lo:  \
 	preprocessing/passes/$(am__dirstamp) \
 	preprocessing/passes/$(DEPDIR)/$(am__dirstamp)
+preprocessing/passes/bv_ackermann.lo:  \
+	preprocessing/passes/$(am__dirstamp) \
+	preprocessing/passes/$(DEPDIR)/$(am__dirstamp)
 preprocessing/passes/bv_gauss.lo:  \
 	preprocessing/passes/$(am__dirstamp) \
 	preprocessing/passes/$(DEPDIR)/$(am__dirstamp)
@@ -1469,6 +1482,9 @@ preprocessing/passes/bv_to_bool.lo:  \
 	preprocessing/passes/$(am__dirstamp) \
 	preprocessing/passes/$(DEPDIR)/$(am__dirstamp)
 preprocessing/passes/real_to_int.lo:  \
+	preprocessing/passes/$(am__dirstamp) \
+	preprocessing/passes/$(DEPDIR)/$(am__dirstamp)
+preprocessing/passes/symmetry_breaker.lo:  \
 	preprocessing/passes/$(am__dirstamp) \
 	preprocessing/passes/$(DEPDIR)/$(am__dirstamp)
 preprocessing/passes/symmetry_detect.lo:  \
@@ -2042,6 +2058,9 @@ theory/quantifiers/sygus/sygus_module.lo:  \
 theory/quantifiers/sygus/sygus_process_conj.lo:  \
 	theory/quantifiers/sygus/$(am__dirstamp) \
 	theory/quantifiers/sygus/$(DEPDIR)/$(am__dirstamp)
+theory/quantifiers/sygus/sygus_repair_const.lo:  \
+	theory/quantifiers/sygus/$(am__dirstamp) \
+	theory/quantifiers/sygus/$(DEPDIR)/$(am__dirstamp)
 theory/quantifiers/sygus/sygus_unif.lo:  \
 	theory/quantifiers/sygus/$(am__dirstamp) \
 	theory/quantifiers/sygus/$(DEPDIR)/$(am__dirstamp)
@@ -2216,12 +2235,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/$(DEPDIR)/preprocessing_pass_registry.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/bool_to_bv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/bv_abstraction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/bv_ackermann.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/bv_gauss.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/bv_intro_pow2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/bv_to_bool.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/int_to_bv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/pseudo_boolean_processor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/real_to_int.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/symmetry_breaker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@preprocessing/passes/$(DEPDIR)/symmetry_detect.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/$(DEPDIR)/dagification_visitor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@printer/$(DEPDIR)/printer.Plo@am__quote@
@@ -2411,6 +2432,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_pbe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_process_conj.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_repair_const.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_unif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_unif_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@theory/quantifiers/sygus/$(DEPDIR)/sygus_unif_rl.Plo@am__quote@

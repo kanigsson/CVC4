@@ -781,6 +781,9 @@ WNO_CONVERSION_NULL
 WERROR
 ANTLR
 CVC4_NEED_INT64_T_OVERLOADS
+CVC4_USE_SYMFPU_FALSE
+CVC4_USE_SYMFPU_TRUE
+SYMFPU_HOME
 LFSC_LIBS
 LFSC_LDFLAGS
 CVC4_USE_LFSC_FALSE
@@ -995,6 +998,8 @@ with_cryptominisat
 with_cryptominisat_dir
 with_lfsc
 with_lfsc_dir
+with_symfpu
+with_symfpu_dir
 enable_personal_make_rules
 enable_internals_documentation
 enable_doxygen_doc
@@ -1042,6 +1047,7 @@ ABC_HOME
 CADICAL_HOME
 CRYPTOMINISAT_HOME
 LFSC_HOME
+SYMFPU_HOME
 ANTLR
 DOXYGEN_PAPER_SIZE
 CXXTEST
@@ -1886,6 +1892,8 @@ Optional Packages:
                           path to top level of cryptominisat source tree
   --with-lfsc             use the LFSC proof checker
   --with-lfsc-dir=PATH    path to top level of lfsc source tree
+  --with-symfpu           use symfpu for floating point solver
+  --with-symfpu-dir=PATH  path to top level of symfpu source tree
   --with-cxxtest-dir=DIR  path to CxxTest installation
   --with-antlr-dir=PATH   path to ANTLR C headers and libraries
   --with-swig=BINARY      path to swig binary
@@ -1920,6 +1928,7 @@ Some influential environment variables:
   CRYPTOMINISAT_HOME
               path to top level of cryptominisat source tree
   LFSC_HOME   path to top level of LFSC source tree
+  SYMFPU_HOME path to top level of symfpu source tree
   ANTLR       location of the antlr3 script
   DOXYGEN_PAPER_SIZE
               a4wide (default), a4, letter, legal or executive
@@ -4586,7 +4595,8 @@ if test -z "${enable_optimized+set}" -a \
         -z "${with_abc+set}" -a \
         -z "${with_cadical+set}" -a \
         -z "${with_cryptominisat+set}" -a \
-        -z "${with_lfsc+set}"; then
+        -z "${with_lfsc+set}" -a \
+        -z "${with_symfpu+set}"; then
   custom_build_profile=no
 else
   custom_build_profile=yes
@@ -4704,6 +4714,11 @@ if test -n "${with_lfsc+set}"; then
   if test "$with_lfsc" = yes; then
     enable_proof=yes
     btargs="$btargs lfsc"
+  fi
+fi
+if test -n "${with_symfpu+set}"; then
+  if test "$with_symfpu" = yes; then
+    btargs="$btargs symfpu"
   fi
 fi
 
@@ -22788,6 +22803,74 @@ fi
 
 
 
+# Build with symfpu
+
+# Check whether --with-symfpu was given.
+if test "${with_symfpu+set}" = set; then :
+  withval=$with_symfpu;
+else
+  with_symfpu=
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether user requested symfpu support" >&5
+$as_echo_n "checking whether user requested symfpu support... " >&6; }
+
+have_symfpu_headers=0
+if test "$with_symfpu" = no; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, symfpu disabled by user" >&5
+$as_echo "no, symfpu disabled by user" >&6; }
+elif test -n "$with_symfpu"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, symfpu requested by user" >&5
+$as_echo "yes, symfpu requested by user" >&6; }
+
+
+# Check whether --with-symfpu-dir was given.
+if test "${with_symfpu_dir+set}" = set; then :
+  withval=$with_symfpu_dir; SYMFPU_HOME="$withval"
+else
+   if test -z "$SYMFPU_HOME" && ! test -e "$ac_abs_confdir/symfpu-CVC4/symfpu/core"; then
+        { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "must give --with-symfpu-dir=PATH, define environment variable SYMFPU_HOME, or use contrib/get-symfpu to setup symfpu for CVC4!
+See \`config.log' for more details" "$LINENO" 5; }
+      fi
+
+
+fi
+
+
+  # Check if symfpu was installed via contrib/get-symfpu or SYMFPU_HOME or --with-symfpu-dir was set
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether symfpu was installed via contrib/get-symfpu" >&5
+$as_echo_n "checking whether symfpu was installed via contrib/get-symfpu... " >&6; }
+  if test -z "$SYMFPU_HOME" && test -e "$ac_abs_confdir/symfpu-CVC4/symfpu/core"; then
+    SYMFPU_HOME="$ac_abs_confdir/symfpu-CVC4"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, $SYMFPU_HOME" >&5
+$as_echo "yes, $SYMFPU_HOME" >&6; }
+    have_symfpu_headers=1
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, user didn't request symfpu" >&5
+$as_echo "no, user didn't request symfpu" >&6; }
+  with_symfpu=no
+fi
+
+
+if test $have_symfpu_headers -eq 1; then
+  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-DCVC4_USE_SYMFPU"
+  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-I$SYMFPU_HOME"
+fi
+ if test $have_symfpu_headers -eq 1; then
+  CVC4_USE_SYMFPU_TRUE=
+  CVC4_USE_SYMFPU_FALSE='#'
+else
+  CVC4_USE_SYMFPU_TRUE='#'
+  CVC4_USE_SYMFPU_FALSE=
+fi
+
 
 # Check to see if this version/architecture of GNU C++ explicitly
 # instantiates std::hash<uint64_t> or not.  Some do, some don't.
@@ -30192,6 +30275,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CVC4_USE_LFSC_TRUE}" && test -z "${CVC4_USE_LFSC_FALSE}"; then
   as_fn_error $? "conditional \"CVC4_USE_LFSC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CVC4_USE_SYMFPU_TRUE}" && test -z "${CVC4_USE_SYMFPU_FALSE}"; then
+  as_fn_error $? "conditional \"CVC4_USE_SYMFPU\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DX_COND_doc_TRUE}" && test -z "${DX_COND_doc_FALSE}"; then
