@@ -19,7 +19,7 @@
 **
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <cassert>
 #include <map>
 
