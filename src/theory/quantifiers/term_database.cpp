@@ -2,9 +2,9 @@
 /*! \file term_database.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Andrew Reynolds, Francois Bobot, Tim King
+ **   Andrew Reynolds, Tim King, Francois Bobot
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -31,49 +31,6 @@ using namespace CVC4::theory::inst;
 namespace CVC4 {
 namespace theory {
 namespace quantifiers {
-
-TNode TermArgTrie::existsTerm( std::vector< TNode >& reps, int argIndex ) {
-  if( argIndex==(int)reps.size() ){
-    if( d_data.empty() ){
-      return Node::null();
-    }else{
-      return d_data.begin()->first;
-    }
-  }else{
-    std::map< TNode, TermArgTrie >::iterator it = d_data.find( reps[argIndex] );
-    if( it==d_data.end() ){
-      return Node::null();
-    }else{
-      return it->second.existsTerm( reps, argIndex+1 );
-    }
-  }
-}
-
-bool TermArgTrie::addTerm( TNode n, std::vector< TNode >& reps, int argIndex ){
-  return addOrGetTerm( n, reps, argIndex )==n;
-}
-
-TNode TermArgTrie::addOrGetTerm( TNode n, std::vector< TNode >& reps, int argIndex ) {
-  if( argIndex==(int)reps.size() ){
-    if( d_data.empty() ){
-      //store n in d_data (this should be interpretted as the "data" and not as a reference to a child)
-      d_data[n].clear();
-      return n;
-    }else{
-      return d_data.begin()->first;
-    }
-  }else{
-    return d_data[reps[argIndex]].addOrGetTerm( n, reps, argIndex+1 );
-  }
-}
-
-void TermArgTrie::debugPrint( const char * c, Node n, unsigned depth ) {
-  for( std::map< TNode, TermArgTrie >::iterator it = d_data.begin(); it != d_data.end(); ++it ){
-    for( unsigned i=0; i<depth; i++ ){ Trace(c) << "  "; }
-    Trace(c) << it->first << std::endl;
-    it->second.debugPrint( c, n, depth+1 );
-  }
-}
 
 TermDb::TermDb(context::Context* c, context::UserContext* u,
                QuantifiersEngine* qe)
@@ -1056,12 +1013,13 @@ bool TermDb::reset( Theory::Effort effort ){
   return true;
 }
 
-TermArgTrie * TermDb::getTermArgTrie( Node f ) {
+TNodeTrie* TermDb::getTermArgTrie(Node f)
+{
   if( options::ufHo() ){
     f = getOperatorRepresentative( f );
   }
   computeUfTerms( f );
-  std::map< Node, TermArgTrie >::iterator itut = d_func_map_trie.find( f );
+  std::map<Node, TNodeTrie>::iterator itut = d_func_map_trie.find(f);
   if( itut!=d_func_map_trie.end() ){
     return &itut->second;
   }else{
@@ -1069,19 +1027,21 @@ TermArgTrie * TermDb::getTermArgTrie( Node f ) {
   }
 }
 
-TermArgTrie * TermDb::getTermArgTrie( Node eqc, Node f ) {
+TNodeTrie* TermDb::getTermArgTrie(Node eqc, Node f)
+{
   if( options::ufHo() ){
     f = getOperatorRepresentative( f );
   }
   computeUfEqcTerms( f );
-  std::map< Node, TermArgTrie >::iterator itut = d_func_map_eqc_trie.find( f );
+  std::map<Node, TNodeTrie>::iterator itut = d_func_map_eqc_trie.find(f);
   if( itut==d_func_map_eqc_trie.end() ){
     return NULL;
   }else{
     if( eqc.isNull() ){
       return &itut->second;
     }else{
-      std::map< TNode, TermArgTrie >::iterator itute = itut->second.d_data.find( eqc );
+      std::map<TNode, TNodeTrie>::iterator itute =
+          itut->second.d_data.find(eqc);
       if( itute!=itut->second.d_data.end() ){
         return &itute->second;
       }else{
@@ -1096,7 +1056,7 @@ TNode TermDb::getCongruentTerm( Node f, Node n ) {
     f = getOperatorRepresentative( f );
   }
   computeUfTerms( f );
-  std::map< Node, TermArgTrie >::iterator itut = d_func_map_trie.find( f );
+  std::map<Node, TNodeTrie>::iterator itut = d_func_map_trie.find(f);
   if( itut!=d_func_map_trie.end() ){
     computeArgReps( n );
     return itut->second.existsTerm( d_arg_reps[n] );

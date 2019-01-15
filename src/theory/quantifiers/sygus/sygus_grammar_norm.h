@@ -2,9 +2,9 @@
 /*! \file sygus_grammar_norm.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Haniel Barbosa
+ **   Haniel Barbosa, Tim King, Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -207,6 +207,16 @@ class SygusGrammarNorm
      */
     void addConsInfo(SygusGrammarNorm* sygus_norm,
                      const DatatypeConstructor& cons);
+    /**
+     * Returns the total version of Kind k if it is a partial operator, or
+     * otherwise k itself.
+     */
+    static Kind getEliminateKind(Kind k);
+    /**
+     * Returns a version of n where all partial functions such as bvudiv
+     * have been replaced by their total versions like bvudiv_total.
+     */
+    static Node eliminatePartialOperators(Node n);
 
     /** builds a datatype with the information in the type object
      *

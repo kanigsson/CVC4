@@ -2,16 +2,16 @@
 /*! \file clock_gettime.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Morgan Deters, Paul Meng, Tim King
+ **   Morgan Deters, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
  **
- ** \brief Replacement for clock_gettime() for systems without it (like Mac OS X)
+ ** \brief Replacement for clock_gettime() for systems without it (Windows)
  **
- ** Replacement for clock_gettime() for systems without it (like Mac OS X).
+ ** Replacement for clock_gettime() for systems without it (Windows).
  **/
 
 #include "cvc4_private_library.h"

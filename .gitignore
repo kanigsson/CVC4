@@ -7,7 +7,7 @@
 /stamp-h1
 /cvc4-*.tar.gz
 /cvc4-*.tar.bz2
-/builds/
+/build/
 /doc/doxygen
 .dep
 callgrind.out*
@@ -16,14 +16,6 @@ stamp-generated
 generated/
 *~
 \#*\#
-*.gcov
-/lcov/
-/config/compile
-/config/tap-driver.sh
-.cvc4_config
-config.reconfig
 *.swp
 /debug/
-/personal.conf
-/personal.mk
 /antlr-3.4

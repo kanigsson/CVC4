@@ -2,9 +2,9 @@
 /*! \file type.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Morgan Deters, Dejan Jovanovic, Martin Brain
+ **   Morgan Deters, Dejan Jovanovic, Christopher L. Conway
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -143,6 +143,33 @@ protected:
    * Is this a well-founded type?
    */
   bool isWellFounded() const;
+
+  /**
+   * Is this a first-class type?
+   *
+   * First-class types are types for which:
+   * (1) we handle equalities between terms of that type, and
+   * (2) they are allowed to be parameters of parametric types (e.g. index or
+   * element types of arrays).
+   *
+   * Examples of types that are not first-class include constructor types,
+   * selector types, tester types, regular expressions and SExprs.
+   */
+  bool isFirstClass() const;
+
+  /**
+   * Is this a function-LIKE type?
+   *
+   * Anything function-like except arrays (e.g., datatype selectors) is
+   * considered a function here. Function-like terms can not be the argument
+   * or return value for any term that is function-like.
+   * This is mainly to avoid higher order.
+   *
+   * Note that arrays are explicitly not considered function-like here.
+   *
+   * @return true if this is a function-like type
+   */
+  bool isFunctionLike() const;
 
   /**
    * Construct and return a ground term for this Type.  Throws an

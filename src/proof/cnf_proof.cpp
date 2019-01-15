@@ -2,9 +2,9 @@
 /*! \file cnf_proof.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Guy Katz, Andrew Reynolds
+ **   Liana Hadarean, Andrew Reynolds, Guy Katz
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -105,6 +105,30 @@ void CnfProof::registerConvertedClause(ClauseId clause, bool explanation) {
   setClauseDefinition(clause, current_expr);
 }
 
+void CnfProof::registerTrueUnitClause(ClauseId clauseId)
+{
+  Node trueNode = NodeManager::currentNM()->mkConst<bool>(true);
+  pushCurrentAssertion(trueNode);
+  pushCurrentDefinition(trueNode);
+  registerConvertedClause(clauseId);
+  popCurrentAssertion();
+  popCurrentDefinition();
+  d_cnfStream->ensureLiteral(trueNode);
+  d_trueUnitClause = clauseId;
+}
+
+void CnfProof::registerFalseUnitClause(ClauseId clauseId)
+{
+  Node falseNode = NodeManager::currentNM()->mkConst<bool>(false).notNode();
+  pushCurrentAssertion(falseNode);
+  pushCurrentDefinition(falseNode);
+  registerConvertedClause(clauseId);
+  popCurrentAssertion();
+  popCurrentDefinition();
+  d_cnfStream->ensureLiteral(falseNode);
+  d_falseUnitClause = clauseId;
+}
+
 void CnfProof::setClauseAssertion(ClauseId clause, Node expr) {
   Debug("proof:cnf") << "CnfProof::setClauseAssertion "
                      << clause << " assertion " << expr << std::endl;
@@ -161,10 +185,14 @@ void CnfProof::setCnfDependence(Node from, Node to) {
 }
 
 void CnfProof::pushCurrentAssertion(Node assertion) {
-  Debug("proof:cnf") << "CnfProof::pushCurrentAssertion "
-                     << assertion  << std::endl;
+  Debug("proof:cnf") << "CnfProof::pushCurrentAssertion " << assertion
+                     << std::endl;
 
   d_currentAssertionStack.push_back(assertion);
+
+  Debug("proof:cnf") << "CnfProof::pushCurrentAssertion "
+                     << "new stack size = " << d_currentAssertionStack.size()
+                     << std::endl;
 }
 
 void CnfProof::popCurrentAssertion() {
@@ -174,6 +202,10 @@ void CnfProof::popCurrentAssertion() {
                      << d_currentAssertionStack.back() << std::endl;
 
   d_currentAssertionStack.pop_back();
+
+  Debug("proof:cnf") << "CnfProof::popCurrentAssertion "
+                     << "new stack size = " << d_currentAssertionStack.size()
+                     << std::endl;
 }
 
 Node CnfProof::getCurrentAssertion() {
