@@ -20,6 +20,7 @@ General options;
   --best                   turn on dependencies known to give best performance
   --gpl                    permit GPL dependencies, if available
   --win64                  cross-compile for Windows 64 bit
+  --win32                  cross-compile for Windows 64 bit
 
 
 Features:
@@ -118,6 +119,7 @@ drat2er=default
 dumping=default
 gpl=default
 win64=default
+win32=default
 glpk=default
 lfsc=default
 muzzle=default
@@ -217,6 +219,9 @@ do
 
     --win64) win64=ON;;
     --no-win64) win64=OFF;;
+
+    --win32) win32=ON;;
+    --no-win32) win32=OFF;;
 
     --glpk) glpk=ON;;
     --no-glpk) glpk=OFF;;
@@ -358,6 +363,8 @@ cmake_opts=""
   && cmake_opts="$cmake_opts -DENABLE_GPL=$gpl"
 [ $win64 != default ] \
   && cmake_opts="$cmake_opts -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-mingw64.cmake"
+[ $win32 != default ] \
+  && cmake_opts="$cmake_opts -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-mingw32.cmake"
 [ $muzzle != default ] \
   && cmake_opts="$cmake_opts -DENABLE_MUZZLE=$muzzle"
 [ $optimized != default ] \
