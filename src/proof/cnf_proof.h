@@ -2,9 +2,9 @@
 /*! \file cnf_proof.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Guy Katz, Morgan Deters
+ **   Liana Hadarean, Guy Katz, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -78,6 +78,11 @@ protected:
 
   ClauseIdSet d_explanations;
 
+  // The clause ID of the unit clause defining the true SAT literal.
+  ClauseId d_trueUnitClause;
+  // The clause ID of the unit clause defining the false SAT literal.
+  ClauseId d_falseUnitClause;
+
   bool isDefinition(Node node);
 
   Node getDefinitionForClause(ClauseId clause);
@@ -110,6 +115,14 @@ public:
   // already in CNF
   void registerConvertedClause(ClauseId clause, bool explanation=false);
 
+  // The CNF proof has a special relationship to true and false.
+  // In particular, it need to know the identity of clauses defining
+  // canonical true and false literals in the underlying SAT solver.
+  void registerTrueUnitClause(ClauseId clauseId);
+  void registerFalseUnitClause(ClauseId clauseId);
+  inline ClauseId getTrueUnitClause() { return d_trueUnitClause; };
+  inline ClauseId getFalseUnitClause() { return d_falseUnitClause; };
+
   /** Clause is one of the clauses defining the node expression*/
   void setClauseDefinition(ClauseId clause, Node node);
 
@@ -126,6 +139,11 @@ public:
   void pushCurrentDefinition(Node assertion); // the current Tseitin definition being converted
   void popCurrentDefinition();
   Node getCurrentDefinition();
+
+  /**
+   * Checks whether the assertion stack is empty.
+   */
+  bool isAssertionStackEmpty() const { return d_currentAssertionStack.empty(); }
 
   void setProofRecipe(LemmaProofRecipe* proofRecipe);
   LemmaProofRecipe getProofRecipe(const std::set<Node> &lemma);

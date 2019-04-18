@@ -35,7 +35,6 @@
 
 my $excluded_directories = '^(CVS|generated)$';
 my $excluded_paths = '^(';
-$excluded_paths .= 'src/bindings/compat/.*';
 # different license
 $excluded_paths .= '|src/util/channel.h';
 # minisat license
@@ -198,7 +197,8 @@ $line";
       print $OUT "/*! \\file $file\n";
     }
     print $OUT " ** \\verbatim\n";
-    print $OUT " ** Top authors (to current version): $authors\n";
+    print $OUT " ** Top contributors (to current version):\n";
+    print $OUT " **   $authors\n";
     print $OUT $standard_template;
     print $OUT " **\n";
     print $OUT " ** \\brief [[ Add one-line brief description here ]]\n";

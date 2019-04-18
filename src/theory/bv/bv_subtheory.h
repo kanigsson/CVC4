@@ -2,9 +2,9 @@
 /*! \file bv_subtheory.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Dejan Jovanovic, Andrew Reynolds
+ **   Liana Hadarean, Tim King, Dejan Jovanovic
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -24,6 +24,11 @@
 #include "theory/theory.h"
 
 namespace CVC4 {
+
+namespace proof {
+class BitVectorProof;
+}
+
 namespace theory {
 
 class TheoryModel;
@@ -88,7 +93,7 @@ class SubtheorySolver {
     return res;
   }
   virtual void assertFact(TNode fact) { d_assertionQueue.push_back(fact); }
-  virtual void setProofLog(BitVectorProof* bvp) {}
+  virtual void setProofLog(proof::BitVectorProof* bvp) {}
   AssertionQueue::const_iterator assertionsBegin() {
     return d_assertionQueue.begin();
   }
@@ -103,7 +108,7 @@ class SubtheorySolver {
   /** The bit-vector theory */
   TheoryBV* d_bv;
   /** proof log */
-  BitVectorProof* d_bvp;
+  proof::ResolutionBitVectorProof* d_bvp;
   AssertionQueue d_assertionQueue;
   context::CDO<uint32_t> d_assertionIndex;
 }; /* class SubtheorySolver */

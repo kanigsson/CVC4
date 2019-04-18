@@ -2,7 +2,7 @@
 /*! \file lazy_bitblaster.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Liana Hadarean, Aina Niemetz, Tim King
+ **   Liana Hadarean, Aina Niemetz, Mathias Preiner
  ** This file is part of the CVC4 project.
  ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
@@ -19,17 +19,16 @@
 #include "theory/bv/bitblast/lazy_bitblaster.h"
 
 #include "options/bv_options.h"
+#include "proof/proof_manager.h"
 #include "prop/cnf_stream.h"
 #include "prop/sat_solver.h"
 #include "prop/sat_solver_factory.h"
 #include "smt/smt_statistics_registry.h"
 #include "theory/bv/abstraction.h"
 #include "theory/bv/theory_bv.h"
+#include "theory/bv/theory_bv_utils.h"
 #include "theory/rewriter.h"
 #include "theory/theory_model.h"
-#include "proof/bitvector_proof.h"
-#include "proof/proof_manager.h"
-#include "theory/bv/theory_bv_utils.h"
 
 namespace CVC4 {
 namespace theory {
@@ -67,7 +66,6 @@ TLazyBitblaster::TLazyBitblaster(context::Context* c,
       d_bv(bv),
       d_ctx(c),
       d_nullRegistrar(new prop::NullRegistrar()),
-      d_nullContext(new context::Context()),
       d_assertedAtoms(new (true) context::CDList<prop::SatLiteral>(c)),
       d_explanations(new (true) ExplanationMap(c)),
       d_variables(),
@@ -90,8 +88,8 @@ TLazyBitblaster::TLazyBitblaster(context::Context* c,
 
   d_satSolverNotify.reset(
       d_emptyNotify
-          ? (prop::BVSatSolverInterface::Notify*)new MinisatEmptyNotify()
-          : (prop::BVSatSolverInterface::Notify*)new MinisatNotify(
+          ? (prop::BVSatSolverNotify*)new MinisatEmptyNotify()
+          : (prop::BVSatSolverNotify*)new MinisatNotify(
                 d_cnfStream.get(), bv, this));
 
   d_satSolver->setNotify(d_satSolverNotify.get());
@@ -566,10 +564,12 @@ bool TLazyBitblaster::collectModelInfo(TheoryModel* m, bool fullModel)
   return true;
 }
 
-void TLazyBitblaster::setProofLog( BitVectorProof * bvp ){
-  d_bvp = bvp;
-  d_satSolver->setProofLog( bvp );
-  bvp->initCnfProof(d_cnfStream.get(), d_nullContext.get());
+void TLazyBitblaster::setProofLog(proof::BitVectorProof* bvp)
+{
+  THEORY_PROOF(d_bvp = bvp; bvp->attachToSatSolver(*d_satSolver);
+               prop::SatVariable t = d_satSolver->trueVar();
+               prop::SatVariable f = d_satSolver->falseVar();
+               bvp->initCnfProof(d_cnfStream.get(), d_nullContext.get(), t, f));
 }
 
 void TLazyBitblaster::clearSolver() {
@@ -590,8 +590,8 @@ void TLazyBitblaster::clearSolver() {
       d_satSolver.get(), d_nullRegistrar.get(), d_nullContext.get()));
   d_satSolverNotify.reset(
       d_emptyNotify
-          ? (prop::BVSatSolverInterface::Notify*)new MinisatEmptyNotify()
-          : (prop::BVSatSolverInterface::Notify*)new MinisatNotify(
+          ? (prop::BVSatSolverNotify*)new MinisatEmptyNotify()
+          : (prop::BVSatSolverNotify*)new MinisatNotify(
                 d_cnfStream.get(), d_bv, this));
   d_satSolver->setNotify(d_satSolverNotify.get());
 }

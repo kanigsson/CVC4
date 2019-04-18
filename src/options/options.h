@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Tim King, Morgan Deters, Paul Meng
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -26,7 +26,6 @@
 
 #include "base/listener.h"
 #include "base/modal_exception.h"
-#include "base/tls.h"
 #include "options/argument_extender.h"
 #include "options/language.h"
 #include "options/option_exception.h"
@@ -34,12 +33,16 @@
 
 namespace CVC4 {
 
+namespace api {
+class Solver;
+}
 namespace options {
   struct OptionsHolder;
   class OptionsHandler;
 }/* CVC4::options namespace */
 
 class CVC4_PUBLIC Options {
+  friend api::Solver;
   /** The struct that holds all option values. */
   options::OptionsHolder* d_holder;
 
@@ -47,7 +50,7 @@ class CVC4_PUBLIC Options {
   options::OptionsHandler* d_handler;
 
   /** The current Options in effect */
-  static CVC4_THREAD_LOCAL Options* s_current;
+  static thread_local Options* s_current;
 
   /** Listeners for options::forceLogicString being set. */
   ListenerCollection d_forceLogicListeners;
@@ -114,13 +117,13 @@ class CVC4_PUBLIC Options {
    * Options cannot be copied as they are given an explicit list of
    * Listeners to respond to.
    */
-  Options(const Options& options) CVC4_UNDEFINED;
+  Options(const Options& options) = delete;
 
   /**
    * Options cannot be assigned as they are given an explicit list of
    * Listeners to respond to.
    */
-  Options& operator=(const Options& options) CVC4_UNDEFINED;
+  Options& operator=(const Options& options) = delete;
 
   static std::string formatThreadOptionException(const std::string& option);
 

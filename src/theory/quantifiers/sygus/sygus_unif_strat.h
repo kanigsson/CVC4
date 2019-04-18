@@ -2,9 +2,9 @@
 /*! \file sygus_unif_strat.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Andrew Reynolds
+ **   Andrew Reynolds, Haniel Barbosa, Andres Noetzli
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -93,6 +93,8 @@ std::ostream& operator<<(std::ostream& os, StrategyType st);
 class UnifContext
 {
  public:
+  virtual ~UnifContext() {}
+
   /** Get the current role
    *
    * In a particular context when constructing solutions in synthesis by
@@ -238,6 +240,34 @@ class EnumTypeInfoStrat
 };
 
 /**
+ * flags for extra restrictions to be inferred during redundant operators
+ * learning
+ */
+struct StrategyRestrictions
+{
+  StrategyRestrictions() : d_iteReturnBoolConst(false), d_iteCondOnlyAtoms(true)
+  {
+  }
+  /**
+   * if this flag is true then staticLearnRedundantOps will also try to make
+   * the return value of boolean ITEs to be restricted to constants
+   */
+  bool d_iteReturnBoolConst;
+  /**
+   * if this flag is true then staticLearnRedundantOps will also try to make
+   * the condition values of ITEs to be restricted to atoms
+   */
+  bool d_iteCondOnlyAtoms;
+  /**
+   * A list of unused strategies. This maps strategy points to the indices
+   * in StrategyNode::d_strats that are not used by the caller of
+   * staticLearnRedundantOps, and hence should not be taken into account
+   * when doing redundant operator learning.
+   */
+  std::map<Node, std::unordered_set<unsigned>> d_unused_strategies;
+};
+
+/**
  * Stores strategy and enumeration information for a function-to-synthesize.
  *
  * When this class is initialized, we construct a "strategy tree" based on
@@ -247,7 +277,7 @@ class EnumTypeInfoStrat
 class SygusUnifStrategy
 {
  public:
-  SygusUnifStrategy() {}
+  SygusUnifStrategy() : d_qe(nullptr) {}
   /** initialize
    *
    * This initializes this class with function-to-synthesize f. We also call
@@ -279,6 +309,16 @@ class SygusUnifStrategy
    * These may correspond to static symmetry breaking predicates (for example,
    * those that exclude ITE from enumerators whose role is enum_io when the
    * strategy is ITE_strat).
+   *
+   * then the module may also try to apply the given pruning restrictions (see
+   * StrategyRestrictions for more details)
+   */
+  void staticLearnRedundantOps(
+      std::map<Node, std::vector<Node>>& strategy_lemmas,
+      StrategyRestrictions& restrictions);
+  /**
+   * creates the default restrictions when they are not given and calls the
+   * above function
    */
   void staticLearnRedundantOps(
       std::map<Node, std::vector<Node>>& strategy_lemmas);
@@ -317,12 +357,12 @@ class SygusUnifStrategy
   //-----------------------end debug printing
 
   //------------------------------ strategy registration
-  /** collect enumerator types
+  /** build strategy graph
    *
    * This builds the strategy for enumerated values of type tn for the given
    * role of nrole, for solutions to function-to-synthesize of this class.
    */
-  void collectEnumeratorTypes(TypeNode tn, NodeRole nrole);
+  void buildStrategyGraph(TypeNode tn, NodeRole nrole);
   /** register enumerator
    *
    * This registers that et is an enumerator of type tn, having enumerator
@@ -333,7 +373,7 @@ class SygusUnifStrategy
    * we may use enumerators for which this flag is false to represent strategy
    * nodes that have child strategies.
    */
-  void registerEnumerator(Node et,
+  void registerStrategyPoint(Node et,
                           TypeNode tn,
                           EnumRole enum_role,
                           bool inSearch);
@@ -353,8 +393,9 @@ class SygusUnifStrategy
   void staticLearnRedundantOps(
       Node e,
       NodeRole nrole,
-      std::map<Node, std::map<NodeRole, bool> >& visited,
-      std::map<Node, std::map<unsigned, bool> >& needs_cons);
+      std::map<Node, std::map<NodeRole, bool>>& visited,
+      std::map<Node, std::map<unsigned, bool>>& needs_cons,
+      StrategyRestrictions& restrictions);
   /** finish initialization of the strategy tree
    *
    * (e, nrole) specify the strategy node in the graph we are currently

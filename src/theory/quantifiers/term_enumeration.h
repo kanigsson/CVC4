@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Andrew Reynolds
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -42,25 +42,19 @@ class TermEnumeration
   ~TermEnumeration() {}
   /** get i^th term for type tn */
   Node getEnumerateTerm(TypeNode tn, unsigned i);
-  /** is closed enumerable type
-   *
-   * This returns true if this type has an enumerator that produces
-   * constants that are handled by ground theory solvers.
-   * Examples of types that are not closed enumerable are:
-   * (1) uninterpreted sorts,
-   * (2) arrays,
-   * (3) codatatypes,
-   * (4) parametric sorts involving any of the above.
-   */
-  bool isClosedEnumerableType(TypeNode tn);
   /** may complete type
    *
-   * Returns true if the type tn is closed 
-   * enumerable, and is small enough
-   * for finite model finding to enumerate it,
-   * by some heuristic (current cardinality < 1000).
+   * Returns true if the type tn is closed enumerable, is interpreted as a
+   * finite type, and has cardinality less than some reasonable value
+   * (currently < 1000). This method caches the results of whether each type
+   * may be completed.
    */
   bool mayComplete(TypeNode tn);
+  /**
+   * Static version of the above method where maximum cardinality is
+   * configurable.
+   */
+  static bool mayComplete(TypeNode tn, unsigned cardMax);
 
  private:
   /** ground terms enumerated for types */

@@ -2,7 +2,7 @@
 /*! \file theory_bv_utils.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Aina Niemetz, Tim King, Liana Hadarean
+ **   Aina Niemetz, Tim King, Mathias Preiner
  ** This file is part of the CVC4 project.
  ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
@@ -57,10 +57,22 @@ unsigned getSignExtendAmount(TNode node)
 
 /* ------------------------------------------------------------------------- */
 
+bool isOnes(TNode node)
+{
+  if (!node.isConst()) return false;
+  return node == mkOnes(getSize(node));
+}
+
 bool isZero(TNode node)
 {
   if (!node.isConst()) return false;
   return node == mkZero(getSize(node));
+}
+
+bool isOne(TNode node)
+{
+  if (!node.isConst()) return false;
+  return node == mkOne(getSize(node));
 }
 
 unsigned isPow2Const(TNode node, bool& isNeg)
@@ -89,7 +101,9 @@ unsigned isPow2Const(TNode node, bool& isNeg)
 
 bool isBvConstTerm(TNode node)
 {
-  if (node.getNumChildren() == 0) { return node.isConst();
+  if (node.getNumChildren() == 0)
+  {
+    return node.isConst();
   }
 
   for (const TNode& n : node)

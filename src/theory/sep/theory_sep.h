@@ -2,9 +2,9 @@
 /*! \file theory_sep.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Andrew Reynolds, Mathias Preiner, Tim King
+ **   Andrew Reynolds, Tim King, Mathias Preiner
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -112,7 +112,6 @@ class TheorySep : public Theory {
   /////////////////////////////////////////////////////////////////////////////
 
  public:
-  Node getNextDecisionRequest(unsigned& priority) override;
 
   void presolve() override;
   void shutdown() override {}
@@ -218,6 +217,9 @@ class TheorySep : public Theory {
   std::map< Node, std::map< Node, Node > > d_red_conc;
   std::map< Node, std::map< Node, Node > > d_neg_guard;
   std::vector< Node > d_neg_guards;
+  /** a (singleton) decision strategy for each negative guard. */
+  std::map<Node, std::unique_ptr<DecisionStrategySingleton> >
+      d_neg_guard_strategy;
   std::map< Node, Node > d_guard_to_assertion;
   /** inferences: maintained to ensure ref count for internally introduced nodes */
   NodeList d_infer;

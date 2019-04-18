@@ -2,9 +2,9 @@
 /*! \file antlr_input.cpp
  ** \verbatim
  ** Top contributors (to current version):
- **   Christopher L. Conway, Kshitij Bansal, Morgan Deters
+ **   Christopher L. Conway, Kshitij Bansal, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -15,11 +15,8 @@
  **/
 
 #include "parser/antlr_input.h"
-// We rely on the inclusion of #include <antlr3.h> in "parser/antlr_input.h".
-// This is avoid having to undefine the symbols in <antlr3.h>.
-// See the documentation in "parser/antlr_undefines.h" for more
-// details.
 
+#include <antlr3.h>
 #include <limits.h>
 #include <stdint.h>
 
@@ -265,7 +262,7 @@ AntlrInput* AntlrInput::newInput(InputLanguage lang, AntlrInputStream& inputStre
   default:
     if (language::isInputLang_smt2(lang))
     {
-      input = new Smt2Input(inputStream, lang);
+      input = new Smt2Input(inputStream);
     }
     else
     {

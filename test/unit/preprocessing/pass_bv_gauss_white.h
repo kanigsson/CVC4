@@ -1,10 +1,10 @@
 /*********************                                                        */
-/*! \file theory_bv_bvgauss_white.h
+/*! \file pass_bv_gauss_white.h
  ** \verbatim
  ** Top contributors (to current version):
  **   Aina Niemetz
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2017 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -14,14 +14,15 @@
  ** Unit tests for Gaussian Elimination preprocessing pass.
  **/
 
+#include "context/context.h"
 #include "expr/node.h"
 #include "expr/node_manager.h"
-#include "preprocessing/preprocessing_pass.h"
 #include "preprocessing/passes/bv_gauss.cpp"
+#include "preprocessing/preprocessing_pass.h"
 #include "smt/smt_engine.h"
 #include "smt/smt_engine_scope.h"
-#include "theory/rewriter.h"
 #include "theory/bv/theory_bv_utils.h"
+#include "theory/rewriter.h"
 #include "util/bitvector.h"
 
 #include <cxxtest/TestSuite.h>
@@ -176,7 +177,7 @@ class TheoryBVGaussWhite : public CxxTest::TestSuite
  public:
   TheoryBVGaussWhite() {}
 
-  void setUp()
+  void setUp() override
   {
     d_em = new ExprManager();
     d_nm = NodeManager::fromExprManager(d_em);
@@ -250,7 +251,7 @@ class TheoryBVGaussWhite : public CxxTest::TestSuite
     d_z_mul_nine = d_nm->mkNode(kind::BITVECTOR_MULT, d_z, d_nine);
   }
 
-  void tearDown()
+  void tearDown() override
   {
     (void)d_scope;
     d_p = Node::null();
