@@ -7,13 +7,13 @@ project(cvc4)
 
 set(CVC4_MAJOR   1) # Major component of the version of CVC4.
 set(CVC4_MINOR   7) # Minor component of the version of CVC4.
-set(CVC4_RELEASE 0) # Release component of the version of CVC4.
+set(CVC4_RELEASE 1) # Release component of the version of CVC4.
 
 # Extraversion component of the version of CVC4.
 set(CVC4_EXTRAVERSION "-prerelease")
 
 # Shared library versioning. Increment SOVERSION for every new CVC4 release.
-set(CVC4_SOVERSION 5)
+set(CVC4_SOVERSION 6)
 
 # Full release string for CVC4.
 if(CVC4_RELEASE)
@@ -226,7 +226,7 @@ if(ENABLE_SHARED)
     message(WARNING "Disabling static binary since shared build is enabled.")
   endif()
 else()
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
   set(BUILD_SHARED_LIBS OFF)
   # This is required to force find_package(Boost) to use static libraries.
   set(Boost_USE_STATIC_LIBS ON)

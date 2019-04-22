@@ -2,9 +2,9 @@
 /*! \file lazy_bitblaster.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Mathias Preiner
+ **   Liana Hadarean, Mathias Preiner, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2019 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -77,7 +77,6 @@ class TLazyBitblaster : public TBitblaster<Node>
    * constants to equivalence classes that don't already have them
    */
   bool collectModelInfo(TheoryModel* m, bool fullModel);
-  void setProofLog(proof::BitVectorProof* bvp);
 
   typedef TNodeSet::const_iterator vars_iterator;
   vars_iterator beginVars() { return d_variables.begin(); }

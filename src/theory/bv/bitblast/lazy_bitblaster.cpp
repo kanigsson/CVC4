@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Liana Hadarean, Aina Niemetz, Mathias Preiner
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2019 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -562,14 +562,6 @@ bool TLazyBitblaster::collectModelInfo(TheoryModel* m, bool fullModel)
     }
   }
   return true;
-}
-
-void TLazyBitblaster::setProofLog(proof::BitVectorProof* bvp)
-{
-  THEORY_PROOF(d_bvp = bvp; bvp->attachToSatSolver(*d_satSolver);
-               prop::SatVariable t = d_satSolver->trueVar();
-               prop::SatVariable f = d_satSolver->falseVar();
-               bvp->initCnfProof(d_cnfStream.get(), d_nullContext.get(), t, f));
 }
 
 void TLazyBitblaster::clearSolver() {

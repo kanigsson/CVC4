@@ -2,9 +2,9 @@
 /*! \file drat_proof_black.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Alex Ozdemir
+ **   Alex Ozdemir, Andres Noetzli
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2019 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -81,19 +81,19 @@ void DratProofBlack::testParseLiteralIsTooBig()
 {
   std::string input("a\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x7f\x00",
                     14);
-  TS_ASSERT_THROWS(DratProof::fromBinary(input), InvalidDratProofException);
+  TS_ASSERT_THROWS(DratProof::fromBinary(input), InvalidDratProofException&);
 }
 
 void DratProofBlack::testParseLiteralOverflow()
 {
   std::string input("a\x80", 2);
-  TS_ASSERT_THROWS(DratProof::fromBinary(input), InvalidDratProofException);
+  TS_ASSERT_THROWS(DratProof::fromBinary(input), InvalidDratProofException&);
 }
 
 void DratProofBlack::testParseClauseOverflow()
 {
   std::string input("a\x80\x01", 3);
-  TS_ASSERT_THROWS(DratProof::fromBinary(input), InvalidDratProofException);
+  TS_ASSERT_THROWS(DratProof::fromBinary(input), InvalidDratProofException&);
 }
 
 void DratProofBlack::testParseTwo()
@@ -170,8 +170,8 @@ void DratProofBlack::testOutputTwoAsLfsc()
     }
   }
   std::string expectedLfsc =
-      "(DRATProofd (clc (neg .v62)  (clc (neg .v8192) cln))"
-      "(DRATProofa (clc (pos .v128) (clc (neg .v8190) cln))"
+      "(DRATProofd (clc (neg bb.v62)  (clc (neg bb.v8192) cln))"
+      "(DRATProofa (clc (pos bb.v128) (clc (neg bb.v8190) cln))"
       "DRATProofn))";
   std::ostringstream expectedLfscWithoutWhitespace;
   for (char c : expectedLfsc)
