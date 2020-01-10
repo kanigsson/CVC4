@@ -16,8 +16,7 @@
 
 #include "theory/quantifiers/theory_quantifiers.h"
 
-
-#include "base/cvc4_assert.h"
+#include "base/check.h"
 #include "expr/kind.h"
 #include "options/quantifiers_options.h"
 #include "theory/quantifiers/ematching/instantiation_engine.h"
@@ -38,8 +37,6 @@ using namespace CVC4::theory::quantifiers;
 TheoryQuantifiers::TheoryQuantifiers(Context* c, context::UserContext* u, OutputChannel& out, Valuation valuation, const LogicInfo& logicInfo) :
     Theory(THEORY_QUANTIFIERS, c, u, out, valuation, logicInfo)
 {
-  d_numInstantiations = 0;
-  d_baseDecLevel = -1;
   out.handleUserAttribute( "axiom", this );
   out.handleUserAttribute( "conjecture", this );
   out.handleUserAttribute( "fun-def", this );
@@ -71,13 +68,6 @@ void TheoryQuantifiers::preRegisterTerm(TNode n) {
     return;
   }
   Debug("quantifiers-prereg") << "TheoryQuantifiers::preRegisterTerm() " << n << endl;
-  if (options::cbqi() && !options::recurseCbqi()
-      && TermUtil::hasInstConstAttr(n))
-  {
-    Debug("quantifiers-prereg")
-        << "TheoryQuantifiers::preRegisterTerm() done, unused " << n << endl;
-    return;
-  }
   // Preregister the quantified formula.
   // This initializes the modules used for handling n in this user context.
   getQuantifiersEngine()->preRegisterQuantifier(n);
@@ -135,7 +125,7 @@ void TheoryQuantifiers::check(Effort e) {
     Trace("quantifiers-assert") << "quantifiers::assert(): " << assertion << std::endl;
     switch(assertion.getKind()) {
     case kind::FORALL:
-      assertUniversal( assertion );
+      getQuantifiersEngine()->assertQuantifier(assertion, true);
       break;
     case kind::INST_CLOSURE:
       getQuantifiersEngine()->addTermToDatabase( assertion[0], false, true );
@@ -150,39 +140,21 @@ void TheoryQuantifiers::check(Effort e) {
       {
         switch( assertion[0].getKind()) {
         case kind::FORALL:
-          assertExistential( assertion );
+          getQuantifiersEngine()->assertQuantifier(assertion[0], false);
           break;
         case kind::EQUAL:
           //do nothing
           break;
         case kind::INST_CLOSURE:
-        default:
-          Unhandled(assertion[0].getKind());
-          break;
+        default: Unhandled() << assertion[0].getKind(); break;
         }
       }
       break;
-    default:
-      Unhandled(assertion.getKind());
-      break;
+      default: Unhandled() << assertion.getKind(); break;
     }
   }
   // call the quantifiers engine to check
   getQuantifiersEngine()->check( e );
-}
-
-void TheoryQuantifiers::assertUniversal( Node n ){
-  Assert( n.getKind()==FORALL );
-  if( !options::cbqi() || options::recurseCbqi() || !TermUtil::hasInstConstAttr(n) ){
-    getQuantifiersEngine()->assertQuantifier( n, true );
-  }
-}
-
-void TheoryQuantifiers::assertExistential( Node n ){
-  Assert( n.getKind()== NOT && n[0].getKind()==FORALL );
-  if( !options::cbqi() || options::recurseCbqi() || !TermUtil::hasInstConstAttr(n[0]) ){
-    getQuantifiersEngine()->assertQuantifier( n[0], false );
-  }
 }
 
 void TheoryQuantifiers::setUserAttribute(const std::string& attr, Node n, std::vector<Node> node_values, std::string str_value){

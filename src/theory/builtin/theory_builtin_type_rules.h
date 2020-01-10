@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__BUILTIN__THEORY_BUILTIN_TYPE_RULES_H
-#define __CVC4__THEORY__BUILTIN__THEORY_BUILTIN_TYPE_RULES_H
+#ifndef CVC4__THEORY__BUILTIN__THEORY_BUILTIN_TYPE_RULES_H
+#define CVC4__THEORY__BUILTIN__THEORY_BUILTIN_TYPE_RULES_H
 
 #include "expr/node.h"
 #include "expr/type_node.h"
@@ -30,44 +30,6 @@
 namespace CVC4 {
 namespace theory {
 namespace builtin {
-
-class ApplyTypeRule {
- public:
-  inline static TypeNode computeType(NodeManager* nodeManager, TNode n, bool check)
-  {
-    TNode f = n.getOperator();
-    TypeNode fType = f.getType(check);
-    if( !fType.isFunction() && n.getNumChildren() > 0 ) {
-      throw TypeCheckingExceptionPrivate(n, "operator does not have function type");
-    }
-    if( check ) {
-      if(fType.isFunction()) {
-        if(n.getNumChildren() != fType.getNumChildren() - 1) {
-          throw TypeCheckingExceptionPrivate(n, "number of arguments does not match the function type");
-        }
-        TNode::iterator argument_it = n.begin();
-        TNode::iterator argument_it_end = n.end();
-        TypeNode::iterator argument_type_it = fType.begin();
-        for(; argument_it != argument_it_end; ++argument_it, ++argument_type_it) {
-          if(!(*argument_it).getType().isComparableTo(*argument_type_it)) {
-            std::stringstream ss;
-            ss << "argument types do not match the function type:\n"
-               << "argument:  " << *argument_it << "\n"
-               << "has type:  " << (*argument_it).getType() << "\n"
-               << "not equal: " << *argument_type_it;
-            throw TypeCheckingExceptionPrivate(n, ss.str());
-          }
-        }
-      } else {
-        if( n.getNumChildren() > 0 ) {
-          throw TypeCheckingExceptionPrivate(n, "number of arguments does not match the function type");
-        }
-      }
-    }
-    return fType.isFunction() ? fType.getRangeType() : fType;
-  }
-};/* class ApplyTypeRule */
-
 
 class EqualityTypeRule {
  public:
@@ -172,7 +134,7 @@ class LambdaTypeRule {
     //get array representation of this function, if possible
     Node na = TheoryBuiltinRewriter::getArrayRepresentationForLambda(n);
     if( !na.isNull() ){
-      Assert( na.getType().isArray() );
+      Assert(na.getType().isArray());
       Trace("lambda-const") << "Array representation for " << n << " is " << na << " " << na.getType() << std::endl;
       // must have the standard bound variable list
       Node bvl = NodeManager::currentNM()->getBoundVarListForFunctionType( n.getType() );
@@ -243,10 +205,7 @@ class ChainTypeRule {
 
     TypeNode tn;
     try {
-      // Actually do the expansion to do the typechecking.
-      // Shouldn't be extra work to do this, since the rewriter
-      // keeps a cache.
-      tn = nodeManager->getType(Rewriter::rewrite(n), check);
+      tn = nodeManager->getType(TheoryBuiltinRewriter::blastChain(n), check);
     } catch(TypeCheckingExceptionPrivate& e) {
       std::stringstream ss;
       ss << "Cannot typecheck the expansion of chained operator `" << n.getOperator() << "':"
@@ -375,4 +334,4 @@ class SExprProperties {
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__BUILTIN__THEORY_BUILTIN_TYPE_RULES_H */
+#endif /* CVC4__THEORY__BUILTIN__THEORY_BUILTIN_TYPE_RULES_H */

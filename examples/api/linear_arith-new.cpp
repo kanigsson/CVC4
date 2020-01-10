@@ -17,8 +17,7 @@
 
 #include <iostream>
 
-// #include "cvc4/api/cvc4cpp.h" // use this after CVC4 is properly installed
-#include "api/cvc4cpp.h"
+#include "cvc4/api/cvc4cpp.h"
 
 using namespace std;
 using namespace CVC4::api;
@@ -36,8 +35,8 @@ int main()
   Sort integer = slv.getIntegerSort();
 
   // Variables
-  Term x = slv.mkVar(integer, "x");
-  Term y = slv.mkVar(real, "y");
+  Term x = slv.mkConst(integer, "x");
+  Term y = slv.mkConst(real, "y");
 
   // Constants
   Term three = slv.mkReal(3);

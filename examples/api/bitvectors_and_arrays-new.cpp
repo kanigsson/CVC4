@@ -17,8 +17,7 @@
 #include <iostream>
 #include <cmath>
 
-// #include "cvc4/api/cvc4cpp.h" // use this after CVC4 is properly installed
-#include "api/cvc4cpp.h"
+#include <cvc4/api/cvc4cpp.h>
 
 using namespace std;
 using namespace CVC4::api;
@@ -53,7 +52,7 @@ int main()
   Sort arraySort = slv.mkArraySort(indexSort, elementSort);
 
   // Variables
-  Term current_array = slv.mkVar(arraySort, "current_array");
+  Term current_array = slv.mkConst(arraySort, "current_array");
 
   // Making a bit-vector constant
   Term zero = slv.mkBitVector(index_size, 0u);

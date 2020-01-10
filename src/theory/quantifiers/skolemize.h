@@ -14,8 +14,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__QUANTIFIERS__SKOLEMIZE_H
-#define __CVC4__THEORY__QUANTIFIERS__SKOLEMIZE_H
+#ifndef CVC4__THEORY__QUANTIFIERS__SKOLEMIZE_H
+#define CVC4__THEORY__QUANTIFIERS__SKOLEMIZE_H
 
 #include <unordered_map>
 #include <unordered_set>
@@ -123,8 +123,8 @@ class Skolemize
    * applied to term n, whose return type in ntn, and stores
    * them in the vector selfSel.
    */
-  static void getSelfSel(const Datatype& dt,
-                         const DatatypeConstructor& dc,
+  static void getSelfSel(const DType& dt,
+                         const DTypeConstructor& dc,
                          Node n,
                          TypeNode ntn,
                          std::vector<Node>& selfSel);
@@ -143,4 +143,4 @@ class Skolemize
 } /* CVC4::theory namespace */
 } /* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__QUANTIFIERS__SKOLEMIZE_H */
+#endif /* CVC4__THEORY__QUANTIFIERS__SKOLEMIZE_H */

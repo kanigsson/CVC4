@@ -16,15 +16,14 @@
 
 #include "cvc4_public.h"
 
-#ifndef __CVC4__THEORY__THEORY_TEST_UTILS_H
-#define __CVC4__THEORY__THEORY_TEST_UTILS_H
+#ifndef CVC4__THEORY__THEORY_TEST_UTILS_H
+#define CVC4__THEORY__THEORY_TEST_UTILS_H
 
 #include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
 
-#include "base/cvc4_assert.h"
 #include "expr/node.h"
 #include "theory/interrupted.h"
 #include "theory/output_channel.h"
@@ -124,4 +123,4 @@ public:
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__THEORY_TEST_UTILS_H */
+#endif /* CVC4__THEORY__THEORY_TEST_UTILS_H */

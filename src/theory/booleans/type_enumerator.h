@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__BOOLEANS__TYPE_ENUMERATOR_H
-#define __CVC4__THEORY__BOOLEANS__TYPE_ENUMERATOR_H
+#ifndef CVC4__THEORY__BOOLEANS__TYPE_ENUMERATOR_H
+#define CVC4__THEORY__BOOLEANS__TYPE_ENUMERATOR_H
 
 #include "theory/type_enumerator.h"
 #include "expr/type_node.h"
@@ -34,8 +34,8 @@ class BooleanEnumerator : public TypeEnumeratorBase<BooleanEnumerator> {
   BooleanEnumerator(TypeNode type, TypeEnumeratorProperties* tep = nullptr)
       : TypeEnumeratorBase<BooleanEnumerator>(type), d_value(FALSE)
   {
-    Assert(type.getKind() == kind::TYPE_CONSTANT &&
-           type.getConst<TypeConstant>() == BOOLEAN_TYPE);
+    Assert(type.getKind() == kind::TYPE_CONSTANT
+           && type.getConst<TypeConstant>() == BOOLEAN_TYPE);
   }
 
   Node operator*() override {
@@ -67,4 +67,4 @@ class BooleanEnumerator : public TypeEnumeratorBase<BooleanEnumerator> {
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__BOOLEANS__TYPE_ENUMERATOR_H */
+#endif /* CVC4__THEORY__BOOLEANS__TYPE_ENUMERATOR_H */

@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__STRINGS__TYPE_ENUMERATOR_H
-#define __CVC4__THEORY__STRINGS__TYPE_ENUMERATOR_H
+#ifndef CVC4__THEORY__STRINGS__TYPE_ENUMERATOR_H
+#define CVC4__THEORY__STRINGS__TYPE_ENUMERATOR_H
 
 #include <sstream>
 
@@ -44,8 +44,8 @@ class StringEnumerator : public TypeEnumeratorBase<StringEnumerator> {
   StringEnumerator(TypeNode type, TypeEnumeratorProperties* tep = nullptr)
       : TypeEnumeratorBase<StringEnumerator>(type)
   {
-    Assert(type.getKind() == kind::TYPE_CONSTANT &&
-           type.getConst<TypeConstant>() == STRING_TYPE);
+    Assert(type.getKind() == kind::TYPE_CONSTANT
+           && type.getConst<TypeConstant>() == STRING_TYPE);
     d_cardinality = TheoryStringsRewriter::getAlphabetCardinality();
     mkCurr();
   }
@@ -128,4 +128,4 @@ class StringEnumeratorLength {
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__STRINGS__TYPE_ENUMERATOR_H */
+#endif /* CVC4__THEORY__STRINGS__TYPE_ENUMERATOR_H */

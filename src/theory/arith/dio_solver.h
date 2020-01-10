@@ -17,8 +17,8 @@
 #include "cvc4_private.h"
 
 
-#ifndef __CVC4__THEORY__ARITH__DIO_SOLVER_H
-#define __CVC4__THEORY__ARITH__DIO_SOLVER_H
+#ifndef CVC4__THEORY__ARITH__DIO_SOLVER_H
+#define CVC4__THEORY__ARITH__DIO_SOLVER_H
 
 #include <unordered_map>
 #include <utility>
@@ -74,7 +74,8 @@ private:
   NodeToInputConstraintIndexMap d_varToInputConstraintMap;
 
   Node proofVariableToReason(const Variable& v) const{
-    Assert(d_varToInputConstraintMap.find(v.getNode()) != d_varToInputConstraintMap.end());
+    Assert(d_varToInputConstraintMap.find(v.getNode())
+           != d_varToInputConstraintMap.end());
     InputConstraintIndex pos = (*(d_varToInputConstraintMap.find(v.getNode()))).second;
     Assert(pos < d_inputConstraints.size());
     return d_inputConstraints[pos].d_reason;
@@ -423,4 +424,4 @@ public:
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__ARITH__DIO_SOLVER_H */
+#endif /* CVC4__THEORY__ARITH__DIO_SOLVER_H */

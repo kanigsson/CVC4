@@ -20,15 +20,14 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "base/cvc4_assert.h"
-#include "base/cvc4_check.h"
+#include "base/check.h"
 #include "lib/clock_gettime.h"
 #include "util/ostream_util.h"
 
 #ifdef CVC4_STATISTICS_ON
-#  define __CVC4_USE_STATISTICS true
+#  define CVC4_USE_STATISTICS true
 #else
-#  define __CVC4_USE_STATISTICS false
+#  define CVC4_USE_STATISTICS false
 #endif
 
 
@@ -77,7 +76,7 @@ inline timespec& operator-=(timespec& a, const timespec& b) {
     nsec -= nsec_per_sec;
     ++a.tv_sec;
   }
-  CVC4_DCHECK(nsec >= 0 && nsec < nsec_per_sec);
+  Assert(nsec >= 0 && nsec < nsec_per_sec);
   a.tv_nsec = nsec;
   return a;
 }
@@ -148,7 +147,7 @@ std::ostream& operator<<(std::ostream& os, const timespec& t) {
 StatisticsRegistry::StatisticsRegistry(const std::string& name) : Stat(name)
 {
   d_prefix = name;
-  if(__CVC4_USE_STATISTICS) {
+  if(CVC4_USE_STATISTICS) {
     PrettyCheckArgument(d_name.find(s_regDelim) == std::string::npos, name,
                         "StatisticsRegistry names cannot contain the string \"%s\"",
                     s_regDelim.c_str());
@@ -170,12 +169,10 @@ void StatisticsRegistry::registerStat(Stat* s, bool ignore) throw(CVC4::IllegalA
 void StatisticsRegistry::unregisterStat(Stat* s, bool ignore) throw(CVC4::IllegalArgumentException)
 {
 #ifdef CVC4_STATISTICS_ON
-  if (!ignore) {
-    CVC4_CHECK(s != nullptr);
-    CVC4_CHECK(d_stats.erase(s) > 0)
-        << "Statistic `" << s->getName()
-        << "' was not registered with this registry.";
-  }
+  AlwaysAssert(s != nullptr);
+  AlwaysAssert(d_stats.erase(s) > 0)
+      << "Statistic `" << s->getName()
+      << "' was not registered with this registry.";
 #endif /* CVC4_STATISTICS_ON */
 } /* StatisticsRegistry::unregisterStat() */
 
@@ -198,7 +195,7 @@ void StatisticsRegistry::safeFlushInformation(int fd) const {
 }
 
 void TimerStat::start() {
-  if(__CVC4_USE_STATISTICS) {
+  if(CVC4_USE_STATISTICS) {
     PrettyCheckArgument(!d_running, *this, "timer already running");
     clock_gettime(CLOCK_MONOTONIC, &d_start);
     d_running = true;
@@ -206,8 +203,8 @@ void TimerStat::start() {
 }/* TimerStat::start() */
 
 void TimerStat::stop() {
-  if(__CVC4_USE_STATISTICS) {
-    CVC4_CHECK(d_running) << "timer not running";
+  if(CVC4_USE_STATISTICS) {
+    AlwaysAssert(d_running) << "timer not running";
     ::timespec end;
     clock_gettime(CLOCK_MONOTONIC, &end);
     d_data += end - d_start;
@@ -221,7 +218,7 @@ bool TimerStat::running() const {
 
 timespec TimerStat::getData() const {
   ::timespec data = d_data;
-  if(__CVC4_USE_STATISTICS && d_running) {
+  if(CVC4_USE_STATISTICS && d_running) {
     ::timespec end;
     clock_gettime(CLOCK_MONOTONIC, &end);
     data += end - d_start;
@@ -231,7 +228,7 @@ timespec TimerStat::getData() const {
 
 SExpr TimerStat::getValue() const {
   ::timespec data = d_data;
-  if(__CVC4_USE_STATISTICS && d_running) {
+  if(CVC4_USE_STATISTICS && d_running) {
     ::timespec end;
     clock_gettime(CLOCK_MONOTONIC, &end);
     data += end - d_start;
@@ -257,4 +254,4 @@ RegisterStatistic::~RegisterStatistic() {
 
 }/* CVC4 namespace */
 
-#undef __CVC4_USE_STATISTICS
+#undef CVC4_USE_STATISTICS

@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__BV__ABSTRACTION_H
-#define __CVC4__THEORY__BV__ABSTRACTION_H
+#ifndef CVC4__THEORY__BV__ABSTRACTION_H
+#define CVC4__THEORY__BV__ABSTRACTION_H
 
 #include <unordered_map>
 #include <unordered_set>
@@ -60,7 +60,11 @@ class AbstractionModule {
     iterator end() { return d_data.end(); }
     unsigned getArity() { return d_arity; }
     unsigned getNumEntries() { return d_data.size(); }
-    ArgsVec& getEntry(unsigned i ) { Assert (i < d_data.size()); return d_data[i]; }
+    ArgsVec& getEntry(unsigned i)
+    {
+      Assert(i < d_data.size());
+      return d_data[i];
+    }
   };
 
   class ArgsTable {

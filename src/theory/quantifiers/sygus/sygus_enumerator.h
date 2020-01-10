@@ -14,8 +14,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__QUANTIFIERS__SYGUS_ENUMERATOR_H
-#define __CVC4__THEORY__QUANTIFIERS__SYGUS_ENUMERATOR_H
+#ifndef CVC4__THEORY__QUANTIFIERS__SYGUS_ENUMERATOR_H
+#define CVC4__THEORY__QUANTIFIERS__SYGUS_ENUMERATOR_H
 
 #include <map>
 #include <unordered_set>
@@ -353,15 +353,16 @@ class SygusEnumerator : public EnumValGenerator
     unsigned d_childrenValid;
     /** initialize children
      *
-     * Initialize all the uninitialized children of this enumerator. If this
-     * method returns true, then all children d_children are successfully
+     * Initialize all the remaining uninitialized children of this enumerator.
+     * If this method returns true, then each of d_children are
      * initialized to be slave enumerators of the argument types indicated by
      * d_ccTypes, and the sum of their current sizes (d_currChildSize) is
      * exactly (d_currSize - d_ccWeight). If this method returns false, then
      * it was not possible to initialize the children such that they meet the
      * size requirements, and such that the assignments from children to size
-     * has not already been considered. In this case, d_children is cleared
-     * and d_currChildSize and d_childrenValid are reset.
+     * has not already been considered. In this case, all updates to d_children
+     * are reverted and d_currChildSize and d_childrenValid are reset to their
+     * values prior to this call.
      */
     bool initializeChildren();
     /** initialize child
@@ -454,4 +455,4 @@ class SygusEnumerator : public EnumValGenerator
 }  // namespace theory
 }  // namespace CVC4
 
-#endif /* __CVC4__THEORY__QUANTIFIERS__SYGUS_ENUMERATOR_H */
+#endif /* CVC4__THEORY__QUANTIFIERS__SYGUS_ENUMERATOR_H */

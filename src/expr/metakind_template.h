@@ -16,12 +16,12 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__KIND__METAKIND_H
-#define __CVC4__KIND__METAKIND_H
+#ifndef CVC4__KIND__METAKIND_H
+#define CVC4__KIND__METAKIND_H
 
 #include <iosfwd>
 
-#include "base/cvc4_assert.h"
+#include "base/check.h"
 #include "expr/kind.h"
 
 namespace CVC4 {
@@ -114,21 +114,6 @@ typedef ::CVC4::kind::metakind::MetaKind_t MetaKind;
 MetaKind metaKindOf(Kind k);
 }/* CVC4::kind namespace */
 
-namespace kind {
-namespace metakind {
-
-/* these are #defines so their sum can be #if-checked in node_value.h */
-#define __CVC4__EXPR__NODE_VALUE__NBITS__REFCOUNT 20
-#define __CVC4__EXPR__NODE_VALUE__NBITS__KIND 10
-#define __CVC4__EXPR__NODE_VALUE__NBITS__ID 40
-#define __CVC4__EXPR__NODE_VALUE__NBITS__NCHILDREN 26
-
-static const unsigned MAX_CHILDREN =
-  (1u << __CVC4__EXPR__NODE_VALUE__NBITS__NCHILDREN) - 1;
-
-}/* CVC4::kind::metakind namespace */
-}/* CVC4::kind namespace */
-
 namespace expr {
 
 // Comparison predicate
@@ -143,11 +128,11 @@ struct NodeValuePoolEq {
 
 #include "expr/node_value.h"
 
-#endif /* __CVC4__KIND__METAKIND_H */
+#endif /* CVC4__KIND__METAKIND_H */
 
 ${metakind_includes}
 
-#ifdef __CVC4__NODE_MANAGER_NEEDS_CONSTANT_MAP
+#ifdef CVC4__NODE_MANAGER_NEEDS_CONSTANT_MAP
 
 namespace CVC4 {
 
@@ -216,7 +201,7 @@ Kind operatorToKind(::CVC4::expr::NodeValue* nv);
 
 }/* CVC4::kind namespace */
 
-#line 220 "${template}"
+#line 205 "${template}"
 
 namespace theory {
 
@@ -234,4 +219,4 @@ ${theory_alternate_doc}";
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__NODE_MANAGER_NEEDS_CONSTANT_MAP */
+#endif /* CVC4__NODE_MANAGER_NEEDS_CONSTANT_MAP */

@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__ARITH__PROOF_H
-#define __CVC4__ARITH__PROOF_H
+#ifndef CVC4__ARITH__PROOF_H
+#define CVC4__ARITH__PROOF_H
 
 #include <memory>
 #include <unordered_set>
@@ -167,9 +167,14 @@ public:
   void printAliasingDeclarations(std::ostream& os,
                                  std::ostream& paren,
                                  const ProofLetMap& globalLetMap) override;
+
+  /**
+   * Return whether this node, when serialized to LFSC, has sort `Bool`. Otherwise, the sort is `formula`.
+   */
+  bool printsAsBool(const Node& n) override;
 };
 
 
 }/* CVC4 namespace */
 
-#endif /* __CVC4__ARITH__PROOF_H */
+#endif /* CVC4__ARITH__PROOF_H */

@@ -14,15 +14,14 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__QUANTIFIERS__SYGUS_UNIF_RL_H
-#define __CVC4__THEORY__QUANTIFIERS__SYGUS_UNIF_RL_H
+#ifndef CVC4__THEORY__QUANTIFIERS__SYGUS_UNIF_RL_H
+#define CVC4__THEORY__QUANTIFIERS__SYGUS_UNIF_RL_H
 
 #include <map>
 #include "options/main_options.h"
 #include "theory/quantifiers/sygus/sygus_unif.h"
 
 #include "theory/quantifiers/lazy_trie.h"
-#include "theory/quantifiers_engine.h"
 
 namespace CVC4 {
 namespace theory {
@@ -104,9 +103,21 @@ class SygusUnifRl : public SygusUnif
   /** retrieve the head of evaluation points for candidate c, if any */
   std::vector<Node> getEvalPointHeads(Node c);
 
+  /**
+   * Whether we are using condition pool enumeration (Section 4 of Barbosa et al
+   * FMCAD 2019). This is determined by option::sygusUnifPi().
+   */
+  bool usingConditionPool() const;
+  /** Whether we are additionally using information gain.  */
+  bool usingConditionPoolInfoGain() const;
+
  protected:
   /** reference to the parent conjecture */
   SynthConjecture* d_parent;
+  /** Whether we are using condition pool enumeration */
+  bool d_useCondPool;
+  /** Whether we are additionally using information gain heuristics */
+  bool d_useCondPoolIGain;
   /* Functions-to-synthesize (a.k.a. candidates) with unification strategies */
   std::unordered_set<Node, NodeHashFunction> d_unif_candidates;
   /** construct sol */
@@ -434,4 +445,4 @@ class SygusUnifRl : public SygusUnif
 }  // namespace theory
 }  // namespace CVC4
 
-#endif /* __CVC4__THEORY__QUANTIFIERS__SYGUS_UNIF_RL_H */
+#endif /* CVC4__THEORY__QUANTIFIERS__SYGUS_UNIF_RL_H */

@@ -17,28 +17,23 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__ARITH__ARITH_REWRITER_H
-#define __CVC4__THEORY__ARITH__ARITH_REWRITER_H
+#ifndef CVC4__THEORY__ARITH__ARITH_REWRITER_H
+#define CVC4__THEORY__ARITH__ARITH_REWRITER_H
 
 #include "theory/theory.h"
-#include "theory/rewriter.h"
+#include "theory/theory_rewriter.h"
 
 namespace CVC4 {
 namespace theory {
 namespace arith {
 
-class ArithRewriter {
-public:
+class ArithRewriter : public TheoryRewriter
+{
+ public:
+  RewriteResponse preRewrite(TNode n) override;
+  RewriteResponse postRewrite(TNode n) override;
 
-  static RewriteResponse preRewrite(TNode n);
-  static RewriteResponse postRewrite(TNode n);
-
-  static void init() { }
-
-  static void shutdown() { }
-
-private:
-
+ private:
   static Node makeSubtractionNode(TNode l, TNode r);
   static Node makeUnaryMinusNode(TNode n);
 
@@ -70,10 +65,10 @@ private:
     return !isAtom(n);
   }
 
-};/* class ArithRewriter */
+}; /* class ArithRewriter */
 
 }/* CVC4::theory::arith namespace */
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__ARITH__ARITH_REWRITER_H */
+#endif /* CVC4__THEORY__ARITH__ARITH_REWRITER_H */

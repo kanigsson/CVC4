@@ -19,8 +19,8 @@
 // ordering dependence
 #include "expr/node.h"
 
-#ifndef __CVC4__EXPR__TYPE_CHECKER_H
-#define __CVC4__EXPR__TYPE_CHECKER_H
+#ifndef CVC4__EXPR__TYPE_CHECKER_H
+#define CVC4__EXPR__TYPE_CHECKER_H
 
 namespace CVC4 {
 namespace expr {
@@ -33,11 +33,9 @@ public:
 
  static bool computeIsConst(NodeManager* nodeManager, TNode n);
 
- static bool neverIsConst(NodeManager* nodeManager, TNode n);
-
 };/* class TypeChecker */
 
 }/* CVC4::expr namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__EXPR__TYPE_CHECKER_H */
+#endif /* CVC4__EXPR__TYPE_CHECKER_H */

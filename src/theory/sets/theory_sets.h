@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__SETS__THEORY_SETS_H
-#define __CVC4__THEORY__SETS__THEORY_SETS_H
+#ifndef CVC4__THEORY__SETS__THEORY_SETS_H
+#define CVC4__THEORY__SETS__THEORY_SETS_H
 
 #include <memory>
 
@@ -42,9 +42,10 @@ class TheorySets : public Theory
              const LogicInfo& logicInfo);
   ~TheorySets() override;
 
+  /** finish initialization */
+  void finishInit() override;
   void addSharedTerm(TNode) override;
   void check(Effort) override;
-  bool needsCheckLastEffort() override;
   bool collectModelInfo(TheoryModel* m) override;
   void computeCareGraph() override;
   Node explain(TNode) override;
@@ -71,4 +72,4 @@ class TheorySets : public Theory
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__SETS__THEORY_SETS_H */
+#endif /* CVC4__THEORY__SETS__THEORY_SETS_H */

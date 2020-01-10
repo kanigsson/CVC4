@@ -242,7 +242,7 @@ EqualityNodeId EqualityEngine::newNode(TNode node) {
 
   Debug("equality") << d_name << "::eq::newNode(" << node << ") => " << newId << std::endl;
 
-  // notify e.g. the UF theory strong solver
+  // notify e.g. the theory that owns this equality engine.
   if (d_performNotify) {
     d_notify.eqNotifyNewClass(node);
   }
@@ -375,7 +375,7 @@ bool EqualityEngine::hasTerm(TNode t) const {
 }
 
 EqualityNodeId EqualityEngine::getNodeId(TNode node) const {
-  Assert(hasTerm(node), node.toString().c_str());
+  Assert(hasTerm(node)) << node;
   return (*d_nodeIds.find(node)).second;
 }
 
@@ -417,7 +417,7 @@ void EqualityEngine::assertEqualityInternal(TNode t1, TNode t2, TNode reason, un
 
 void EqualityEngine::assertPredicate(TNode t, bool polarity, TNode reason, unsigned pid) {
   Debug("equality") << d_name << "::eq::addPredicate(" << t << "," << (polarity ? "true" : "false") << ")" << std::endl;
-  Assert(t.getKind() != kind::EQUAL, "Use assertEquality instead");
+  Assert(t.getKind() != kind::EQUAL) << "Use assertEquality instead";
   assertEqualityInternal(t, polarity ? d_true : d_false, reason, pid);
   propagate();
 }
@@ -556,8 +556,9 @@ bool EqualityEngine::merge(EqualityNode& class1, EqualityNode& class2, std::vect
   // Check for constant merges
   bool class1isConstant = d_isConstant[class1Id];
   bool class2isConstant = d_isConstant[class2Id];
-  Assert(class1isConstant || !class2isConstant, "Should always merge into constants");
-  Assert(!class1isConstant || !class2isConstant, "Don't merge constants");
+  Assert(class1isConstant || !class2isConstant)
+      << "Should always merge into constants";
+  Assert(!class1isConstant || !class2isConstant) << "Don't merge constants";
 
   // Trigger set of class 1
   TriggerTermSetRef class1triggerRef = d_nodeIndividualTrigger[class1Id];
@@ -884,7 +885,8 @@ void EqualityEngine::backtrack() {
   if (d_deducedDisequalities.size() > d_deducedDisequalitiesSize) {
     for(int i = d_deducedDisequalities.size() - 1, i_end = (int)d_deducedDisequalitiesSize; i >= i_end; -- i) {
       EqualityPair pair = d_deducedDisequalities[i];
-      Assert(d_disequalityReasonsMap.find(pair) != d_disequalityReasonsMap.end());
+      Assert(d_disequalityReasonsMap.find(pair)
+             != d_disequalityReasonsMap.end());
       // Remove from the map
       d_disequalityReasonsMap.erase(pair);
       std::swap(pair.first, pair.second);
@@ -929,20 +931,22 @@ std::string EqualityEngine::edgesToString(EqualityEdgeId edgeId) const {
 void EqualityEngine::explainEquality(TNode t1, TNode t2, bool polarity,
                                      std::vector<TNode>& equalities,
                                      EqProof* eqp) const {
-  Debug("equality") << d_name << "::eq::explainEquality(" << t1 << ", " << t2
-                    << ", " << (polarity ? "true" : "false") << ")"
-                    << ", proof = " << (eqp ? "ON" : "OFF") << std::endl;
+  Debug("pf::ee") << d_name << "::eq::explainEquality(" << t1 << ", " << t2
+                  << ", " << (polarity ? "true" : "false") << ")"
+                  << ", proof = " << (eqp ? "ON" : "OFF") << std::endl;
 
   // The terms must be there already
-  Assert(hasTerm(t1) && hasTerm(t2));;
+  Assert(hasTerm(t1) && hasTerm(t2));
+  ;
 
   // Get the ids
   EqualityNodeId t1Id = getNodeId(t1);
   EqualityNodeId t2Id = getNodeId(t2);
 
+  std::map<std::pair<EqualityNodeId, EqualityNodeId>, EqProof*> cache;
   if (polarity) {
     // Get the explanation
-    getExplanation(t1Id, t2Id, equalities, eqp);
+    getExplanation(t1Id, t2Id, equalities, cache, eqp);
   } else {
     if (eqp) {
       eqp->d_id = eq::MERGED_THROUGH_TRANS;
@@ -951,7 +955,8 @@ void EqualityEngine::explainEquality(TNode t1, TNode t2, bool polarity,
 
     // Get the reason for this disequality
     EqualityPair pair(t1Id, t2Id);
-    Assert(d_disequalityReasonsMap.find(pair) != d_disequalityReasonsMap.end(), "Don't ask for stuff I didn't notify you about");
+    Assert(d_disequalityReasonsMap.find(pair) != d_disequalityReasonsMap.end())
+        << "Don't ask for stuff I didn't notify you about";
     DisequalityReasonRef reasonRef = d_disequalityReasonsMap.find(pair)->second;
 
     for (unsigned i = reasonRef.mergesStart; i < reasonRef.mergesEnd; ++ i) {
@@ -964,12 +969,15 @@ void EqualityEngine::explainEquality(TNode t1, TNode t2, bool polarity,
         eqpc = std::make_shared<EqProof>();
       }
 
-      getExplanation(toExplain.first, toExplain.second, equalities, eqpc.get());
+      getExplanation(
+          toExplain.first, toExplain.second, equalities, cache, eqpc.get());
 
       if (eqpc) {
-        Debug("pf::ee") << "Child proof is:" << std::endl;
-        eqpc->debug_print("pf::ee", 1);
-
+        if (Debug.isOn("pf::ee"))
+        {
+          Debug("pf::ee") << "Child proof is:" << std::endl;
+          eqpc->debug_print("pf::ee", 1);
+        }
         if (eqpc->d_id == eq::MERGED_THROUGH_TRANS) {
           std::vector<std::shared_ptr<EqProof>> orderedChildren;
           bool nullCongruenceFound = false;
@@ -987,8 +995,13 @@ void EqualityEngine::explainEquality(TNode t1, TNode t2, bool polarity,
 
           if (nullCongruenceFound) {
             eqpc->d_children = orderedChildren;
-            Debug("pf::ee") << "Child proof's children have been reordered. It is now:" << std::endl;
-            eqpc->debug_print("pf::ee", 1);
+            if (Debug.isOn("pf::ee"))
+            {
+              Debug("pf::ee")
+                  << "Child proof's children have been reordered. It is now:"
+                  << std::endl;
+              eqpc->debug_print("pf::ee", 1);
+            }
           }
         }
 
@@ -1011,8 +1024,11 @@ void EqualityEngine::explainEquality(TNode t1, TNode t2, bool polarity,
         *eqp = *temp;
       }
 
-      Debug("pf::ee") << "Disequality explanation final proof: " << std::endl;
-      eqp->debug_print("pf::ee", 1);
+      if (Debug.isOn("pf::ee"))
+      {
+        Debug("pf::ee") << "Disequality explanation final proof: " << std::endl;
+        eqp->debug_print("pf::ee", 1);
+      }
     }
   }
 }
@@ -1024,15 +1040,65 @@ void EqualityEngine::explainPredicate(TNode p, bool polarity,
                     << std::endl;
   // Must have the term
   Assert(hasTerm(p));
+  std::map<std::pair<EqualityNodeId, EqualityNodeId>, EqProof*> cache;
   // Get the explanation
-  getExplanation(getNodeId(p), polarity ? d_trueId : d_falseId, assertions,
-                 eqp);
+  getExplanation(
+      getNodeId(p), polarity ? d_trueId : d_falseId, assertions, cache, eqp);
 }
 
-void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
-                                    std::vector<TNode>& equalities,
-                                    EqProof* eqp) const {
-  Debug("equality") << d_name << "::eq::getExplanation(" << d_nodes[t1Id] << "," << d_nodes[t2Id] << ")" << std::endl;
+void EqualityEngine::getExplanation(
+    EqualityNodeId t1Id,
+    EqualityNodeId t2Id,
+    std::vector<TNode>& equalities,
+    std::map<std::pair<EqualityNodeId, EqualityNodeId>, EqProof*>& cache,
+    EqProof* eqp) const
+{
+  Trace("eq-exp") << d_name << "::eq::getExplanation(" << d_nodes[t1Id] << ","
+                  << d_nodes[t2Id] << ") size = " << cache.size() << std::endl;
+
+  // determine if we have already computed the explanation.
+  std::pair<EqualityNodeId, EqualityNodeId> cacheKey;
+  std::map<std::pair<EqualityNodeId, EqualityNodeId>, EqProof*>::iterator it;
+  if (!eqp)
+  {
+    // If proofs are disabled, we order the ids, since explaining t1 = t2 is the
+    // same as explaining t2 = t1.
+    cacheKey = std::minmax(t1Id, t2Id);
+    it = cache.find(cacheKey);
+    if (it != cache.end())
+    {
+      return;
+    }
+  }
+  else
+  {
+    // If proofs are enabled, note that proofs are sensitive to the order of t1
+    // and t2, so we don't sort the ids in this case. TODO: Depending on how
+    // issue #2965 is resolved, we may be able to revisit this, if it is the
+    // case that proof/uf_proof.h,cpp is robust to equality ordering.
+    cacheKey = std::pair<EqualityNodeId, EqualityNodeId>(t1Id, t2Id);
+    it = cache.find(cacheKey);
+    if (it != cache.end())
+    {
+      if (it->second)
+      {
+        eqp->d_id = it->second->d_id;
+        eqp->d_children.insert(eqp->d_children.end(),
+                               it->second->d_children.begin(),
+                               it->second->d_children.end());
+        eqp->d_node = it->second->d_node;
+      }
+      else
+      {
+        // We may have cached null in its place, create the trivial proof now.
+        Assert(d_nodes[t1Id] == d_nodes[t2Id]);
+        Assert(eqp->d_id == MERGED_THROUGH_REFLEXIVITY);
+        eqp->d_node = d_nodes[t1Id];
+      }
+      return;
+    }
+  }
+  cache[cacheKey] = eqp;
 
   // We can only explain the nodes that got merged
 #ifdef CVC4_ASSERTIONS
@@ -1136,11 +1202,11 @@ void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
               Debug("equality") << "Explaining left hand side equalities" << std::endl;
               std::shared_ptr<EqProof> eqpc1 =
                   eqpc ? std::make_shared<EqProof>() : nullptr;
-              getExplanation(f1.a, f2.a, equalities, eqpc1.get());
+              getExplanation(f1.a, f2.a, equalities, cache, eqpc1.get());
               Debug("equality") << "Explaining right hand side equalities" << std::endl;
               std::shared_ptr<EqProof> eqpc2 =
                   eqpc ? std::make_shared<EqProof>() : nullptr;
-              getExplanation(f1.b, f2.b, equalities, eqpc2.get());
+              getExplanation(f1.b, f2.b, equalities, cache, eqpc2.get());
               if( eqpc ){
                 eqpc->d_children.push_back( eqpc1 );
                 eqpc->d_children.push_back( eqpc2 );
@@ -1157,7 +1223,8 @@ void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
                       eqpc->d_node = NodeManager::currentNM()->mkNode(kind::PARTIAL_SELECT_1, d_nodes[f1.b]);
                       // The first child is a PARTIAL_SELECT_0.
                       // Give it a child so that we know what kind of (read) it is, when we dump to LFSC.
-                      Assert(eqpc->d_children[0]->d_node.getKind() == kind::PARTIAL_SELECT_0);
+                      Assert(eqpc->d_children[0]->d_node.getKind()
+                             == kind::PARTIAL_SELECT_0);
                       Assert(eqpc->d_children[0]->d_children.size() == 0);
 
                       eqpc->d_children[0]->d_node = NodeManager::currentNM()->mkNode(kind::PARTIAL_SELECT_0,
@@ -1179,13 +1246,13 @@ void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
               Debug("equality") << d_name << "::eq::getExplanation(): due to reflexivity, going deeper" << std::endl;
               EqualityNodeId eqId = currentNode == d_trueId ? edgeNode : currentNode;
               const FunctionApplication& eq = d_applications[eqId].original;
-              Assert(eq.isEquality(), "Must be an equality");
+              Assert(eq.isEquality()) << "Must be an equality";
 
               // Explain why a = b constant
               Debug("equality") << push;
               std::shared_ptr<EqProof> eqpc1 =
                   eqpc ? std::make_shared<EqProof>() : nullptr;
-              getExplanation(eq.a, eq.b, equalities, eqpc1.get());
+              getExplanation(eq.a, eq.b, equalities, cache, eqpc1.get());
               if( eqpc ){
                 eqpc->d_children.push_back( eqpc1 );
               }
@@ -1211,13 +1278,20 @@ void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
                 Assert(isConstant(childId));
                 std::shared_ptr<EqProof> eqpcc =
                     eqpc ? std::make_shared<EqProof>() : nullptr;
-                getExplanation(childId, getEqualityNode(childId).getFind(),
-                               equalities, eqpcc.get());
+                getExplanation(childId,
+                               getEqualityNode(childId).getFind(),
+                               equalities,
+                               cache,
+                               eqpcc.get());
                 if( eqpc ) {
                   eqpc->d_children.push_back( eqpcc );
-
-                  Debug("pf::ee") << "MERGED_THROUGH_CONSTANTS. Dumping the child proof" << std::endl;
-                  eqpc->debug_print("pf::ee", 1);
+                  if (Debug.isOn("pf::ee"))
+                  {
+                    Debug("pf::ee")
+                        << "MERGED_THROUGH_CONSTANTS. Dumping the child proof"
+                        << std::endl;
+                    eqpc->debug_print("pf::ee", 1);
+                  }
                 }
               }
 
@@ -1255,7 +1329,6 @@ void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
                 }
                 eqpc->d_id = reasonType;
               }
-
               equalities.push_back(reason);
               break;
             }
@@ -1288,8 +1361,10 @@ void EqualityEngine::getExplanation(EqualityNodeId t1Id, EqualityNodeId t2Id,
               eqp->d_children.insert( eqp->d_children.end(), eqp_trans.begin(), eqp_trans.end() );
               eqp->d_node = NodeManager::currentNM()->mkNode(kind::EQUAL, d_nodes[t1Id], d_nodes[t2Id]);
             }
-
-            eqp->debug_print("pf::ee", 1);
+            if (Debug.isOn("pf::ee"))
+            {
+              eqp->debug_print("pf::ee", 1);
+            }
           }
 
           // Done
@@ -1346,8 +1421,10 @@ void EqualityEngine::addTriggerEquality(TNode eq) {
 }
 
 void EqualityEngine::addTriggerPredicate(TNode predicate) {
-  Assert(predicate.getKind() != kind::NOT && predicate.getKind() != kind::EQUAL);
-  Assert(d_congruenceKinds.tst(predicate.getKind()), "No point in adding non-congruence predicates");
+  Assert(predicate.getKind() != kind::NOT
+         && predicate.getKind() != kind::EQUAL);
+  Assert(d_congruenceKinds.tst(predicate.getKind()))
+      << "No point in adding non-congruence predicates";
 
   if (d_done) {
     return;
@@ -1741,7 +1818,8 @@ size_t EqualityEngine::getSize(TNode t) {
 
 void EqualityEngine::addPathReconstructionTrigger(unsigned trigger, const PathReconstructionNotify* notify) {
   // Currently we can only inform one callback per trigger
-  Assert(d_pathReconstructionTriggers.find(trigger) == d_pathReconstructionTriggers.end());
+  Assert(d_pathReconstructionTriggers.find(trigger)
+         == d_pathReconstructionTriggers.end());
   d_pathReconstructionTriggers[trigger] = notify;
 }
 
@@ -1923,7 +2001,7 @@ bool EqualityEngine::hasPropagatedDisequality(EqualityNodeId lhsId, EqualityNode
   bool propagated = d_propagatedDisequalities.find(eq) != d_propagatedDisequalities.end();
 #ifdef CVC4_ASSERTIONS
   bool stored = d_disequalityReasonsMap.find(eq) != d_disequalityReasonsMap.end();
-  Assert(propagated == stored, "These two should be in sync");
+  Assert(propagated == stored) << "These two should be in sync";
 #endif
   Debug("equality::disequality") << d_name << "::eq::hasPropagatedDisequality(" << d_nodes[lhsId] << ", " << d_nodes[rhsId] << ") => " << (propagated ? "true" : "false") << std::endl;
   return propagated;
@@ -1935,11 +2013,13 @@ bool EqualityEngine::hasPropagatedDisequality(TheoryId tag, EqualityNodeId lhsId
 
   PropagatedDisequalitiesMap::const_iterator it = d_propagatedDisequalities.find(eq);
   if (it == d_propagatedDisequalities.end()) {
-    Assert(d_disequalityReasonsMap.find(eq) == d_disequalityReasonsMap.end(), "Why do we have a proof if not propagated");
+    Assert(d_disequalityReasonsMap.find(eq) == d_disequalityReasonsMap.end())
+        << "Why do we have a proof if not propagated";
     Debug("equality::disequality") << d_name << "::eq::hasPropagatedDisequality(" << tag << ", " << d_nodes[lhsId] << ", " << d_nodes[rhsId] << ") => false" << std::endl;
     return false;
   }
-  Assert(d_disequalityReasonsMap.find(eq) != d_disequalityReasonsMap.end(), "We propagated but there is no proof");
+  Assert(d_disequalityReasonsMap.find(eq) != d_disequalityReasonsMap.end())
+      << "We propagated but there is no proof";
   bool result = Theory::setContains(tag, (*it).second);
   Debug("equality::disequality") << d_name << "::eq::hasPropagatedDisequality(" << tag << ", " << d_nodes[lhsId] << ", " << d_nodes[rhsId] << ") => " << (result ? "true" : "false") << std::endl;
   return result;
@@ -1947,9 +2027,9 @@ bool EqualityEngine::hasPropagatedDisequality(TheoryId tag, EqualityNodeId lhsId
 
 
 void EqualityEngine::storePropagatedDisequality(TheoryId tag, EqualityNodeId lhsId, EqualityNodeId rhsId) {
-
-  Assert(!hasPropagatedDisequality(tag, lhsId, rhsId), "Check before you store it");
-  Assert(lhsId != rhsId, "Wow, wtf!");
+  Assert(!hasPropagatedDisequality(tag, lhsId, rhsId))
+      << "Check before you store it";
+  Assert(lhsId != rhsId) << "Wow, wtf!";
 
   Debug("equality::disequality") << d_name << "::eq::storePropagatedDisequality(" << tag << ", " << d_nodes[lhsId] << ", " << d_nodes[rhsId] << ")" << std::endl;
 
@@ -1970,12 +2050,15 @@ void EqualityEngine::storePropagatedDisequality(TheoryId tag, EqualityNodeId lhs
   // Store the proof if provided
   if (d_deducedDisequalityReasons.size() > d_deducedDisequalityReasonsSize) {
     Debug("equality::disequality") << d_name << "::eq::storePropagatedDisequality(" << tag << ", " << d_nodes[lhsId] << ", " << d_nodes[rhsId] << "): storing proof" << std::endl;
-    Assert(d_disequalityReasonsMap.find(pair1) == d_disequalityReasonsMap.end(), "There can't be a proof if you're adding a new one");
+    Assert(d_disequalityReasonsMap.find(pair1) == d_disequalityReasonsMap.end())
+        << "There can't be a proof if you're adding a new one";
     DisequalityReasonRef ref(d_deducedDisequalityReasonsSize, d_deducedDisequalityReasons.size());
 #ifdef CVC4_ASSERTIONS
     // Check that the reasons are valid
     for (unsigned i = ref.mergesStart; i < ref.mergesEnd; ++ i) {
-      Assert(getEqualityNode(d_deducedDisequalityReasons[i].first).getFind() == getEqualityNode(d_deducedDisequalityReasons[i].second).getFind());
+      Assert(
+          getEqualityNode(d_deducedDisequalityReasons[i].first).getFind()
+          == getEqualityNode(d_deducedDisequalityReasons[i].second).getFind());
     }
 #endif
     if (Debug.isOn("equality::disequality")) {
@@ -1995,7 +2078,8 @@ void EqualityEngine::storePropagatedDisequality(TheoryId tag, EqualityNodeId lhs
     d_disequalityReasonsMap[pair1] = ref;
     d_disequalityReasonsMap[pair2] = ref;
   } else {
-    Assert(d_disequalityReasonsMap.find(pair1) != d_disequalityReasonsMap.end(), "You must provide a proof initially");
+    Assert(d_disequalityReasonsMap.find(pair1) != d_disequalityReasonsMap.end())
+        << "You must provide a proof initially";
   }
 }
 
@@ -2003,7 +2087,11 @@ void EqualityEngine::getDisequalities(bool allowConstants, EqualityNodeId classI
   // Must be empty on input
   Assert(out.size() == 0);
   // The class we are looking for, shouldn't have any of the tags we are looking for already set
-  Assert(d_nodeIndividualTrigger[classId] == null_set_id || Theory::setIntersection(getTriggerTermSet(d_nodeIndividualTrigger[classId]).tags, inputTags) == 0);
+  Assert(d_nodeIndividualTrigger[classId] == null_set_id
+         || Theory::setIntersection(
+                getTriggerTermSet(d_nodeIndividualTrigger[classId]).tags,
+                inputTags)
+                == 0);
 
   if (inputTags == 0) {
     return;
@@ -2189,7 +2277,7 @@ EqClassIterator::EqClassIterator(Node eqc, const eq::EqualityEngine* ee)
   Assert(d_ee->consistent());
   d_current = d_start = d_ee->getNodeId(eqc);
   Assert(d_start == d_ee->getEqualityNode(d_start).getFind());
-  Assert (!d_ee->d_isInternal[d_start]);
+  Assert(!d_ee->d_isInternal[d_start]);
 }
 
 Node EqClassIterator::operator*() const {
@@ -2236,27 +2324,48 @@ bool EqClassIterator::isFinished() const {
 }
 
 void EqProof::debug_print(const char* c, unsigned tb, PrettyPrinter* prettyPrinter) const {
-  for(unsigned i=0; i<tb; i++) { Debug( c ) << "  "; }
+  std::stringstream ss;
+  debug_print(ss, tb, prettyPrinter);
+  Debug(c) << ss.str();
+}
+void EqProof::debug_print(std::ostream& os,
+                          unsigned tb,
+                          PrettyPrinter* prettyPrinter) const
+{
+  for (unsigned i = 0; i < tb; i++)
+  {
+    os << "  ";
+  }
 
   if (prettyPrinter)
-    Debug( c ) << prettyPrinter->printTag(d_id);
+  {
+    os << prettyPrinter->printTag(d_id);
+  }
   else
-    Debug( c ) << d_id;
+  {
+    os << d_id;
+  }
 
-  Debug( c ) << "(";
+  os << "(";
   if( !d_children.empty() || !d_node.isNull() ){
     if( !d_node.isNull() ){
-      Debug( c ) << std::endl;
-      for( unsigned i=0; i<tb+1; i++ ) { Debug( c ) << "  "; }
-      Debug( c ) << d_node;
+      os << std::endl;
+      for (unsigned i = 0; i < tb + 1; i++)
+      {
+        os << "  ";
+      }
+      os << d_node;
     }
     for( unsigned i=0; i<d_children.size(); i++ ){
-      if( i>0 || !d_node.isNull() ) Debug( c ) << ",";
-      Debug( c ) << std::endl;
-      d_children[i]->debug_print( c, tb+1, prettyPrinter );
+      if (i > 0 || !d_node.isNull())
+      {
+        os << ",";
+      }
+      os << std::endl;
+      d_children[i]->debug_print(os, tb + 1, prettyPrinter);
     }
   }
-  Debug( c ) << ")" << std::endl;
+  os << ")" << std::endl;
 }
 
 } // Namespace uf

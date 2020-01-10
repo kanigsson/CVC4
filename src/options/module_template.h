@@ -17,8 +17,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__OPTIONS__${id}$_H
-#define __CVC4__OPTIONS__${id}$_H
+#ifndef CVC4__OPTIONS__${id}$_H
+#define CVC4__OPTIONS__${id}$_H
 
 #include "options/options.h"
 
@@ -32,8 +32,9 @@ namespace CVC4 {
 
 namespace options {
 
-${decls}$
+${modes}$
 
+${decls}$
 
 }  // namespace options
 
@@ -44,8 +45,7 @@ namespace options {
 
 ${inls}$
 
-
 }  // namespace options
 }  // namespace CVC4
 
-#endif /* __CVC4__OPTIONS__${id}$_H */
+#endif /* CVC4__OPTIONS__${id}$_H */

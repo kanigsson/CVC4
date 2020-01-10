@@ -22,8 +22,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__PROP__CNF_STREAM_H
-#define __CVC4__PROP__CNF_STREAM_H
+#ifndef CVC4__PROP__CNF_STREAM_H
+#define CVC4__PROP__CNF_STREAM_H
 
 #include "context/cdinsert_hashmap.h"
 #include "context/cdlist.h"
@@ -87,25 +87,6 @@ class CnfStream {
 
   /** Pointer to the proof corresponding to this CnfStream */
   CnfProof* d_cnfProof;
-
-  /**
-   * How many literals were already mapped at the top-level when we
-   * tried to convertAndAssert() something.  This
-   * achieves early detection of units and leads to fewer
-   * clauses.  It's motivated by the following pattern:
-   *
-   *   ASSERT  BIG FORMULA => x
-   *   (and then later...)
-   *   ASSERT  BIG FORMULA
-   *
-   * With the first assert, BIG FORMULA is clausified, and a literal
-   * is assigned for the top level so that the final clause for the
-   * implication is "lit => x".  But without "fortunate literal
-   * detection," when BIG FORMULA is later asserted, it is clausified
-   * separately, and "lit" is never asserted as a unit clause.
-   */
-  // KEEP_STATISTIC(IntStat, d_fortunateLiterals,
-  //               "prop::CnfStream::fortunateLiterals", 0);
 
   /** Remove nots from the node */
   TNode stripNot(TNode node) {
@@ -338,4 +319,4 @@ class TseitinCnfStream : public CnfStream {
 } /* CVC4::prop namespace */
 } /* CVC4 namespace */
 
-#endif /* __CVC4__PROP__CNF_STREAM_H */
+#endif /* CVC4__PROP__CNF_STREAM_H */

@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__PROP__SAT_SOLVER_H
-#define __CVC4__PROP__SAT_SOLVER_H
+#ifndef CVC4__PROP__SAT_SOLVER_H
+#define CVC4__PROP__SAT_SOLVER_H
 
 #include <stdint.h>
 
@@ -83,7 +83,7 @@ public:
   /** Check satisfiability under assumptions */
   virtual SatValue solve(const std::vector<SatLiteral>& assumptions)
   {
-    Unimplemented("Solving under assumptions not implemented");
+    Unimplemented() << "Solving under assumptions not implemented";
   };
 
   /** Interrupt the solver */
@@ -192,4 +192,4 @@ inline std::ostream& operator <<(std::ostream& out, prop::SatValue val) {
 }/* CVC4::prop namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__PROP__SAT_MODULE_H */
+#endif /* CVC4__PROP__SAT_MODULE_H */

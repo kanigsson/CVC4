@@ -15,8 +15,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__ARRAYS__ARRAY_INFO_H
-#define __CVC4__THEORY__ARRAYS__ARRAY_INFO_H
+#ifndef CVC4__THEORY__ARRAYS__ARRAY_INFO_H
+#define CVC4__THEORY__ARRAYS__ARRAY_INFO_H
 
 #include <iostream>
 #include <map>
@@ -78,7 +78,7 @@ public:
    * prints the information
    */
   void print() const {
-    Assert(indices != NULL && stores!= NULL && in_stores != NULL);
+    Assert(indices != NULL && stores != NULL && in_stores != NULL);
     Trace("arrays-info")<<"  indices   ";
     printList(indices);
     Trace("arrays-info")<<"  stores ";
@@ -211,4 +211,4 @@ public:
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__ARRAYS__ARRAY_INFO_H */
+#endif /* CVC4__THEORY__ARRAYS__ARRAY_INFO_H */

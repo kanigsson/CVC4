@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__ARRAYS__THEORY_ARRAYS_TYPE_RULES_H
-#define __CVC4__THEORY__ARRAYS__THEORY_ARRAYS_TYPE_RULES_H
+#ifndef CVC4__THEORY__ARRAYS__THEORY_ARRAYS_TYPE_RULES_H
+#define CVC4__THEORY__ARRAYS__THEORY_ARRAYS_TYPE_RULES_H
 
 #include "theory/arrays/theory_arrays_rewriter.h" // for array-constant attributes
 #include "theory/type_enumerator.h"
@@ -218,7 +218,8 @@ struct ArraysProperties {
 struct ArrayPartialSelectTypeRule {
   inline static TypeNode computeType(NodeManager* nodeManager, TNode n, bool check)
   {
-    Assert(n.getKind() == kind::PARTIAL_SELECT_0 || n.getKind() == kind::PARTIAL_SELECT_1);
+    Assert(n.getKind() == kind::PARTIAL_SELECT_0
+           || n.getKind() == kind::PARTIAL_SELECT_1);
     return nodeManager->integerType();
   }
 };/* struct ArrayPartialSelectTypeRule */
@@ -227,4 +228,4 @@ struct ArrayPartialSelectTypeRule {
 }/* CVC4::theory namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__THEORY__ARRAYS__THEORY_ARRAYS_TYPE_RULES_H */
+#endif /* CVC4__THEORY__ARRAYS__THEORY_ARRAYS_TYPE_RULES_H */

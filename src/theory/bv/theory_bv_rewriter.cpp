@@ -29,23 +29,7 @@ using namespace CVC4;
 using namespace CVC4::theory;
 using namespace CVC4::theory::bv;
 
-
-// thread_local AllRewriteRules* TheoryBVRewriter::s_allRules = NULL;
-// thread_local TimerStat* TheoryBVRewriter::d_rewriteTimer = NULL;
-RewriteFunction TheoryBVRewriter::d_rewriteTable[kind::LAST_KIND]; 
-void TheoryBVRewriter::init() {
-   // s_allRules = new AllRewriteRules;
-   // d_rewriteTimer = new TimerStat("theory::bv::rewriteTimer");
-   // smtStatisticsRegistry()->registerStat(d_rewriteTimer); 
-   initializeRewrites();
-
-}
-
-void TheoryBVRewriter::shutdown() {
-   // delete s_allRules;
-   // smtStatisticsRegistry()->unregisterStat(d_rewriteTimer); 
-   //delete d_rewriteTimer;
-}
+TheoryBVRewriter::TheoryBVRewriter() { initializeRewrites(); }
 
 RewriteResponse TheoryBVRewriter::preRewrite(TNode node) {
   RewriteResponse res = d_rewriteTable[node.getKind()](node, true);
@@ -171,9 +155,20 @@ RewriteResponse TheoryBVRewriter::RewriteITEBv(TNode node, bool prerewrite)
   Node resultNode =
       LinearRewriteStrategy<RewriteRule<EvalITEBv>,
                             RewriteRule<BvIteConstCond>,
-                            RewriteRule<BvIteEqualChildren>,
-                            RewriteRule<BvIteConstChildren>,
-                            RewriteRule<BvIteEqualCond>>::apply(node);
+                            RewriteRule<BvIteEqualChildren>>::apply(node);
+  // If the node has been rewritten, we return here because we need to make
+  // sure that `BvIteEqualChildren` has been applied until we reach a fixpoint
+  // before applying `BvIteConstChildren`. Otherwise, `BvIteConstChildren`
+  // potentially performs an unsound rewrite. Returning hands back the control
+  // to the `Rewriter` which will then call this method again, ensuring that
+  // the rewrites are applied in the correct order.
+  if (resultNode != node)
+  {
+    return RewriteResponse(REWRITE_AGAIN, resultNode);
+  }
+
+  resultNode = LinearRewriteStrategy<RewriteRule<BvIteConstChildren>,
+                                     RewriteRule<BvIteEqualCond>>::apply(node);
   if (resultNode != node)
   {
     return RewriteResponse(REWRITE_AGAIN, resultNode);

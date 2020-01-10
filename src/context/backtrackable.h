@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__UTIL__BACKTRACKABLE_H
-#define __CVC4__UTIL__BACKTRACKABLE_H
+#ifndef CVC4__UTIL__BACKTRACKABLE_H
+#define CVC4__UTIL__BACKTRACKABLE_H
 
 #include <cstdlib>
 #include <vector>
@@ -160,7 +160,7 @@ template <class T>
 void List<T>::concat (List<T>* other) {
   bck->checkConsistency();
   bck->notifyConcat(this, other);
-  Assert(tail->next==NULL);
+  Assert(tail->next == NULL);
   tail->next = other->head;
   Assert(other->ptr_to_head == NULL);
   other->ptr_to_head = tail;
@@ -219,4 +219,4 @@ template <class T> void Backtracker<T>::checkConsistency() {
 
 }/* CVC4 namespace */
 
-#endif /* __CVC4__UTIL__BACKTRACKABLE_H */
+#endif /* CVC4__UTIL__BACKTRACKABLE_H */

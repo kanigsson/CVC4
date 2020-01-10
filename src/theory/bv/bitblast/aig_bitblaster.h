@@ -16,8 +16,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__BV__BITBLAST__AIG_BITBLASTER_H
-#define __CVC4__THEORY__BV__BITBLAST__AIG_BITBLASTER_H
+#ifndef CVC4__THEORY__BV__BITBLAST__AIG_BITBLASTER_H
+#define CVC4__THEORY__BV__BITBLAST__AIG_BITBLASTER_H
 
 #include "theory/bv/bitblast/bitblaster.h"
 #include "prop/sat_solver.h"
@@ -37,6 +37,8 @@ typedef Cnf_Dat_t_ Cnf_Dat_t;
 namespace CVC4 {
 namespace theory {
 namespace bv {
+
+#ifdef CVC4_USE_ABC
 
 class AigBitblaster : public TBitblaster<Abc_Obj_t*>
 {
@@ -108,7 +110,21 @@ class AigBitblaster : public TBitblaster<Abc_Obj_t*>
   Statistics d_statistics;
 };
 
+#else /* CVC4_USE_ABC */
+
+/**
+ * Dummy version of the AigBitblaster class that cannot be instantiated s.t. we
+ * can declare `std::unique_ptr<AigBitblaster>` without ABC.
+ */
+class AigBitblaster : public TBitblaster<Abc_Obj_t*>
+{
+  AigBitblaster() = delete;
+};
+
+#endif /* CVC4_USE_ABC */
+
 }  // namespace bv
 }  // namespace theory
 }  // namespace CVC4
-#endif  //  __CVC4__THEORY__BV__BITBLAST__AIG_BITBLASTER_H
+
+#endif  //  CVC4__THEORY__BV__BITBLAST__AIG_BITBLASTER_H

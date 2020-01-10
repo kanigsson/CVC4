@@ -16,12 +16,12 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__EXPR__NODE_SELF_ITERATOR_H
-#define __CVC4__EXPR__NODE_SELF_ITERATOR_H
+#ifndef CVC4__EXPR__NODE_SELF_ITERATOR_H
+#define CVC4__EXPR__NODE_SELF_ITERATOR_H
 
 #include <iterator>
 
-#include "base/cvc4_assert.h"
+#include "base/check.h"
 #include "expr/node.h"
 
 namespace CVC4 {
@@ -53,12 +53,12 @@ public:
 };/* class NodeSelfIterator */
 
 inline NodeSelfIterator NodeSelfIterator::self(TNode n) {
-  Assert(!n.isNull(), "Self-iteration over null nodes not permitted.");
+  Assert(!n.isNull()) << "Self-iteration over null nodes not permitted.";
   return NodeSelfIterator(n);
 }
 
 inline NodeSelfIterator NodeSelfIterator::selfEnd(TNode n) {
-  Assert(!n.isNull(), "Self-iteration over null nodes not permitted.");
+  Assert(!n.isNull()) << "Self-iteration over null nodes not permitted.";
   return NodeSelfIterator(n.end());
 }
 
@@ -70,13 +70,13 @@ inline NodeSelfIterator::NodeSelfIterator() :
 inline NodeSelfIterator::NodeSelfIterator(Node node) :
   d_node(node),
   d_child() {
-  Assert(!node.isNull(), "Self-iteration over null nodes not permitted.");
+  Assert(!node.isNull()) << "Self-iteration over null nodes not permitted.";
 }
 
 inline NodeSelfIterator::NodeSelfIterator(TNode node) :
   d_node(node),
   d_child() {
-  Assert(!node.isNull(), "Self-iteration over null nodes not permitted.");
+  Assert(!node.isNull()) << "Self-iteration over null nodes not permitted.";
 }
 
 inline NodeSelfIterator::NodeSelfIterator(const NodeSelfIterator& i) :
@@ -125,4 +125,4 @@ inline bool NodeSelfIterator::operator!=(NodeSelfIterator i) const {
 }/* CVC4::expr namespace */
 }/* CVC4 namespace */
 
-#endif /* __CVC4__EXPR__NODE_SELF_ITERATOR_H */
+#endif /* CVC4__EXPR__NODE_SELF_ITERATOR_H */

@@ -17,8 +17,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__THEORY__FP__TYPE_ENUMERATOR_H
-#define __CVC4__THEORY__FP__TYPE_ENUMERATOR_H
+#ifndef CVC4__THEORY__FP__TYPE_ENUMERATOR_H
+#define CVC4__THEORY__FP__TYPE_ENUMERATOR_H
 
 #include "expr/kind.h"
 #include "expr/type_node.h"
@@ -114,9 +114,7 @@ class RoundingModeEnumerator
       case roundNearestTiesToAway:
         d_enumerationComplete = true;
         break;
-      default:
-        Unreachable("Unknown rounding mode?");
-        break;
+      default: Unreachable() << "Unknown rounding mode?"; break;
     }
     return *this;
   }
@@ -132,4 +130,4 @@ class RoundingModeEnumerator
 }  // namespace theory
 }  // namespace CVC4
 
-#endif /* __CVC4__THEORY__FP__TYPE_ENUMERATOR_H */
+#endif /* CVC4__THEORY__FP__TYPE_ENUMERATOR_H */

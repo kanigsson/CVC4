@@ -16,13 +16,13 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__BOOLEAN_SIMPLIFICATION_H
-#define __CVC4__BOOLEAN_SIMPLIFICATION_H
+#ifndef CVC4__BOOLEAN_SIMPLIFICATION_H
+#define CVC4__BOOLEAN_SIMPLIFICATION_H
 
 #include <vector>
 #include <algorithm>
 
-#include "base/cvc4_assert.h"
+#include "base/check.h"
 #include "expr/expr_manager_scope.h"
 #include "expr/node.h"
 
@@ -238,4 +238,4 @@ class BooleanSimplification {
 
 }/* CVC4 namespace */
 
-#endif /* __CVC4__BOOLEAN_SIMPLIFICATION_H */
+#endif /* CVC4__BOOLEAN_SIMPLIFICATION_H */

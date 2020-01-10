@@ -16,8 +16,8 @@
 
 #include "cvc4_public.h"
 
-#ifndef __CVC4__EXPR_MANAGER_H
-#define __CVC4__EXPR_MANAGER_H
+#ifndef CVC4__EXPR_MANAGER_H
+#define CVC4__EXPR_MANAGER_H
 
 #include <vector>
 
@@ -43,12 +43,6 @@ class Options;
 class IntStat;
 struct ExprManagerMapCollection;
 class ResourceManager;
-
-namespace expr {
-  namespace pickle {
-    class Pickler;
-  }/* CVC4::expr::pickle namespace */
-}/* CVC4::expr namespace */
 
 class CVC4_PUBLIC ExprManager {
 private:
@@ -86,11 +80,10 @@ private:
   ExprManager(const ExprManager&) = delete;
   ExprManager& operator=(const ExprManager&) = delete;
 
-  std::vector<DatatypeType> d_keep_dtt;
-  std::vector<Datatype> d_keep_dt;
+  /** A list of datatypes owned by this expr manager. */
+  std::vector<std::unique_ptr<Datatype> > d_ownedDatatypes;
 
-public:
-
+ public:
   /**
    * Creates an expression manager with default options.
    */
@@ -520,7 +513,7 @@ public:
 
   /**
    * Create a new, fresh variable for use in a binder expression
-   * (the BOUND_VAR_LIST of a FORALL, EXISTS, or LAMBDA).  It is
+   * (the BOUND_VAR_LIST of a FORALL, EXISTS, LAMBDA, or CHOICE).  It is
    * an error for this bound variable to exist outside of a binder,
    * and it should also only be used in a single binder expression.
    * That is, two distinct FORALL expressions should use entirely
@@ -539,7 +532,7 @@ public:
 
   /**
    * Create a (nameless) new, fresh variable for use in a binder
-   * expression (the BOUND_VAR_LIST of a FORALL, EXISTS, or LAMBDA).
+   * expression (the BOUND_VAR_LIST of a FORALL, EXISTS, LAMBDA, or CHOICE).
    * It is an error for this bound variable to exist outside of a
    * binder, and it should also only be used in a single binder
    * expression.  That is, two distinct FORALL expressions should use
@@ -580,10 +573,16 @@ public:
   /** Returns the maximum arity of the given kind. */
   static unsigned maxArity(Kind kind);
 
+  /**
+   * Return the datatype at the given index owned by this class. Type nodes are
+   * associated with datatypes through the DatatypeIndexConstant class. The
+   * argument index is intended to be a value taken from that class.
+   */
+  const Datatype& getDatatypeForIndex(unsigned index) const;
 };/* class ExprManager */
 
 ${mkConst_instantiations}
 
 }/* CVC4 namespace */
 
-#endif /* __CVC4__EXPR_MANAGER_H */
+#endif /* CVC4__EXPR_MANAGER_H */

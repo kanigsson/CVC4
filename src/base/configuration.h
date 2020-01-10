@@ -18,8 +18,8 @@
 
 #include "cvc4_public.h"
 
-#ifndef __CVC4__CONFIGURATION_H
-#define __CVC4__CONFIGURATION_H
+#ifndef CVC4__CONFIGURATION_H
+#define CVC4__CONFIGURATION_H
 
 #include <string>
 
@@ -64,6 +64,10 @@ public:
   static bool isProfilingBuild();
 
   static bool isAsanBuild();
+
+  static bool isUbsanBuild();
+
+  static bool isTsanBuild();
 
   static bool isCompetitionBuild();
 
@@ -133,4 +137,4 @@ public:
 
 }/* CVC4 namespace */
 
-#endif /* __CVC4__CONFIGURATION_H */
+#endif /* CVC4__CONFIGURATION_H */
