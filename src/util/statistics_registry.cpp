@@ -169,10 +169,12 @@ void StatisticsRegistry::registerStat(Stat* s, bool ignore) throw(CVC4::IllegalA
 void StatisticsRegistry::unregisterStat(Stat* s, bool ignore) throw(CVC4::IllegalArgumentException)
 {
 #ifdef CVC4_STATISTICS_ON
+  if (!ignore) {
   AlwaysAssert(s != nullptr);
   AlwaysAssert(d_stats.erase(s) > 0)
       << "Statistic `" << s->getName()
       << "' was not registered with this registry.";
+  }
 #endif /* CVC4_STATISTICS_ON */
 } /* StatisticsRegistry::unregisterStat() */
 
